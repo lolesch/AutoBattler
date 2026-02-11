@@ -659,15 +659,13 @@ MonoBehaviour:
   player: {fileID: 2078738982}
   playerTimer:
     duration: 0
-    autoRepeat: 0
-    laps: 1
+    repeat: 0
     stopwatch:
       timeElapsed: 0
   enemy: {fileID: 1334688241}
   enemyTimer:
     duration: 0
-    autoRepeat: 0
-    laps: 1
+    repeat: 0
     stopwatch:
       timeElapsed: 0
 --- !u!1 &1268372385
@@ -813,6 +811,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701dc6fa688adea48af1d00b4e8b72e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pawn
+  image: {fileID: 0}
   health:
     name: 'None: 0'
     <StatType>k__BackingField: 0
@@ -880,6 +879,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701dc6fa688adea48af1d00b4e8b72e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pawn
+  image: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   health:
     name: 'None: 0'
     <StatType>k__BackingField: 0

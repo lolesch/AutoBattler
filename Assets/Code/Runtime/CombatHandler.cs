@@ -1,5 +1,6 @@
 using System;
 using Submodules.Utility.Tools;
+using Submodules.Utility.Tools.Timer;
 using UnityEngine;
 
 namespace Code.Runtime
@@ -11,21 +12,19 @@ namespace Code.Runtime
         [SerializeField] private Pawn enemy;
         [SerializeField] private Timer enemyTimer;
 
-        private void Start() => StartCombat();
-
-        [ContextMenu("StartCombat")]
-        void StartCombat()
+        [ContextMenu( "StartCombat" )]
+        private void StartCombat()
+        {
+            playerTimer.Start();
+            enemyTimer.Start();
+        }
+        
+        private void Start()
         {
             playerTimer = player.StartAttacking( enemy );
             enemyTimer = enemy.StartAttacking( player );
             
             player.AddDamage();
-        }
-
-        private void FixedUpdate()
-        {
-            playerTimer?.Tick( Time.fixedDeltaTime );
-            enemyTimer?.Tick( Time.fixedDeltaTime );
         }
     }
 }

@@ -1,12 +1,15 @@
-using System;
 using Code.Runtime.Statistics;
+using Submodules.Utility.Attributes;
 using Submodules.Utility.Tools;
+using Submodules.Utility.Tools.Timer;
 using UnityEngine;
 
 namespace Code.Runtime
 {
     public class Pawn : MonoBehaviour
     {
+        [SerializeField, PreviewIcon] private Sprite icon;
+        
         [SerializeField] private Resource health;
         [SerializeField] private Stat damage;
         [SerializeField] private Stat attackSpeed;
@@ -35,7 +38,7 @@ namespace Code.Runtime
         // TODO: transform into command pattern
         public Timer StartAttacking( Pawn target )
         {
-            var timer = new Timer( attackSpeed );
+            var timer = new Timer( attackSpeed, true );
             timer.OnRewind += () => target?.ReceiveDamage( damage );
             return timer;
         }
