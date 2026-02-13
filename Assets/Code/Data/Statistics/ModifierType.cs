@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Code.Runtime.Statistics
+namespace Code.Data.Statistics
 {
     public enum ModifierType : byte
     {

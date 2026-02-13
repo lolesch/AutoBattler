@@ -3,7 +3,7 @@ using NaughtyAttributes;
 using Submodules.Utility.Extensions;
 using UnityEngine;
 
-namespace Code.Runtime.Statistics
+namespace Code.Data.Statistics
 {
     [Serializable]
     public class Stat : ISerializationCallbackReceiver, IStat

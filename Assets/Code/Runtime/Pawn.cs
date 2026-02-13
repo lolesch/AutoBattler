@@ -1,37 +1,48 @@
-using Code.Runtime.Statistics;
+using System.Collections.Generic;
+using Code.Data.SO;
+using Code.Data.Statistics;
+using NaughtyAttributes;
 using Submodules.Utility.Attributes;
-using Submodules.Utility.Tools;
 using Submodules.Utility.Tools.Timer;
 using UnityEngine;
 
 namespace Code.Runtime
 {
-    public class Pawn : MonoBehaviour
+    public sealed class Pawn : MonoBehaviour
     {
-        [SerializeField, PreviewIcon] private Sprite icon;
+        // TODO: make constructor, object pool the prefab and populate scene on the fly
+        [SerializeField] private PawnConfig config;
         
-        [SerializeField] private Resource health;
-        [SerializeField] private Stat damage;
-        [SerializeField] private Stat attackSpeed;
+        [SerializeField, ReadOnly, PreviewIcon] private Sprite icon;
+        [SerializeField, ReadOnly] private Resource health;
+        [SerializeField, ReadOnly] private Stat damage;
+        [SerializeField, ReadOnly] private Stat attackSpeed;
         
-        private void Awake()
-        {
-            SpwanPawn();
-        }
+        [SerializeField] public List<Item> items;
+        
+        private void OnValidate() => SpawnPawn();
+        private void Awake() => SpawnPawn();
 
-        private void SpwanPawn()
+        [ContextMenu("Spawn")]
+        private void SpawnPawn()
         {
-            // TODO: import start values from database
-            health = new Resource( StatType.MaxLife, 100f );
-            damage = new Stat( StatType.Damage, 5f );
-            attackSpeed = new Stat( StatType.AttackSpeed, .5f );
+            if( !config )
+            {
+                Debug.LogError("Missing Config to draw from");
+                return;
+            }
             
-            health.OnDepleted += DespwanPawn;
+            icon = config.icon;
+            health = new Resource( StatType.MaxLife, config.baseHealth );
+            damage = new Stat( StatType.Damage, config.baseDamage );
+            attackSpeed = new Stat( StatType.AttackSpeed, config.baseAttackSpeed );
+            
+            health.OnDepleted += DespawnPawn;
         }
 
-        private void DespwanPawn()
+        private void DespawnPawn()
         {
-            Debug.Log( $"{name} has been defeated!" );
+            Debug.Log( $"{gameObject.name} has been defeated!" );
             gameObject.SetActive(false);
         }
 

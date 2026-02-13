@@ -4,7 +4,7 @@ using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Code.Runtime.Statistics
+namespace Code.Data.Statistics
 {
     [Serializable]
     public sealed class MutableFloat : IMutable<float>, IFormattable

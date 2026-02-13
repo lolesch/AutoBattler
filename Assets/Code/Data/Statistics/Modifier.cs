@@ -2,7 +2,7 @@
 using Submodules.Utility.SerializeInterface;
 using UnityEngine;
 
-namespace Code.Runtime.Statistics
+namespace Code.Data.Statistics
 {
     [Serializable]
     public struct Modifier : IComparable<Modifier>, IEquatable<Modifier>
@@ -11,7 +11,7 @@ namespace Code.Runtime.Statistics
 
         [SerializeField] private float value;
         [SerializeField] private ModifierType type;
-        [SerializeField] private InterfaceReference<IModifierSource> source;
+        [field: SerializeField] private InterfaceReference<IModifierSource> source { get; }
 
         public Modifier( float value, ModifierType type, IModifierSource source )
         {
@@ -46,7 +46,5 @@ namespace Code.Runtime.Statistics
             source.Value == other.source.Value && Type == other.Type && Mathf.Approximately( value, other.value );
     }
     
-    public interface IModifierSource
-    {
-    }
+    public interface IModifierSource {}
 }
