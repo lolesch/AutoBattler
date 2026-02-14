@@ -1,6 +1,5 @@
-using System;
 using Code.Data.SO;
-using Submodules.Utility.Tools;
+using Code.Runtime.GUI;
 using Submodules.Utility.Tools.Timer;
 using UnityEngine;
 
@@ -10,26 +9,33 @@ namespace Code.Runtime
     {
         [SerializeField] private Pawn player;
         [SerializeField] private Timer playerTimer;
+        [SerializeField] private PawnResourceView playerHealthView;
         [SerializeField] private Pawn enemy;
         [SerializeField] private Timer enemyTimer;
+        [SerializeField] private PawnResourceView enemyHealthView;
+        
         [SerializeField] private ItemConfig itemConfig;
+
+        private void Start()
+        {
+            playerTimer = new Timer( player.stats.attackSpeed, true );
+            playerTimer.OnRewind += () => enemy.ReceiveDamage( player.stats.damage );
+            
+            enemyTimer = new Timer( enemy.stats.attackSpeed, true );
+            enemyTimer.OnRewind += () => player.ReceiveDamage( enemy.stats.damage );
+            
+            playerHealthView.SetPawn( player.stats.health );
+            enemyHealthView.SetPawn( enemy.stats.health );
+        }
 
         [ContextMenu( "StartCombat" )]
         private void StartCombat()
         {
-            playerTimer = player.StartAttacking( enemy );
-            enemyTimer = enemy.StartAttacking( player );
-            
             playerTimer.Start();
             enemyTimer.Start();
         }
 
         [ContextMenu( "AddItem" )]
-        private void AddItem()
-        {
-            var item = new Item( itemConfig );
-            item.Initialize();
-            player.items.Add( item );
-        }
+        private void AddItem() => enemy.EquipItem( new Item( itemConfig ) );
     }
 }

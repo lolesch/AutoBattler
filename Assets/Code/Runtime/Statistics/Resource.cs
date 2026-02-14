@@ -1,8 +1,9 @@
 ﻿using System;
 using NaughtyAttributes;
 using UnityEngine;
+using Code.Data.Enums; 
 
-namespace Code.Data.Statistics
+namespace Code.Runtime.Statistics
 {
     [Serializable]
     public sealed class Resource : Stat, IResource
@@ -10,7 +11,7 @@ namespace Code.Data.Statistics
         public Resource( StatType resource, /*Stat regen,*/ float baseValue ) : base( resource, baseValue )
         {
             CurrentValue = baseValue;
-            TotalValue.OnTotalChanged += _ => SetCurrentTo( CurrentValue );
+            MaxValue.OnTotalChanged += _ => SetCurrentTo( CurrentValue );
         }
 
         //Regen = regen;
@@ -18,9 +19,9 @@ namespace Code.Data.Statistics
         //[field: SerializeField, ReadOnly] public Stat Regen { get; private set; }
 
         public bool IsDepleted => CurrentValue <= 0;
-        public bool IsFull => CurrentValue >= TotalValue;
-        public float MissingValue => TotalValue - CurrentValue;
-        public float Percentage => CurrentValue / TotalValue;
+        public bool IsFull => CurrentValue >= MaxValue;
+        public float MissingValue => MaxValue - CurrentValue;
+        public float Percentage => CurrentValue / MaxValue;
         public event Action<float, float, float> OnCurrentChanged; // (previous, newValue, total)
         public event Action OnDepleted;
         public event Action OnRecharged;
@@ -61,7 +62,7 @@ namespace Code.Data.Statistics
             return amountToRemove - removed;
         }
 
-        public void RefillCurrent() => SetCurrentTo( TotalValue );
+        public void RefillCurrent() => SetCurrentTo( MaxValue );
         //public void DepleteCurrent() => SetCurrentTo(0);
 
         public override Stat GetDeepCopy()
@@ -69,7 +70,7 @@ namespace Code.Data.Statistics
             var other = (Resource) MemberwiseClone();
             other.name = string.Copy( name );
             other.StatType = StatType;
-            other.TotalValue = TotalValue;
+            other.MaxValue = MaxValue;
             other.CurrentValue = CurrentValue;
             other.OnCurrentChanged = null; //have no listeners to these deep copies
 
@@ -78,14 +79,15 @@ namespace Code.Data.Statistics
 
         private void SetCurrentTo( float value )
         {
-            var newCurrent = Mathf.Clamp( value, 0, TotalValue );
+            var newCurrent = Mathf.Clamp( value, 0, MaxValue );
 
             if( Mathf.Approximately( CurrentValue, newCurrent ) )
                 return;
 
-            OnCurrentChanged?.Invoke( CurrentValue, newCurrent, TotalValue );
-
+            var previousValue = CurrentValue;
             CurrentValue = newCurrent;
+            
+            OnCurrentChanged?.Invoke( previousValue, CurrentValue, MaxValue );
 
             if( IsDepleted )
                 OnDepleted?.Invoke();
@@ -98,7 +100,7 @@ namespace Code.Data.Statistics
             var other = (Resource) MemberwiseClone();
             other.name = string.Copy( name );
             other.StatType = StatType;
-            other.TotalValue = TotalValue;
+            other.MaxValue = MaxValue;
             other.OnCurrentChanged = null; //have no listeners to these deep copies
 
             return other;

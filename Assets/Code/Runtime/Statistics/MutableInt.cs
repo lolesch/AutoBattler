@@ -2,7 +2,7 @@ using System;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Code.Data.Statistics
+namespace Code.Runtime.Statistics
 {
     [Serializable]
     public sealed class MutableInt : IMutable<int>

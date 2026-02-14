@@ -1,40 +1,39 @@
 ﻿using System;
 using NaughtyAttributes;
-using Submodules.Utility.Extensions;
 using UnityEngine;
+using Code.Data.Enums;
+using Submodules.Utility.Extensions;
 
-namespace Code.Data.Statistics
+namespace Code.Runtime.Statistics
 {
     [Serializable]
-    public class Stat : ISerializationCallbackReceiver, IStat
+    public class Stat : IStat
     {
         [SerializeField, HideInInspector] protected string name;
 
         [field: SerializeField, ReadOnly] public StatType StatType { get; protected set; }
 
-        [SerializeField, ReadOnly] protected MutableFloat TotalValue;
+        [SerializeField, ReadOnly] protected MutableFloat MaxValue;
 
         public Stat( StatType stat, float baseValue )
         {
             StatType = stat;
-            TotalValue = new MutableFloat( baseValue );
+            MaxValue = new MutableFloat( baseValue );
         }
 
-        public static implicit operator float( Stat stat ) => stat.TotalValue;
+        public static implicit operator float( Stat stat ) => stat.MaxValue;
 
-        public void OnBeforeSerialize() => name = ToString();
-
-        public void OnAfterDeserialize() {}
-
-        public void AddModifier( Modifier modifier ) => TotalValue.AddModifier( modifier );
-        public bool TryRemoveModifier( Modifier modifier ) => TotalValue.TryRemoveModifier( modifier );
+        public void AddModifier( Modifier modifier ) => MaxValue.AddModifier( modifier );
+        public bool TryRemoveModifier( Modifier modifier ) => MaxValue.TryRemoveModifier( modifier );
+        
+        public bool TryRemoveAllModifiersBySource( IModifierSource source ) => MaxValue.TryRemoveAllModifiersBySource( source.guid );
 
         public virtual Stat GetDeepCopy()
         {
             var other = (Stat) MemberwiseClone();
             other.name = string.Copy( name );
             other.StatType = StatType;
-            other.TotalValue = TotalValue;
+            other.MaxValue = MaxValue;
 
             return other;
         }
@@ -46,7 +45,7 @@ namespace Code.Data.Statistics
             if( statName.Contains( "Percent" ) )
                 statName = statName.Replace( " Percent", "%" );
 
-            return $"{statName}: {TotalValue:0.###}";
+            return $"{statName}: {MaxValue:0.###}";
         }
     }
 

@@ -2,8 +2,7 @@
     "name": "Data",
     "rootNamespace": "",
     "references": [
-        "GUID:5b468494b8115f048b2a122fb22ae9ef",
-        "Statistics"
+        "GUID:5b468494b8115f048b2a122fb22ae9ef"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

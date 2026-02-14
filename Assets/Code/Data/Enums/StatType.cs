@@ -1,4 +1,4 @@
-namespace Code.Data.Statistics
+namespace Code.Data.Enums
 {
     public enum StatType : byte
     {

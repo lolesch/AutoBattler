@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Code.Data.Enums;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Code.Data.Statistics
+namespace Code.Runtime.Statistics
 {
     [Serializable]
     public sealed class MutableFloat : IMutable<float>, IFormattable
@@ -43,6 +44,26 @@ namespace Code.Data.Statistics
                 }
 
             Debug.LogWarning( $"Modifier {modifier} not found" );
+            return false;
+        }
+
+        public bool TryRemoveAllModifiersBySource( Guid source )
+        {
+            var removed = false;
+            for( var i = modifiers.Count; i-- > 0; )
+            {
+                if( modifiers[i].source != source ) 
+                    continue;
+                modifiers.RemoveAt( i );
+                removed = true;
+            }
+            if( removed )
+            {
+                CalculateTotalValue();
+                return true;
+            }
+            
+            Debug.LogWarning( $"No modifiers of source {source} were found" );
             return false;
         }
 

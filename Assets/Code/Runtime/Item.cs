@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using Code.Data.SO;
-using Code.Data.Statistics;
+using Code.Data.Enums;
+using Code.Runtime.Statistics;
 using NaughtyAttributes;
 using Submodules.Utility.Attributes;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Code.Runtime
 {
@@ -11,16 +14,20 @@ namespace Code.Runtime
     public sealed class Item : IModifierSource
     {
         [SerializeField] private ItemConfig config;
-        
         [SerializeField, ReadOnly, PreviewIcon] private Sprite icon;
-        [SerializeField] private StatModifier modifier;
+        
+        [field: SerializeField] public Guid guid { get; } = Guid.NewGuid();
+        [field: SerializeField] public RarityType RarityType { get; }
+        [field: SerializeField] public List<PawnStatModifier> Affixes { get; } = new List<PawnStatModifier>();
 
+        private RarityType GetRandomRarity() => (RarityType) Random.Range(0, Enum.GetValues( typeof(RarityType) ).Length);
+        
         internal Item( ItemConfig config )
         {
             this.config = config;
             icon = config.icon;
+            RarityType = GetRandomRarity();
+            Affixes.Add( new PawnStatModifier( config.statType, new Modifier( config.value, config.modifierType, guid ) ) );
         }
-        
-        public void Initialize() => modifier = new StatModifier( config.statType, new Modifier( config.value, config.modifierType, this ) );
     }
 }

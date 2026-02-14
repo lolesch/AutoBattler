@@ -1,24 +1,21 @@
 ﻿using System;
-using Submodules.Utility.SerializeInterface;
+using Code.Data.Enums;
 using UnityEngine;
 
-namespace Code.Data.Statistics
+namespace Code.Runtime.Statistics
 {
     [Serializable]
     public struct Modifier : IComparable<Modifier>, IEquatable<Modifier>
     {
-        // TODO: add source to IModifier -> support removal of all modifiers from source
-
         [SerializeField] private float value;
         [SerializeField] private ModifierType type;
-        [field: SerializeField] private InterfaceReference<IModifierSource> source { get; }
+        [field:SerializeField] public Guid source { get; }
 
-        public Modifier( float value, ModifierType type, IModifierSource source )
+        public Modifier( float value, ModifierType type, Guid source )
         {
             this.value = value;
             this.type = type;
-            this.source = new InterfaceReference<IModifierSource>();
-            this.source.Value = source;
+            this.source = source;
         }
         
         public readonly ModifierType Type => type;
@@ -43,8 +40,10 @@ namespace Code.Data.Statistics
         };
 
         public readonly bool Equals( Modifier other ) =>
-            source.Value == other.source.Value && Type == other.Type && Mathf.Approximately( value, other.value );
+            source == other.source && Type == other.Type && Mathf.Approximately( value, other.value );
     }
     
-    public interface IModifierSource {}
+    public interface IModifierSource {
+        Guid guid { get; }
+    }
 }

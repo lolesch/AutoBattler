@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using Code.Data.SO;
-using Code.Data.Statistics;
 using NaughtyAttributes;
 using Submodules.Utility.Attributes;
-using Submodules.Utility.Tools.Timer;
 using UnityEngine;
 
 namespace Code.Runtime
@@ -12,13 +10,11 @@ namespace Code.Runtime
     {
         // TODO: make constructor, object pool the prefab and populate scene on the fly
         [SerializeField] private PawnConfig config;
+        [SerializeField] public PawnStats stats;
         
         [SerializeField, ReadOnly, PreviewIcon] private Sprite icon;
-        [SerializeField, ReadOnly] private Resource health;
-        [SerializeField, ReadOnly] private Stat damage;
-        [SerializeField, ReadOnly] private Stat attackSpeed;
         
-        [SerializeField] public List<Item> items;
+        [SerializeField] private List<Item> items;
         
         private void OnValidate() => SpawnPawn();
         private void Awake() => SpawnPawn();
@@ -33,11 +29,9 @@ namespace Code.Runtime
             }
             
             icon = config.icon;
-            health = new Resource( StatType.MaxLife, config.baseHealth );
-            damage = new Stat( StatType.Damage, config.baseDamage );
-            attackSpeed = new Stat( StatType.AttackSpeed, config.baseAttackSpeed );
+            stats = new PawnStats( config );
             
-            health.OnDepleted += DespawnPawn;
+            stats.health.OnDepleted += DespawnPawn;
         }
 
         private void DespawnPawn()
@@ -46,20 +40,15 @@ namespace Code.Runtime
             gameObject.SetActive(false);
         }
 
-        // TODO: transform into command pattern
-        public Timer StartAttacking( Pawn target )
-        {
-            var timer = new Timer( attackSpeed, true );
-            timer.OnRewind += () => target?.ReceiveDamage( damage );
-            return timer;
-        }
         
         // TODO: transform into command pattern
-        public void ReceiveDamage( float damage ) => health.ReduceCurrent( damage );
+        public void ReceiveDamage( float damage ) => stats.health.ReduceCurrent( damage );
 
-        public void AddDamage()
+        public void EquipItem( Item item )
         {
-            damage.AddModifier( new Modifier( 10, ModifierType.FlatAdd, null ) );
+            items.Add( item );
+            foreach( var affix in item.Affixes )
+                stats.ApplyMod( affix );
         }
     }
 }

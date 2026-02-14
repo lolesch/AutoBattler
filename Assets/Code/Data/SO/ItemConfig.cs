@@ -1,6 +1,6 @@
-using System;
-using Code.Data.Statistics;
+using Code.Data.Enums;
 using Submodules.Utility.Attributes;
+using Submodules.Utility.Extensions;
 using UnityEngine;
 
 namespace Code.Data.SO
@@ -16,7 +16,7 @@ namespace Code.Data.SO
 
         private void OnValidate()
         {
-            debugStatModifierString = modifierType switch
+            var mod = modifierType switch
             {
                 ModifierType.Overwrite => $"= {value:0.###;-0.###}", //  = 123   | = -123   |  = 0
                 ModifierType.FlatAdd => $"{value:+0.###;0.###;-0.###}", //   +123   |   -123   |    0
@@ -25,6 +25,7 @@ namespace Code.Data.SO
 
                 var _ => $"?? {value:+ 0.###;- 0.###;0.###}",
             };
+            debugStatModifierString = $"{statType.ToDescription()} {mod}";
         }
     }
 }
