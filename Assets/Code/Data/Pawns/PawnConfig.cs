@@ -1,7 +1,7 @@
 using Submodules.Utility.Attributes;
 using UnityEngine;
 
-namespace Code.Data.SO
+namespace Code.Data.Pawns
 {
     [CreateAssetMenu(fileName = "PawnConfig", menuName = Const.ConfigRoot + "Pawns")]
     public sealed class PawnConfig : ScriptableObject

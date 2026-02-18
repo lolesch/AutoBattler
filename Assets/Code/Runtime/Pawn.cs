@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using Code.Data.SO;
+using Code.Data.Pawns;
 using NaughtyAttributes;
 using Submodules.Utility.Attributes;
 using UnityEngine;
 
 namespace Code.Runtime
 {
-    public sealed class Pawn : MonoBehaviour
+    public sealed class Pawn : MonoBehaviour, IDamageable
     {
         // TODO: make constructor, object pool the prefab and populate scene on the fly
         [SerializeField] private PawnConfig config;
@@ -42,7 +42,7 @@ namespace Code.Runtime
 
         
         // TODO: transform into command pattern
-        public void ReceiveDamage( float damage ) => stats.health.ReduceCurrent( damage );
+        public void TakeDamage( float damage ) => stats.health.ReduceCurrent( damage );
 
         public void EquipItem( Item item )
         {
@@ -50,5 +50,10 @@ namespace Code.Runtime
             foreach( var affix in item.Affixes )
                 stats.ApplyMod( affix );
         }
+    }
+
+    public interface IDamageable
+    {
+        void TakeDamage( float damage );
     }
 }

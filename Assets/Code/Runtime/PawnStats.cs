@@ -1,6 +1,6 @@
 using System;
 using Code.Data.Enums;
-using Code.Data.SO;
+using Code.Data.Pawns;
 using Code.Runtime.Statistics;
 using NaughtyAttributes;
 using UnityEngine;

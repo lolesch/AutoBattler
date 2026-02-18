@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Code.Data.SO;
 using Code.Data.Enums;
+using Code.Data.Items;
 using Code.Runtime.Statistics;
 using NaughtyAttributes;
 using Submodules.Utility.Attributes;

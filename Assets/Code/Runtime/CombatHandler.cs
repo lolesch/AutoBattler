@@ -1,4 +1,4 @@
-using Code.Data.SO;
+using Code.Data.Items;
 using Code.Runtime.GUI;
 using Submodules.Utility.Tools.Timer;
 using UnityEngine;
@@ -19,10 +19,10 @@ namespace Code.Runtime
         private void Start()
         {
             playerTimer = new Timer( player.stats.attackSpeed, true );
-            playerTimer.OnRewind += () => enemy.ReceiveDamage( player.stats.damage );
+            playerTimer.OnRewind += () => enemy.TakeDamage( player.stats.damage );
             
             enemyTimer = new Timer( enemy.stats.attackSpeed, true );
-            enemyTimer.OnRewind += () => player.ReceiveDamage( enemy.stats.damage );
+            enemyTimer.OnRewind += () => player.TakeDamage( enemy.stats.damage );
             
             playerHealthView.SetPawn( player.stats.health );
             enemyHealthView.SetPawn( enemy.stats.health );

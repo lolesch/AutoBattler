@@ -2,6 +2,6 @@ namespace Code.Data
 {
     internal static class Const
     {
-        internal const string ConfigRoot = "Scriptable Objects/Configs/";
+        internal const string ConfigRoot = "SO/Configs/";
     }
 }

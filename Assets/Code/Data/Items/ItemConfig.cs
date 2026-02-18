@@ -3,7 +3,7 @@ using Submodules.Utility.Attributes;
 using Submodules.Utility.Extensions;
 using UnityEngine;
 
-namespace Code.Data.SO
+namespace Code.Data.Items
 {
     [CreateAssetMenu(fileName = "ItemConfig", menuName = Const.ConfigRoot + "Items")]
     public sealed class ItemConfig : ScriptableObject
