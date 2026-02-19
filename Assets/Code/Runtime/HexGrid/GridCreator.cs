@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Code.Runtime.HexGrid;
 using Code.Runtime.HexGrid.HexGridInspector.Runtime;
 using NaughtyAttributes;
 using Submodules.Utility.Extensions;
 using UnityEngine;
 
-namespace Code.Runtime.GUI
+namespace Code.Runtime.HexGrid
 {
     [Serializable]
     public class GridCreator : MonoBehaviour
