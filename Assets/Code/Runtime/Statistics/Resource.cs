@@ -81,9 +81,6 @@ namespace Code.Runtime.Statistics
         {
             var newCurrent = Mathf.Clamp( value, 0, MaxValue );
 
-            if( Mathf.Approximately( CurrentValue, newCurrent ) )
-                return;
-
             var previousValue = CurrentValue;
             CurrentValue = newCurrent;
             

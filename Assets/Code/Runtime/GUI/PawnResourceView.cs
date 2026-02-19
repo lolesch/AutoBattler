@@ -16,7 +16,7 @@ namespace Code.Runtime.GUI
                 return;
             
             var previous = resource;
-            if( previous != null ) 
+            if( previous != null )
                 previous.OnCurrentChanged -= UpdateView;
             
             resource = res;
