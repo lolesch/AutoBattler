@@ -82,7 +82,7 @@ namespace Code.Runtime.HexGrid.HexGridInspector.Runtime
         }
 
         [SerializeField]
-        private RowBool[] rows = new RowBool[defaultRadius * 2 + 1];
+        private RowBool[] rows;
 
         protected override Row<bool> GetRow(int i) => rows[i];
         protected override bool IsInvalidValue(bool target) => target == false;

@@ -1,5 +1,8 @@
+using System.Linq;
 using Code.Data.Items;
 using Code.Runtime.GUI;
+using Code.Runtime.HexGrid;
+using Submodules.Utility.Extensions;
 using Submodules.Utility.Tools.Timer;
 using UnityEngine;
 
@@ -16,6 +19,9 @@ namespace Code.Runtime
         
         [SerializeField] private ItemConfig itemConfig;
 
+        private void OnDestroy() => GridController.OnHexSelected -= CheckHexForUnit;
+        private void Awake() => GridController.OnHexSelected += CheckHexForUnit;
+        
         private void Start()
         {
             playerTimer = new Timer( player.stats.attackSpeed, true );
@@ -27,6 +33,7 @@ namespace Code.Runtime
             playerHealthView.SetPawn( player.stats.health );
             enemyHealthView.SetPawn( enemy.stats.health );
         }
+        
 
         [ContextMenu( "StartCombat" )]
         private void StartCombat()
@@ -37,5 +44,17 @@ namespace Code.Runtime
 
         [ContextMenu( "AddItem" )]
         private void AddItem() => enemy.EquipItem( new Item( itemConfig ) );
+        
+        void CheckHexForUnit( Hex selectedHex )
+        {
+            //foreach( var pawn in new[] { player, enemy } )
+            //{
+            //    if( pawn.transform.position.WorldToHex( GridController.HexWidth, GridController.Circumradius ) !=
+            //        selectedHex ) continue;
+
+            //    foreach( var hex in pawn.pawnEffects.Select( effect => effect.shape.GetHexes() ).SelectMany( hexes => hexes ) )
+            //        GridController.DrawHexagonOnXZPlane( hex, Color.red );
+            //}
+        }
     }
 }

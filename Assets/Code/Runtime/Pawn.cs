@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Code.Data.Pawns;
+using Code.Runtime.HexGrid;
 using NaughtyAttributes;
 using Submodules.Utility.Attributes;
 using UnityEngine;
@@ -14,7 +15,8 @@ namespace Code.Runtime
         
         [SerializeField, ReadOnly, PreviewIcon] private Sprite icon;
         
-        [SerializeField] private List<Item> items;
+        [SerializeField] private List<Item> inventory;
+        [SerializeField] public List<PawnEffect> pawnEffects;
         
         private void OnValidate() => SpawnPawn();
         private void Awake() => SpawnPawn();
@@ -46,7 +48,7 @@ namespace Code.Runtime
 
         public void EquipItem( Item item )
         {
-            items.Add( item );
+            inventory.Add( item );
             foreach( var affix in item.Affixes )
                 stats.ApplyMod( affix );
         }
