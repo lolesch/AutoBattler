@@ -16,7 +16,7 @@ namespace Code.Runtime
         [SerializeField, ReadOnly, PreviewIcon] private Sprite icon;
         
         [SerializeField] private List<Item> inventory;
-        [SerializeField] public List<PawnEffect> pawnEffects;
+        [SerializeField] public PawnEffect pawnEffects;
         
         private void OnValidate() => SpawnPawn();
         private void Awake() => SpawnPawn();
@@ -41,7 +41,6 @@ namespace Code.Runtime
             Debug.Log( $"{gameObject.name} has been defeated!" );
             gameObject.SetActive(false);
         }
-
         
         // TODO: transform into command pattern
         public void TakeDamage( float damage ) => stats.health.ReduceCurrent( damage );

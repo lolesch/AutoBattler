@@ -40,12 +40,9 @@ namespace Code.Runtime.HexGrid.HexGridInspector.Runtime
 
         public void SetCell(int x, int y, T value) => GetRow(y)[x] = value;
 
-        public List<Hex> GetHexes(bool originIsCenter = true)
+        public List<Hex> GetHexes() //bool originIsCenter = true
         {
             var cells = GetCells();
-
-            if (Diameter % 2 == 0 && originIsCenter)
-                Debug.LogWarning("This shape has no center");
 
             var map = new List<Hex>();
 
@@ -60,10 +57,8 @@ namespace Code.Runtime.HexGrid.HexGridInspector.Runtime
                      *  continue;
                      */
 
-                    if (!IsInvalidValue(GetCell(y, x)))
-                        map.Add(originIsCenter
-                            ? new(q, r)
-                            : new(x, y));
+                    if( !IsInvalidValue( GetCell( y, x ) ) )
+                        map.Add( new( q, r ) ); // originIsCenter ? new(q, r) : new(x, y));
                 }
 
             return map;
