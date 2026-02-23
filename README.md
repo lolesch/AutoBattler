@@ -6,6 +6,6 @@
 
 - [ ] unit placement
   - [ ] Unit bank
-  - [x] Unit drag and drop
 - [ ] unit synergy effects
+  - [ ] apply effect
 - [ ] unit inventory
