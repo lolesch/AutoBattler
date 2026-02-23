@@ -7,6 +7,7 @@ namespace Code.Data.Enums
         Damage,
         
         MaxLife,
+        MaxMana,
         AttackSpeed,
     }
 }
