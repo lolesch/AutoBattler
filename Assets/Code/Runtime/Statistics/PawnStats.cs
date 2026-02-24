@@ -1,11 +1,10 @@
 using System;
 using Code.Data.Enums;
 using Code.Data.Pawns;
-using Code.Runtime.Statistics;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Code.Runtime
+namespace Code.Runtime.Statistics
 {
     [Serializable]
     public sealed class PawnStats
