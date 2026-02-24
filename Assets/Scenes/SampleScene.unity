@@ -2683,8 +2683,8 @@ MonoBehaviour:
     repeat: 1
     stopwatch:
       timeElapsed: 0
-  itemConfig: {fileID: 11400000, guid: fe32e45ce1a617145a7b2e1d36b4e1f8, type: 2}
-  inventoryView: {fileID: 0}
+  itemConfig: {fileID: 11400000, guid: 86ef919e21fad044d8e40c5d38531c3e, type: 2}
+  inventoryView: {fileID: 716019294}
   grid: {fileID: 1769693919}
   levelMap: {fileID: 1117111160}
   pawnEffectMap: {fileID: 709809114}

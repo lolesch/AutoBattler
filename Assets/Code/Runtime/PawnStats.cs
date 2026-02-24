@@ -30,7 +30,7 @@ namespace Code.Runtime
         public PawnStats( PawnConfig config )
         {
             health = new Resource( StatType.MaxLife, config.baseHealth );
-            health = new Resource( StatType.MaxMana, config.baseMana );
+            Mana = new Resource( StatType.MaxMana, config.baseMana );
             damage = new Stat( StatType.Damage, config.baseDamage );
             attackSpeed = new Stat( StatType.AttackSpeed, config.baseAttackSpeed );
         }

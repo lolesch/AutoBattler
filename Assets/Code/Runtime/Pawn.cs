@@ -32,6 +32,7 @@ namespace Code.Runtime
             
             icon = config.icon;
             stats = new PawnStats( config );
+            inventory = new List<Item>();
             
             stats.health.OnDepleted += DespawnPawn;
         }

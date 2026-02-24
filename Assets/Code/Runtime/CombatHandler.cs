@@ -82,12 +82,14 @@ namespace Code.Runtime
 
         [ContextMenu("AddItemToEnemy")]
         private void AddItemToEnemy() => AddItem(enemy);
-        [ContextMenu("AddItemToEnemy")]
+        
+        [ContextMenu("AddItemToPlayer")]
         private void AddItemToPlayer() => AddItem(player);
         
         private void AddItem( Pawn pawn )
         {
             pawn.EquipItem(new Item(itemConfig));
+            inventoryView.RefreshView(pawn);
         }
 
         void CheckHexForUnit( )
