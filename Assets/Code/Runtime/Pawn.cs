@@ -15,7 +15,7 @@ namespace Code.Runtime
         
         [SerializeField, ReadOnly, PreviewIcon] private Sprite icon;
         
-        [SerializeField] private List<Item> inventory;
+        [SerializeField] public List<Item> inventory;
         [SerializeField] public PawnEffect pawnEffects;
         
         private void OnValidate() => SpawnPawn();

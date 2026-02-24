@@ -14,18 +14,17 @@ namespace Code.Runtime
     public sealed class Item : IModifierSource
     {
         [SerializeField] private ItemConfig config;
-        [SerializeField, ReadOnly, PreviewIcon] private Sprite icon;
+        public Sprite Icon => config.icon;
         
-        [field: SerializeField] public Guid guid { get; } = Guid.NewGuid();
-        [field: SerializeField] public RarityType RarityType { get; }
-        [field: SerializeField] public List<PawnStatModifier> Affixes { get; } = new List<PawnStatModifier>();
+        public Guid guid { get; } = Guid.NewGuid();
+        [field: SerializeField] public RarityType RarityType { get; private set; }
+        [field: SerializeField] public List<PawnStatModifier> Affixes { get; private set; } = new List<PawnStatModifier>();
 
         private RarityType GetRandomRarity() => (RarityType) Random.Range(0, Enum.GetValues( typeof(RarityType) ).Length);
         
         internal Item( ItemConfig config )
         {
             this.config = config;
-            icon = config.icon;
             RarityType = GetRandomRarity();
             Affixes.Add( new PawnStatModifier( config.statType, new Modifier( config.value, config.modifierType, guid ) ) );
         }

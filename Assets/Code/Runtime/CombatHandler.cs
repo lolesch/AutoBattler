@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Code.Data.Items;
 using Code.Runtime.GUI;
+using Code.Runtime.GUI.Inventory;
 using Code.Runtime.HexGrid;
 using Submodules.Utility.Extensions;
 using Submodules.Utility.Tools.Timer;
@@ -18,6 +19,8 @@ namespace Code.Runtime
         [SerializeField] private Pawn enemy;
         [SerializeField] private Timer enemyTimer;
         //[SerializeField] private PawnResourceView enemyHealthView;
+        [SerializeField] private ItemConfig itemConfig;
+        [SerializeField] private InventoryView inventoryView;
         
         [SerializeField] private Grid grid;
         [SerializeField] private Tilemap levelMap;
@@ -27,8 +30,8 @@ namespace Code.Runtime
         private Plane plane = new Plane( Vector3.back, 0f );
         private Vector3Int selectedCell;
         private Camera cam;
+        private Pawn selectedPawn;
         
-        [SerializeField] private ItemConfig itemConfig;
 
         private void Awake()
         {
@@ -77,9 +80,16 @@ namespace Code.Runtime
             enemyTimer.Start();
         }
 
-        [ContextMenu( "AddItem" )]
-        private void AddItem() => enemy.EquipItem( new Item( itemConfig ) );
+        [ContextMenu("AddItemToEnemy")]
+        private void AddItemToEnemy() => AddItem(enemy);
+        [ContextMenu("AddItemToEnemy")]
+        private void AddItemToPlayer() => AddItem(player);
         
+        private void AddItem( Pawn pawn )
+        {
+            pawn.EquipItem(new Item(itemConfig));
+        }
+
         void CheckHexForUnit( )
         {
             pawnEffectMap.ClearAllTiles();
@@ -90,6 +100,12 @@ namespace Code.Runtime
                 
                 if( pawnCell != selectedCell )
                     continue;
+
+                if (selectedPawn != pawn)
+                {
+                    selectedPawn = pawn;
+                    inventoryView.RefreshView( pawn );
+                }
 
                 foreach( var hex in pawn.pawnEffects.GetHexes() )
                 {
