@@ -1,4 +1,17 @@
 {
-	"name": "Items",
-	"references":[ "Statistics" ]
+    "name": "Items",
+    "rootNamespace": "",
+    "references": [
+        "GUID:18bd0a5c99a54b06a5051b4533213ce0",
+        "GUID:0d5a74922bb778442abeedf4258fb044"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

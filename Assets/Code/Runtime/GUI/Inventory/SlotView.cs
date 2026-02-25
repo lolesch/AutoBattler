@@ -1,3 +1,4 @@
+using Code.Runtime.Container.Items;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,7 @@ namespace Code.Runtime.GUI.Inventory
     {
         [SerializeField] private Image icon;
     
-        public void RefreshView( Item item )
+        public void RefreshView( TetrisItem item )
         {
             var hasItem = item != null;
             if( hasItem )

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Code.Data.Items;
 using UnityEngine;
 
 namespace Code.Runtime.Container.Items
@@ -7,48 +8,31 @@ namespace Code.Runtime.Container.Items
     [Serializable]
     public abstract class AbstractItem : IItem
     {
-        [field: SerializeField] public Sprite Icon { get; protected set; } = null;
-        [field: SerializeField] private string _name { get; set; } = "Item";
-        
-        public readonly IItemData ItemData;
-
-        protected AbstractItem( IItemData itemData, StackLimitType stackLimit )
-        {
-            ItemData = itemData;
-            this.stackLimit = stackLimit;
-            guid = Guid.NewGuid();
-        }
-
         public Guid guid { get; }
-        public StackLimitType stackLimit { get; }
+        [field: SerializeField] public Sprite Icon { get; private set; }
 
-        public abstract void Use();
-        public abstract void Revert();
+        protected AbstractItem( IItemData itemData )
+        {
+            guid = Guid.NewGuid();
+            Icon = itemData.Icon;
+        }
         
-        // refactor? used only in GridContainer -> have an AbstractGridItem for this?
-        public virtual List<Vector2Int> GetPointers( Vector2Int position, RotationType rotation ) => new() { position };
+        public abstract void Use();
+        //public abstract void Revert();
     }
 
     [Serializable]
     public abstract class AbstractGridItem : AbstractItem
     {
-        protected AbstractGridItem( IItemData itemData, StackLimitType stackLimit ) : base( itemData, stackLimit )
-        {
-        }
+        protected AbstractGridItem( IItemData itemData ) : base( itemData ) {}    
+        
+        public virtual List<Vector2Int> GetPointers( Vector2Int position, RotationType rotation ) => new() { position };
     }
     
-    public interface IItemData
-    {
-        // DATA -> in ScriptableObject
-        // name
-        // description
-        //[field: SerializeField] public Sprite icon { get; }
-    }
-    
-    public interface IItem //: IEquatable<AbstractItem> // : IItemData
+    public interface IItem
     {
         Guid guid { get; }
-        StackLimitType stackLimit { get; }
+        Sprite Icon { get; }
         void Use();
     }
 }

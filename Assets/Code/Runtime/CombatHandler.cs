@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Code.Data.Items;
+using Code.Runtime.Container.Items;
 using Code.Runtime.GUI;
 using Code.Runtime.GUI.Inventory;
 using Code.Runtime.HexGrid;
@@ -88,7 +89,7 @@ namespace Code.Runtime
         
         private void AddItem( Pawn pawn )
         {
-            pawn.EquipItem(new Item(itemConfig));
+            pawn.EquipItem(new TetrisItem(itemConfig));
             inventoryView.RefreshView(pawn);
         }
 

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67d47e3d21d945a68b68fc444d73992c, type: 3}
   m_Name: Rune_04_Nef
   m_EditorClassIdentifier: Data::Code.Data.SO.ItemConfig
-  icon: {fileID: -229378712, guid: f53c29de7123b714d9b24a977fb43f39, type: 3}
+  <Icon>k__BackingField: {fileID: -229378712, guid: f53c29de7123b714d9b24a977fb43f39, type: 3}
   statType: 2
   value: 5
   modifierType: 2
