@@ -2,7 +2,8 @@
     "name": "Data",
     "rootNamespace": "",
     "references": [
-        "GUID:5b468494b8115f048b2a122fb22ae9ef"
+        "GUID:5b468494b8115f048b2a122fb22ae9ef",
+        "Grids"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

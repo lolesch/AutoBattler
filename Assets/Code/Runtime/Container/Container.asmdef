@@ -2,8 +2,9 @@
     "name": "Container",
     "rootNamespace": "",
     "references": [
-        "GUID:c1e184691c84c4c4980abbb85788d21b",
-        "GUID:0d5a74922bb778442abeedf4258fb044"
+        "GUID:0d5a74922bb778442abeedf4258fb044",
+        "GUID:18bd0a5c99a54b06a5051b4533213ce0",
+        "GUID:5e3ec151ae9c2fd418f3f9e74d30a5b7"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

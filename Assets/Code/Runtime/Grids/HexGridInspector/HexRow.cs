@@ -1,11 +1,11 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Code.Runtime.HexGrid.HexGridInspector.Runtime
+namespace Code.Runtime.Grids.HexGridInspector
 {
     // based on: https://github.com/Eldoir/Array2DEditor
     [Serializable]
-    public abstract class Row<T>
+    public abstract class HexRow<T>
     {
         [SerializeField]
         private T[] row = new T[HexGrid<T>.defaultRadius * 2 + 1];
@@ -18,6 +18,6 @@ namespace Code.Runtime.HexGrid.HexGridInspector.Runtime
     }
 
     [Serializable]
-    public class RowBool : Row<bool> { }
+    public sealed class HexRowBool : HexRow<bool> {}
 
 }

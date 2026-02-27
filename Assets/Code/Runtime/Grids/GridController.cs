@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
 using NaughtyAttributes;
 using Submodules.Utility.Extensions;
 using UnityEngine;
 
-namespace Code.Runtime.HexGrid
+namespace Code.Runtime.Grids
 {
     [Serializable]
     public sealed class GridController : MonoBehaviour

@@ -2,9 +2,8 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Code.Runtime.HexGrid.HexGridInspector.Editor
+namespace Code.Runtime.Grids.HexGridInspector.Editor
 {
-    // based on: https://github.com/Eldoir/Array2DEditor
     public class EditorWindowIntField : EditorWindow
     {
         private const string controlName = "IntField";

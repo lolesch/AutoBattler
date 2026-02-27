@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Code.Runtime.HexGrid.HexGridInspector.Runtime;
+using Code.Runtime.Grids.HexGridInspector;
 using Submodules.Utility.Extensions;
 using UnityEngine;
 
-namespace Code.Runtime.HexGrid
+namespace Code.Runtime.Grids
 {
     [Serializable]
     public sealed class PawnEffect

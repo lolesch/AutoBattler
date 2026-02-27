@@ -1,4 +1,5 @@
 using Code.Data.Enums;
+using Code.Runtime.Grids.RectGridInspector;
 using Submodules.Utility.Attributes;
 using Submodules.Utility.Extensions;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace Code.Data.Items
     public sealed class ItemConfig : ScriptableObject, ITetrisItemData
     {
         [field: SerializeField, PreviewIcon] public Sprite Icon { get; private set; }
-        public Vector2Int[] Shape { get; } = new[] { Vector2Int.zero };
+        [field: SerializeField] public RectGridBool Shape { get; private set; }
         public StatType statType;
         public float value;
         public ModifierType modifierType;
@@ -37,6 +38,9 @@ namespace Code.Data.Items
         // name
         // description
     }
-    
-    public interface ITetrisItemData : IItemData { Vector2Int[] Shape { get; } }
+
+    public interface ITetrisItemData : IItemData
+    {
+        RectGridBool Shape { get; }
+    }
 }

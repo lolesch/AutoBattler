@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Submodules.Utility.Extensions;
 using UnityEngine;
 
-namespace Code.Runtime.HexGrid.HexGridInspector.Runtime
+namespace Code.Runtime.Grids.HexGridInspector
 {
     // based on: https://github.com/Eldoir/Array2DEditor
     [Serializable]
@@ -23,7 +23,7 @@ namespace Code.Runtime.HexGrid.HexGridInspector.Runtime
         private Vector2Int cellSize;
 #pragma warning restore 414
 
-        protected abstract Row<T> GetRow(int i);
+        protected abstract HexRow<T> GetRow(int i);
 
         public T[,] GetCells()
         {
@@ -57,14 +57,14 @@ namespace Code.Runtime.HexGrid.HexGridInspector.Runtime
                      *  continue;
                      */
 
-                    if( !IsInvalidValue( GetCell( y, x ) ) )
+                    if( IsValid( GetCell( y, x ) ) )
                         map.Add( new( q, r ) ); // originIsCenter ? new(q, r) : new(x, y));
                 }
 
             return map;
         }
 
-        protected abstract bool IsInvalidValue(T target);
+        protected abstract bool IsValid(T target);
     }
 
     [Serializable]
@@ -73,13 +73,13 @@ namespace Code.Runtime.HexGrid.HexGridInspector.Runtime
         public HexGridBool(int radius = defaultRadius)
         {
             this.radius = radius;
-            rows = new RowBool[radius * 2 + 1];
+            rows = new HexRowBool[radius * 2 + 1];
         }
 
         [SerializeField]
-        private RowBool[] rows;
+        private HexRowBool[] rows;
 
-        protected override Row<bool> GetRow(int i) => rows[i];
-        protected override bool IsInvalidValue(bool target) => target == false;
+        protected override HexRow<bool> GetRow(int i) => rows[i];
+        protected override bool IsValid(bool target) => target == true;
     }
 }

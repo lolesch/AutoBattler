@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Code.Data.Enums;
 using Code.Data.Items;
+using Code.Runtime.Grids.RectGridInspector;
 using Code.Runtime.Statistics;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -11,7 +12,8 @@ namespace Code.Runtime.Container.Items
     [Serializable]
     public sealed class TetrisItem : AbstractGridItem
     {
-        public readonly Vector2Int[] Shape;
+        public readonly RectGridBool Shape;
+        public RotationType rotation;
         
         public TetrisItem( ItemConfig itemData ) : base( itemData )
         {
@@ -20,13 +22,12 @@ namespace Code.Runtime.Container.Items
             Affixes.Add( new PawnStatModifier( itemData.statType, new Modifier( itemData.value, itemData.modifierType, guid ) ) );
         }
 
-        // should rotation be stored in the package/container or at item level?
         public override List<Vector2Int> GetPointers( Vector2Int position, RotationType rotation ) 
         {
             var pointers = new List<Vector2Int>();
 
             // TODO: consider rotation
-            foreach ( var part in Shape ) 
+            foreach ( var part in Shape.GetVec2Ints() ) 
                 pointers.Add( position + part );
 
             return pointers;
