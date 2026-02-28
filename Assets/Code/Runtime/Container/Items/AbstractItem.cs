@@ -19,14 +19,8 @@ namespace Code.Runtime.Container.Items
         
         public abstract void Use();
         //public abstract void Revert();
-    }
-
-    [Serializable]
-    public abstract class AbstractGridItem : AbstractItem
-    {
-        protected AbstractGridItem( IItemData itemData ) : base( itemData ) {}    
-        
-        public virtual List<Vector2Int> GetPointers( Vector2Int position, RotationType rotation ) => new() { position };
+    
+        public abstract List<Vector2Int> GetPointers( Vector2Int position );
     }
     
     public interface IItem

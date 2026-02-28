@@ -10,7 +10,7 @@ using Random = UnityEngine.Random;
 namespace Code.Runtime.Container.Items
 {
     [Serializable]
-    public sealed class TetrisItem : AbstractGridItem
+    public sealed class TetrisItem : AbstractItem
     {
         public readonly RectGridBool Shape;
         public RotationType rotation;
@@ -22,13 +22,16 @@ namespace Code.Runtime.Container.Items
             Affixes.Add( new PawnStatModifier( itemData.statType, new Modifier( itemData.value, itemData.modifierType, guid ) ) );
         }
 
-        public override List<Vector2Int> GetPointers( Vector2Int position, RotationType rotation ) 
+        public override List<Vector2Int> GetPointers( Vector2Int position) 
         {
+            var parts = Shape.GetVec2Ints();
+            var anchor = parts[0]; // or however we define the anchor
+
             var pointers = new List<Vector2Int>();
 
             // TODO: consider rotation
-            foreach ( var part in Shape.GetVec2Ints() ) 
-                pointers.Add( position + part );
+            foreach ( var part in parts ) 
+                pointers.Add( position + part - anchor );
 
             return pointers;
         }

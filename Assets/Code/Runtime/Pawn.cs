@@ -12,13 +12,12 @@ namespace Code.Runtime
 {
     public sealed class Pawn : MonoBehaviour, IDamageable
     {
-        // TODO: make constructor, object pool the prefab and populate scene on the fly
         [SerializeField] private PawnConfig config;
         [SerializeField] public PawnStats stats;
         
         [SerializeField, ReadOnly, PreviewIcon] private Sprite icon;
         
-        [SerializeField] public List<TetrisItem> inventory;
+        [SerializeField] public TetrisContainer inventory;
         [SerializeField] public PawnEffect pawnEffects;
         
         private void OnValidate() => SpawnPawn();
@@ -35,7 +34,7 @@ namespace Code.Runtime
             
             icon = config.icon;
             stats = new PawnStats( config );
-            inventory = new List<TetrisItem>();
+            inventory = new TetrisContainer( new Vector2Int( 6, 2 ) );
             
             stats.health.OnDepleted += DespawnPawn;
         }
@@ -51,7 +50,9 @@ namespace Code.Runtime
 
         public void EquipItem( TetrisItem item )
         {
-            inventory.Add( item );
+            if( !inventory.TryAdd( item ) ) 
+                return;
+            
             foreach( var affix in item.Affixes )
                 stats.ApplyMod( affix );
         }
