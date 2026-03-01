@@ -34,7 +34,7 @@ namespace Code.Runtime
             
             icon = config.icon;
             stats = new PawnStats( config );
-            inventory = new TetrisContainer( new Vector2Int( 6, 2 ) );
+            inventory = new TetrisContainer( new Vector2Int( 6, 2 ), stats );
             
             stats.health.OnDepleted += DespawnPawn;
         }
@@ -48,14 +48,7 @@ namespace Code.Runtime
         // TODO: transform into command pattern
         public void TakeDamage( float damage ) => stats.health.ReduceCurrent( damage );
 
-        public void EquipItem( TetrisItem item )
-        {
-            if( !inventory.TryAdd( item ) ) 
-                return;
-            
-            foreach( var affix in item.Affixes )
-                stats.ApplyMod( affix );
-        }
+        public void EquipItem( TetrisItem item ) => inventory.TryAdd( item );
     }
 
     public interface IDamageable

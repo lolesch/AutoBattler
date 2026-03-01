@@ -17,6 +17,7 @@ namespace Code.Runtime
         [SerializeField] private Timer enemyTimer;
         //[SerializeField] private PawnResourceView enemyHealthView;
         [SerializeField] private ItemConfig itemConfig;
+        [SerializeField] private RotationType rotation;
         [SerializeField] private InventoryView inventoryView;
         
         [SerializeField] private Grid grid;
@@ -85,7 +86,7 @@ namespace Code.Runtime
         
         private void AddItem( Pawn pawn )
         {
-            pawn.EquipItem(new TetrisItem(itemConfig));
+            pawn.EquipItem( new TetrisItem(itemConfig, rotation) );
             inventoryView.RefreshView(pawn);
         }
 

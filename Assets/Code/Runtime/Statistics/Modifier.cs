@@ -21,12 +21,16 @@ namespace Code.Runtime.Statistics
         public readonly ModifierType Type => type;
 
         public static implicit operator float( Modifier mod ) => mod.value;
-
+        public readonly override int GetHashCode() => HashCode.Combine( source, type, value );
         public readonly int CompareTo( Modifier other )
         {
             var typeComparison = Type.CompareTo( other.Type );
-
-            return typeComparison != 0 ? typeComparison : value.CompareTo( other.value );
+            if( typeComparison != 0 ) return typeComparison;
+    
+            var valueComparison = value.CompareTo( other.value );
+            if( valueComparison != 0 ) return valueComparison;
+    
+            return source.CompareTo( other.source );
         }
 
         public readonly override string ToString() => Type switch

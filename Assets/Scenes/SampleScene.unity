@@ -2684,6 +2684,7 @@ MonoBehaviour:
     stopwatch:
       timeElapsed: 0
   itemConfig: {fileID: 11400000, guid: 86ef919e21fad044d8e40c5d38531c3e, type: 2}
+  rotation: 0
   inventoryView: {fileID: 716019294}
   grid: {fileID: 1769693919}
   levelMap: {fileID: 1117111160}

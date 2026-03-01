@@ -12,7 +12,11 @@ namespace Code.Runtime.GUI.Inventory
         {
             var hasItem = item != null;
             if( hasItem )
+            {
                 icon.sprite = item.Icon;
+                float angle = (int)item.rotation * 90f;
+                icon.rectTransform.localEulerAngles = new Vector3(0f, 0f, angle);
+            }
         
             icon.color = hasItem? Color.white : Color.clear;
         }

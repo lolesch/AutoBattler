@@ -45,5 +45,6 @@ namespace Code.Runtime.Statistics
         };
 
         public void ApplyMod( PawnStatModifier mod ) => GetStat( mod.stat )?.AddModifier( mod.modifier );
+        public void RemoveMod( PawnStatModifier mod ) => GetStat( mod.stat )?.TryRemoveModifier( mod.modifier );
     }
 }
