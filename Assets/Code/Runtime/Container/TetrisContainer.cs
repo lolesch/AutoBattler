@@ -31,10 +31,11 @@ namespace Code.Runtime.Container
                 for( var y = 0; y < GridSize.y; y++ )
                 {
                     var position = new Vector2Int( x, y );
-                    if( IsEmpty( position ) && TryAddAt( position, ref arrival) )
-                        return true;
+                    if( CanAddAt( position, arrival, out var other ) && other.Count == 0 )
+                        if( TryAddAt( position, ref arrival ) )
+                            return true;
                 }
-            
+    
             return false;
         }
         public bool TryAddAt( Vector2Int position, ref TetrisItem arrival )
@@ -77,6 +78,7 @@ namespace Code.Runtime.Container
                     return false;
                 }
                 addedPointers.Add(pointer);
+                Debug.Log( $"Added Pointer {pointer}");
             }
 
             if (!Contents.TryAdd(position, arrival))
@@ -87,6 +89,7 @@ namespace Code.Runtime.Container
                 Debug.LogWarning($"Failed to add item to Contents at {position}.");
                 return false;
             }
+            Debug.Log( $"Added {arrival} at {position}");
             
             if (arrival is IEquippable equippable)
                 equippable.OnEquipped(_stats);
@@ -98,7 +101,7 @@ namespace Code.Runtime.Container
             Contents[position] == toRemove && TryRemove( position, out _ ) );
         public bool TryRemove( Vector2Int position, out TetrisItem removed )
         {
-            if( !IsEmpty( position ) )
+            if( IsEmpty( position ) )
             {
                 removed = null;
                 return false;

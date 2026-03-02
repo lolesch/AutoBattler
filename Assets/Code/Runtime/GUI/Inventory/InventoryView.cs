@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Code.Runtime.GUI.Inventory
@@ -12,13 +12,7 @@ namespace Code.Runtime.GUI.Inventory
             for( var i = 0; i < slots.Count; i++ )
             {
                 var pos = ToPosition( i, pawn );
-                if( pawn.inventory.ContentPointer.TryGetValue( pos, out var key ) )
-                {
-                    pawn.inventory.Contents.TryGetValue( key, out var item );
-                    slots[i].RefreshView( item );
-                }
-                else 
-                    slots[i].RefreshView( null );
+                slots[i].RefreshView( pawn.inventory.Contents.TryGetValue( pos, out var item ) ? item : null );
             }
         }
         

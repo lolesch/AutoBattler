@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Code.Data.Enums;
 using Code.Data.Items;
 using Code.Runtime.Grids.RectGridInspector;
@@ -13,32 +14,44 @@ namespace Code.Runtime.Container.Items
     [Serializable]
     public sealed class TetrisItem : AbstractItem, IEquippable
     {
-        public readonly RectGridBool Shape;
+        private readonly RectGridBool _shape;
         public RotationType rotation;
         
         public TetrisItem( ItemConfig itemData, RotationType rotation ) : base( itemData )
         {
-            Shape = itemData.Shape;
+            _shape = itemData.Shape;
             this.rotation = rotation; 
             RarityType = GetRandomRarity();
             Affixes.Add( new PawnStatModifier( itemData.statType, new Modifier( itemData.value, itemData.modifierType, guid ) ) );
         }
 
-        public override List<Vector2Int> GetPointers( Vector2Int position) 
+        public override List<Vector2Int> GetPointers(Vector2Int position)
         {
-            var parts = Shape.GetVec2Ints();
+            var normalized = GetNormalizedShape();
+            return normalized.Select(p => position + p - GetShapeOrigin( normalized )).ToList();
+        }
+        
+        public List<Vector2Int> GetNormalizedShape()
+        {
+            var parts = _shape.GetVec2Ints();
             var pivot = parts[0];
             var rotated = parts.Select(p => ApplyRotation(p - pivot, rotation)).ToList();
 
-            // snap top of shape to y=0
             var minY = rotated.Min(p => p.y);
-            var normalized = rotated.Select(p => p - new Vector2Int(0, minY)).ToList();
-
-            // find leftmost occupied cell in top row as placement anchor
+            var minX = rotated.Min(p => p.x);
+            
+            var sb = new StringBuilder();
+            foreach( var pos in rotated.Select( p => p - new Vector2Int( 0, minY ) ).ToList() )
+                sb.Append( pos );
+            
+            return rotated.Select(p => p - new Vector2Int(minX, minY)).ToList();
+        }
+        
+        public Vector2Int GetShapeOrigin(List<Vector2Int> normalized = null)
+        {
+            normalized ??= GetNormalizedShape();
             var minXInTopRow = normalized.Where(p => p.y == 0).Min(p => p.x);
-            var placementAnchor = new Vector2Int(minXInTopRow, 0);
-
-            return normalized.Select(p => position + p - placementAnchor).ToList();
+            return new Vector2Int(minXInTopRow, 0);
         }
         
         private Vector2Int ApplyRotation(Vector2Int v, RotationType rotation)
@@ -47,6 +60,13 @@ namespace Code.Runtime.Container.Items
             for (var i = 0; i < rotations; i++)
                 v = new Vector2Int(v.y, -v.x);
             return v;
+        }
+        public Vector2Int GetDimensions()
+        {
+            var normalized = GetNormalizedShape();
+            var width = normalized.Max(p => p.x) - normalized.Min(p => p.x) + 1;
+            var height = normalized.Max(p => p.y) - normalized.Min(p => p.y) + 1;
+            return new Vector2Int(width, height);
         }
         
         public override void Use() => throw new NotImplementedException();

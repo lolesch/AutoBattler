@@ -34,7 +34,7 @@ namespace Code.Runtime
             
             icon = config.icon;
             stats = new PawnStats( config );
-            inventory = new TetrisContainer( new Vector2Int( 6, 2 ), stats );
+            inventory = new TetrisContainer( new Vector2Int( 6, 3 ), stats );
             
             stats.health.OnDepleted += DespawnPawn;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace Code.Runtime.Grids.RectGridInspector
@@ -43,14 +44,15 @@ namespace Code.Runtime.Grids.RectGridInspector
 
             var map = new List<Vector2Int>();
 
-            for (int x = 0; x < cells.GetLength(0); x++)
-                for (int y = 0; y < cells.GetLength(1); y++)
+            for (var x = 0; x < cells.GetLength(0); x++)
+                for (var y = 0; y < cells.GetLength(1); y++)
                     if( IsValid( GetCell( y, x ) ) )
-                        map.Add( new( y, x ) );
-                
+                        map.Add( new Vector2Int( y, x ) );
+
             return map;
         }
-
+        public Vector2Int GetDimensions() => gridSize;
+        
         protected abstract bool IsValid(T target);
     }
     

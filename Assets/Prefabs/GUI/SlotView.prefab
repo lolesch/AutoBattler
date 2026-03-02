@@ -32,11 +32,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 3828399165725986623}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_SizeDelta: {x: 60, y: 60}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &9017831748086588692
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -164,9 +164,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32dfbb0c6d514ff49a43f5e83931afc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Runtime::SlotView
-  item:
-    config: {fileID: 0}
-    <icon>k__BackingField: {fileID: 0}
-    <RarityType>k__BackingField: 0
-    <Affixes>k__BackingField: []
   icon: {fileID: 4141773371939373180}
+  cellSize: 60
