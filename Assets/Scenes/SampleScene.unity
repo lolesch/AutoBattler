@@ -3162,9 +3162,10 @@ MonoBehaviour:
     repeat: 1
     stopwatch:
       timeElapsed: 0
-  itemConfig: {fileID: 11400000, guid: 4797c3be89ee94742a37f6822ab0e170, type: 2}
-  rotation: 0
   inventoryView: {fileID: 716019294}
+  weaponConfig: {fileID: 0}
+  amplifierConfig: {fileID: 0}
+  rotation: 0
   grid: {fileID: 1769693919}
   levelMap: {fileID: 1117111160}
   pawnEffectMap: {fileID: 709809114}
@@ -4917,11 +4918,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: stats.<health>k__BackingField.MaxValue.baseValue
-      value: 60
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: stats.<health>k__BackingField.MaxValue.totalValue
-      value: 60
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: pawnEffects.shape.rows.Array.data[0].row.Array.size
@@ -4957,7 +4958,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: stats.<health>k__BackingField.<CurrentValue>k__BackingField
-      value: 60
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: pawnEffects.Array.data[0].shape.rows.Array.data[0].row.Array.size

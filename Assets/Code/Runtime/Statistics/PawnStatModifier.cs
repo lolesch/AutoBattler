@@ -1,11 +1,12 @@
 using System;
 using UnityEngine;
 using Code.Data.Enums;
+using Code.Data.Items.Amplifier;
 
 namespace Code.Runtime.Statistics
 {
     [Serializable]
-    public struct PawnStatModifier : IStatModifier
+    public struct PawnStatModifier : IPawnStatModifier
     {
         /// where to put this?
         //[field: SerializeField] protected float randomRoll { get; } = Random.value;
@@ -21,7 +22,7 @@ namespace Code.Runtime.Statistics
         }
     }
 
-    internal interface IStatModifier
+    internal interface IPawnStatModifier
     {
         StatType stat { get; }
         Modifier modifier { get; }
