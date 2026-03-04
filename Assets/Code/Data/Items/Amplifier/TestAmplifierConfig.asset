@@ -18,10 +18,16 @@ MonoBehaviour:
     cellSize: {x: 16, y: 16}
     rows:
     - row: 01
-  inputSlots: []
-  outputSlots: []
+  connectors:
+  - <LocalPosition>k__BackingField: {x: 0, y: 0}
+    <Direction>k__BackingField: 0
+  - <LocalPosition>k__BackingField: {x: 0, y: 0}
+    <Direction>k__BackingField: 2
   <StatType>k__BackingField: 3
   <Value>k__BackingField: 5
   <ModifierType>k__BackingField: 2
   debugStatModifierString: Max Mana +5 %
   <WeaponStat>k__BackingField: 2
+  <WeaponValue>k__BackingField: -1
+  <WeaponModifierType>k__BackingField: 1
+  debugWeaponModifierString: ResourceCost 1

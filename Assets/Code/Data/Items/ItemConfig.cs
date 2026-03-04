@@ -37,7 +37,7 @@ namespace Code.Data.Items
 
         [SerializeField, HideInInspector] private string debugStatModifierString;
 
-        private void OnValidate()
+        protected void OnValidate()
         {
             var mod = ModifierType switch
             {

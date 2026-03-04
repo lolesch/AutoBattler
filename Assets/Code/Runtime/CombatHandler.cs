@@ -5,6 +5,7 @@ using Code.Data.Items.Weapon;
 using Code.Runtime.Container.Items;
 using Code.Runtime.Container.Items.Chain;
 using Code.Runtime.GUI.Inventory;
+using NaughtyAttributes;
 using Submodules.Utility.Extensions;
 using Submodules.Utility.Tools.Timer;
 using UnityEngine;
@@ -19,7 +20,8 @@ namespace Code.Runtime
         [SerializeField] private Timer enemyTimer;
         [SerializeField] private InventoryView inventoryView;
 
-        [Header("Item Testing")]
+        [Header("Item Testing")] 
+        [SerializeField, Range(1,18)] private int amountOfItems = 1;
         [Tooltip("Assign a WeaponConfig to add a WeaponItem to the player.")]
         [SerializeField] private WeaponConfig weaponConfig;
         [Tooltip("Assign an AmplifierConfig to chain an amplifier after the weapon.")]
@@ -95,7 +97,8 @@ namespace Code.Runtime
             }
 
             var weapon = new WeaponItem(weaponConfig, rotation);
-            player.EquipItem(weapon);
+            for (int i = 0; i < amountOfItems; i++)
+                player.EquipItem(weapon);
             inventoryView.RefreshView(player);
         }
 
@@ -113,7 +116,8 @@ namespace Code.Runtime
             }
 
             var amp = new AmplifierItem(amplifierConfig, rotation);
-            player.EquipItem(amp);
+            for (int i = 0; i < amountOfItems; i++)
+                player.EquipItem(amp);
             inventoryView.RefreshView(player);
         }
 

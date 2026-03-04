@@ -78,13 +78,33 @@ namespace Code.Runtime.Container.Items
         /// </summary>
         public List<(Vector2Int slotPos, Vector2Int direction)> GetGridConnectors(Vector2Int placement)
         {
+            // Apply the same transform as GetNormalizedShape so connector positions
+            // stay consistent with the placed shape at any rotation:
+            //   1. Subtract pivot (parts[0]) before rotating — same as GetNormalizedShape
+            //   2. Subtract (minX, minY) after rotating    — same as GetNormalizedShape
+            var parts  = _shape.GetVec2Ints();
+            var pivot  = parts[0];
+
+            var rotatedCells = new List<Vector2Int>(parts.Count);
+            foreach (var p in parts)
+                rotatedCells.Add(ApplyRotation(p - pivot, rotation));
+
+            var minX      = int.MaxValue;
+            var minY      = int.MaxValue;
+            foreach (var p in rotatedCells)
+            {
+                if (p.x < minX) minX = p.x;
+                if (p.y < minY) minY = p.y;
+            }
+            var normOffset = new Vector2Int(minX, minY);
+
             var origin = GetShapeOrigin();
             var result = new List<(Vector2Int, Vector2Int)>(_config.Connectors.Count);
 
             foreach (var connector in _config.Connectors)
             {
-                var rotatedPos = ApplyRotation(connector.LocalPosition, rotation);
-                var rotatedDir = ApplyRotation(connector.Direction,     rotation);
+                var rotatedPos = ApplyRotation(connector.LocalPosition - pivot, rotation) - normOffset;
+                var rotatedDir = ApplyRotation(connector.Direction.ToVector2Int(),         rotation);
                 var gridPos    = placement + rotatedPos - origin;
                 result.Add((gridPos, rotatedDir));
             }

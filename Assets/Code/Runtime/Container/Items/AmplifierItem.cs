@@ -13,10 +13,12 @@ namespace Code.Runtime.Container.Items
 
         public AmplifierItem(AmplifierConfig config, RotationType rotation) : base(config, rotation)
         {
+            // Chain effect — independent fields from the standalone pawn modifier
             WeaponModifier = new WeaponStatModifier(
                 config.WeaponStat,
-                new Modifier(config.Value, config.ModifierType, guid));
+                new Modifier(config.WeaponValue, config.WeaponModifierType, guid));
 
+            // Standalone effect — pawn stat modifier applied on equip
             _affixes.Add(new PawnStatModifier(
                 config.StatType,
                 new Modifier(config.Value, config.ModifierType, guid)));
@@ -44,7 +46,7 @@ namespace Code.Runtime.Container.Items
 
     /// <summary>
     /// Opt-in interface for items that apply passive stat effects when equipped.
-    /// Extends IEquippable — TetrisContainer's is IEquippable check picks these up automatically.
+    /// Extends IEquippable — TetrisContainer's IEquippable check picks these up automatically.
     /// WeaponItem intentionally does not implement this.
     /// </summary>
     public interface IStatModifier : IEquippable

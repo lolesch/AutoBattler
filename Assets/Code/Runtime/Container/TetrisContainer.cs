@@ -22,7 +22,7 @@ namespace Code.Runtime.Container
         public IReadOnlyDictionary<Vector2Int, ITetrisItem> Contents       => _contents;
         public IReadOnlyDictionary<Vector2Int, Vector2Int>  ContentPointer => _contentPointer;
 
-        public readonly Vector2Int GridSize;
+        public Vector2Int GridSize { get; }
         private readonly PawnStats _stats;
 
         public event Action<IReadOnlyDictionary<Vector2Int, ITetrisItem>> OnContentsChanged;
@@ -162,6 +162,7 @@ namespace Code.Runtime.Container
 
     public interface ITetrisContainer
     {
+        Vector2Int GridSize { get; }
         IReadOnlyDictionary<Vector2Int, ITetrisItem> Contents       { get; }
         IReadOnlyDictionary<Vector2Int, Vector2Int>  ContentPointer { get; }
         event Action<IReadOnlyDictionary<Vector2Int, ITetrisItem>> OnContentsChanged;

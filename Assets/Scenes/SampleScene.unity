@@ -1739,6 +1739,7 @@ GameObject:
   - component: {fileID: 716019293}
   - component: {fileID: 716019297}
   - component: {fileID: 716019296}
+  - component: {fileID: 716019299}
   - component: {fileID: 716019294}
   - component: {fileID: 716019295}
   - component: {fileID: 716019298}
@@ -1817,6 +1818,7 @@ MonoBehaviour:
   - {fileID: 1000863256}
   - {fileID: 280836280}
   - {fileID: 359176739}
+  _chainOverlay: {fileID: 716019299}
 --- !u!114 &716019295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1893,6 +1895,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!114 &716019299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 716019292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6e67273a3ee4d4ca39a690fa3ff8669, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::Code.Runtime.GUI.Inventory.ChainOverlayView
+  _inventoryView: {fileID: 716019294}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -3151,11 +3166,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Runtime::Code.Runtime.CombatHandler
   player: {fileID: 2078738982}
-  playerTimer:
-    duration: 1
-    repeat: 1
-    stopwatch:
-      timeElapsed: 0
   enemy: {fileID: 1334688241}
   enemyTimer:
     duration: 2
@@ -3163,8 +3173,9 @@ MonoBehaviour:
     stopwatch:
       timeElapsed: 0
   inventoryView: {fileID: 716019294}
-  weaponConfig: {fileID: 0}
-  amplifierConfig: {fileID: 0}
+  amountOfItems: 7
+  weaponConfig: {fileID: 11400000, guid: fb19e700426d517408b5be9a2cefd59e, type: 2}
+  amplifierConfig: {fileID: 11400000, guid: d287988fc72bebe49a9a88107b6d4e2f, type: 2}
   rotation: 0
   grid: {fileID: 1769693919}
   levelMap: {fileID: 1117111160}

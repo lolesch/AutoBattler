@@ -1,3 +1,5 @@
+using Code.Data.Enums;
+using Submodules.Utility.Extensions;
 using UnityEngine;
 
 namespace Code.Data.Items.Amplifier
@@ -5,9 +7,28 @@ namespace Code.Data.Items.Amplifier
     [CreateAssetMenu(fileName = "AmplifierConfig", menuName = "Configs/Items/Amplifier")]
     public sealed class AmplifierConfig : StatItemConfig
     {
-        [Header("Amplifier Properties")]
-        [Tooltip("Which weapon stat this amplifier scales. Uses Value and ModifierType from base config.")]
-        [field: SerializeField] public WeaponStatType WeaponStat { get; private set; }
+        [Header("Chain Effect")]
+        [Tooltip("Which weapon stat this amplifier modifies when connected in a chain.")]
+        [field: SerializeField] public WeaponStatType WeaponStat          { get; private set; }
+        [field: SerializeField] public float          WeaponValue         { get; private set; }
+        [field: SerializeField] public ModifierType   WeaponModifierType  { get; private set; }
+
+        [SerializeField, HideInInspector] private string debugWeaponModifierString;
+
+        private new void OnValidate()
+        {
+            base.OnValidate();
+
+            var mod = WeaponModifierType switch
+            {
+                ModifierType.Overwrite   => $"= {WeaponValue:0.###;-0.###}",
+                ModifierType.FlatAdd     => $"{WeaponValue:+0.###;0.###;-0.###}",
+                ModifierType.PercentAdd  => $"{WeaponValue:+0.###;0.###;-0.###} %",
+                ModifierType.PercentMult => $"* {WeaponValue:0.###;-0.###} %",
+                var _                    => $"?? {WeaponValue:+0.###;-0.###;0.###}",
+            };
+            debugWeaponModifierString = $"{WeaponStat} {mod}";
+        }
     }
 
     public enum WeaponStatType
