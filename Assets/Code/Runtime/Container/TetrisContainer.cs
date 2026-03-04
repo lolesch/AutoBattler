@@ -10,7 +10,7 @@ namespace Code.Runtime.Container
     [Serializable]
     public sealed class TetrisContainer : ITetrisContainer
     {
-        public TetrisContainer(Vector2Int gridSize, PawnStats stats)
+        public TetrisContainer(Vector2Int gridSize, IPawnStats stats)
         {
             GridSize = gridSize;
             _stats   = stats;
@@ -23,7 +23,7 @@ namespace Code.Runtime.Container
         public IReadOnlyDictionary<Vector2Int, Vector2Int>  ContentPointer => _contentPointer;
 
         public Vector2Int GridSize { get; }
-        private readonly PawnStats _stats;
+        private readonly IPawnStats _stats;
 
         public event Action<IReadOnlyDictionary<Vector2Int, ITetrisItem>> OnContentsChanged;
 
@@ -70,8 +70,8 @@ namespace Code.Runtime.Container
 
         private bool Add(Vector2Int position, ITetrisItem arrival)
         {
-            var pointers       = arrival.GetPointers(position);
-            var addedPointers  = new List<Vector2Int>();
+            var pointers      = arrival.GetPointers(position);
+            var addedPointers = new List<Vector2Int>();
 
             foreach (var pointer in pointers)
             {

@@ -5,22 +5,17 @@ using UnityEngine;
 
 namespace Code.Runtime.Grids.HexGridInspector
 {
-    // based on: https://github.com/Eldoir/Array2DEditor
     [Serializable]
     public abstract class HexGrid<T>
     {
         public const int defaultRadius = 2;
         public int Diameter => radius * 2 + 1;
-        public int Radius => radius;
+        public int Radius   => radius;
 
         [SerializeField] protected int radius = defaultRadius;
 
 #pragma warning disable 414
-        /// <summary>
-        /// NOTE: Only used to display the cells in the Editor. This won't affect the build.
-        /// </summary>
-        [SerializeField]
-        private Vector2Int cellSize;
+        [SerializeField] private Vector2Int cellSize;
 #pragma warning restore 414
 
         protected abstract HexRow<T> GetRow(int i);
@@ -28,37 +23,28 @@ namespace Code.Runtime.Grids.HexGridInspector
         public T[,] GetCells()
         {
             var cells = new T[Diameter, Diameter];
-
             for (var y = 0; y < Diameter; y++)
                 for (var x = 0; x < Diameter; x++)
                     cells[y, x] = GetCell(x, y);
-
             return cells;
         }
 
-        public T GetCell(int x, int y) => GetRow(y)[x];
-
+        public T    GetCell(int x, int y)          => GetRow(y)[x];
         public void SetCell(int x, int y, T value) => GetRow(y)[x] = value;
 
-        public List<Hex> GetHexes() //bool originIsCenter = true
+        public List<Hex> GetHexes()
         {
             var cells = GetCells();
-
-            var map = new List<Hex>();
+            var map   = new List<Hex>();
 
             for (int x = 0, r = -Diameter / 2; x < cells.GetLength(0); x++, r++)
                 for (int y = 0, q = -Diameter / 2; y < cells.GetLength(1); y++, q++)
                 {
-                    // skip cells to convert [,] into a hexRange
                     if (x + y < Radius || x + y - Diameter >= Radius)
                         continue;
-                    // skip the center
-                    /* else if (x == Radius && y == Radius)
-                     *  continue;
-                     */
 
-                    if( IsValid( GetCell( y, x ) ) )
-                        map.Add( new( q, r ) ); // originIsCenter ? new(q, r) : new(x, y));
+                    if (IsValid(GetCell(y, x)))
+                        map.Add(new(q, r));
                 }
 
             return map;
@@ -73,13 +59,15 @@ namespace Code.Runtime.Grids.HexGridInspector
         public HexGridBool(int radius = defaultRadius)
         {
             this.radius = radius;
-            rows = new HexRowBool[radius * 2 + 1];
+            rows        = new HexRowBool[radius * 2 + 1];
         }
 
-        [SerializeField]
-        private HexRowBool[] rows;
+        // Field initializer ensures rows is never null when Unity deserializes
+        // a fresh instance without calling the parameterized constructor.
+        // Mirrors the pattern used by RectGridBool.
+        [SerializeField] private HexRowBool[] rows = new HexRowBool[defaultRadius * 2 + 1];
 
         protected override HexRow<bool> GetRow(int i) => rows[i];
-        protected override bool IsValid(bool target) => target == true;
+        protected override bool IsValid(bool target)  => target == true;
     }
 }

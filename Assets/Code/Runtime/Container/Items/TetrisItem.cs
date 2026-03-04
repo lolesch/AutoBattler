@@ -10,28 +10,23 @@ using Random = UnityEngine.Random;
 
 namespace Code.Runtime.Container.Items
 {
-    /// <summary>
-    /// Base class for all grid-placed items.
-    /// Handles shape, rotation, and chain slot resolution only.
-    /// Stat modifier behaviour is opt-in via IStatModifier — not all items apply stats.
-    /// </summary>
     [Serializable]
     public abstract class TetrisItem : AbstractItem, ITetrisItem
     {
         private readonly RectGridBool _shape;
         private readonly ItemConfig   _config;
 
-        public string       Name      { get; private set; }
-        public RotationType rotation  { get; set; }
+        public string       Name       { get; private set; }
+        public RotationType rotation   { get; set; }
         public RarityType   RarityType { get; private set; }
 
         protected TetrisItem(ItemConfig config, RotationType rotation) : base(config)
         {
-            _shape         = config.Shape;
-            _config        = config;
-            Name           = config.name;
-            this.rotation  = rotation;
-            RarityType     = (RarityType)Random.Range(0, Enum.GetValues(typeof(RarityType)).Length);
+            _shape        = config.Shape;
+            _config       = config;
+            Name          = config.name;
+            this.rotation = rotation;
+            RarityType    = (RarityType)Random.Range(0, Enum.GetValues(typeof(RarityType)).Length);
         }
 
         // ── Grid placement ────────────────────────────────────────────────
@@ -69,19 +64,8 @@ namespace Code.Runtime.Container.Items
 
         // ── Chain connectors ──────────────────────────────────────────────
 
-        /// <summary>
-        /// Returns all connectors resolved to grid space.
-        /// Each entry is (slotGridPosition, gridDirection) where:
-        ///   slotGridPosition — the grid cell on this item that hosts the connector
-        ///   gridDirection    — the adjacent cell this connector reaches into
-        /// Both the position and direction are rotated to match the item's placed rotation.
-        /// </summary>
         public List<(Vector2Int slotPos, Vector2Int direction)> GetGridConnectors(Vector2Int placement)
         {
-            // Apply the same transform as GetNormalizedShape so connector positions
-            // stay consistent with the placed shape at any rotation:
-            //   1. Subtract pivot (parts[0]) before rotating — same as GetNormalizedShape
-            //   2. Subtract (minX, minY) after rotating    — same as GetNormalizedShape
             var parts  = _shape.GetVec2Ints();
             var pivot  = parts[0];
 
@@ -89,8 +73,8 @@ namespace Code.Runtime.Container.Items
             foreach (var p in parts)
                 rotatedCells.Add(ApplyRotation(p - pivot, rotation));
 
-            var minX      = int.MaxValue;
-            var minY      = int.MaxValue;
+            var minX = int.MaxValue;
+            var minY = int.MaxValue;
             foreach (var p in rotatedCells)
             {
                 if (p.x < minX) minX = p.x;
@@ -139,8 +123,8 @@ namespace Code.Runtime.Container.Items
 
     public interface IEquippable
     {
-        void OnEquipped(PawnStats stats);
-        void OnUnequipped(PawnStats stats);
+        void OnEquipped(IPawnStats stats);
+        void OnUnequipped(IPawnStats stats);
     }
 
     [Serializable]

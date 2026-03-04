@@ -12,17 +12,17 @@ namespace Code.Runtime.GUI.Inventory
 
         private void Awake() => _chainOverlay ??= GetComponent<ChainOverlayView>();
 
-        public void RefreshView(Pawn pawn)
+        public void RefreshView(IPawn pawn)
         {
             for (var i = 0; i < slots.Count; i++)
             {
                 var pos = ToPosition(i, pawn);
-                slots[i].RefreshView(pawn.inventory.Contents.TryGetValue(pos, out var item) ? item : null);
+                slots[i].RefreshView(pawn.Inventory.Contents.TryGetValue(pos, out var item) ? item : null);
             }
 
-            _chainOverlay?.Bind(pawn.inventory);
+            _chainOverlay?.Bind(pawn.Inventory);
         }
 
-        private Vector2Int ToPosition(int slot, Pawn pawn) => new(slot % pawn.inventory.GridSize.x, slot / pawn.inventory.GridSize.x);
+        private Vector2Int ToPosition(int slot, IPawn pawn) => new(slot % pawn.Inventory.GridSize.x, slot / pawn.Inventory.GridSize.x);
     }
 }

@@ -139,33 +139,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701dc6fa688adea48af1d00b4e8b72e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pawn
-  config: {fileID: 11400000, guid: 5f7e65c9f1b721a49ab1b539386fcbbb, type: 2}
-  stats:
-    <health>k__BackingField:
-      name: 
-      <StatType>k__BackingField: 2
-      MaxValue:
-        totalValue: 100
-        baseValue: 100
-        modifiers: []
-      <CurrentValue>k__BackingField: 100
-    <damage>k__BackingField:
-      name: 
-      <StatType>k__BackingField: 1
-      MaxValue:
-        totalValue: 10
-        baseValue: 10
-        modifiers: []
-    <attackSpeed>k__BackingField:
-      name: 
-      <StatType>k__BackingField: 3
-      MaxValue:
-        totalValue: 1
-        baseValue: 1
-        modifiers: []
-  icon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  inventory: []
-  pawnEffects: []
+  _config: {fileID: 11400000, guid: 4525cc981333f3e429fcc6aff9c4caaa, type: 2}
+  _icon: {fileID: 21300000, guid: 9e735fd97a3956f499e8da8a5708e7a6, type: 3}
+  _pawnEffects:
+    shape:
+      radius: 1
+      cellSize: {x: 16, y: 16}
+      rows:
+      - row: 010101
+      - row: 010001
+      - row: 010101
+    rotation: 0
+    <Effect>k__BackingField: 
 --- !u!114 &211134515494925660
 MonoBehaviour:
   m_ObjectHideFlags: 0

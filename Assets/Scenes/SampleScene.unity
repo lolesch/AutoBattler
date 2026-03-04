@@ -3167,20 +3167,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Runtime::Code.Runtime.CombatHandler
   player: {fileID: 2078738982}
   enemy: {fileID: 1334688241}
-  enemyTimer:
-    duration: 2
-    repeat: 1
-    stopwatch:
-      timeElapsed: 0
-  inventoryView: {fileID: 716019294}
-  amountOfItems: 7
+  amountOfItems: 1
   weaponConfig: {fileID: 11400000, guid: fb19e700426d517408b5be9a2cefd59e, type: 2}
   amplifierConfig: {fileID: 11400000, guid: d287988fc72bebe49a9a88107b6d4e2f, type: 2}
   rotation: 0
-  grid: {fileID: 1769693919}
-  levelMap: {fileID: 1117111160}
-  pawnEffectMap: {fileID: 709809114}
-  effectTile: {fileID: 11400000, guid: 823821f3c2c2e4a40a988953611f2111, type: 2}
+  inventoryView: {fileID: 716019294}
 --- !u!1 &1307511338
 GameObject:
   m_ObjectHideFlags: 0
@@ -4215,6 +4206,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1769693920}
   - component: {fileID: 1769693919}
+  - component: {fileID: 1769693921}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
@@ -4251,6 +4243,26 @@ Transform:
   - {fileID: 709809112}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1769693921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1769693918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb9cc9693654437b845b1461e08ed5eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::Code.Runtime.HexSelectionHandler
+  pawns:
+  - {fileID: 2078738982}
+  - {fileID: 1334688241}
+  inventoryView: {fileID: 716019294}
+  grid: {fileID: 1769693919}
+  levelMap: {fileID: 1117111160}
+  pawnEffectMap: {fileID: 709809114}
+  effectTile: {fileID: 11400000, guid: 823821f3c2c2e4a40a988953611f2111, type: 2}
 --- !u!1 &1775969132
 GameObject:
   m_ObjectHideFlags: 0
@@ -4840,7 +4852,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _icon
+      value: 
+      objectReference: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: config
+      value: 
+      objectReference: {fileID: 11400000, guid: 4525cc981333f3e429fcc6aff9c4caaa, type: 2}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _config
       value: 
       objectReference: {fileID: 11400000, guid: 4525cc981333f3e429fcc6aff9c4caaa, type: 2}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
@@ -4861,6 +4881,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: pawnEffects.shape.radius
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.radius
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
@@ -4888,6 +4912,14 @@ PrefabInstance:
       value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.cellSize.x
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.cellSize.y
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: attackSpeed.MaxValue.baseValue
       value: 2
       objectReference: {fileID: 0}
@@ -4905,6 +4937,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: pawnEffects.shape.rows.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.rows.Array.size
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
@@ -4948,6 +4984,18 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.rows.Array.data[0].row.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.rows.Array.data[1].row.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.rows.Array.data[2].row.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: stats.<attackSpeed>k__BackingField.MaxValue.baseValue
       value: 2
       objectReference: {fileID: 0}
@@ -4966,6 +5014,18 @@ PrefabInstance:
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: stats.<attackSpeed>k__BackingField.MaxValue.totalValue
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: '_pawnEffects.shape.rows.Array.data[0].row.Array.data[0]'
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: '_pawnEffects.shape.rows.Array.data[1].row.Array.data[2]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: '_pawnEffects.shape.rows.Array.data[2].row.Array.data[1]'
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: stats.<health>k__BackingField.<CurrentValue>k__BackingField
@@ -5101,6 +5161,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1117111160}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _icon
+      value: 
+      objectReference: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _config
+      value: 
+      objectReference: {fileID: 11400000, guid: 5f7e65c9f1b721a49ab1b539386fcbbb, type: 2}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: pawnEffects.effect
       value: 
       objectReference: {fileID: 0}
@@ -5113,11 +5181,23 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.radius
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: pawnEffects.shape.cellSize.x
       value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: pawnEffects.shape.cellSize.y
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.cellSize.x
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.cellSize.y
       value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
@@ -5130,6 +5210,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: pawnEffects.shape.rows.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.rows.Array.size
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
@@ -5173,6 +5257,18 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.rows.Array.data[0].row.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.rows.Array.data[1].row.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: _pawnEffects.shape.rows.Array.data[2].row.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: 'pawnEffects.shape.rows.Array.data[0].row.Array.data[0]'
       value: 1
       objectReference: {fileID: 0}
@@ -5190,6 +5286,26 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: 'pawnEffects.shape.rows.Array.data[2].row.Array.data[0]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: '_pawnEffects.shape.rows.Array.data[0].row.Array.data[0]'
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: '_pawnEffects.shape.rows.Array.data[0].row.Array.data[1]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: '_pawnEffects.shape.rows.Array.data[1].row.Array.data[0]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: '_pawnEffects.shape.rows.Array.data[1].row.Array.data[2]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: '_pawnEffects.shape.rows.Array.data[2].row.Array.data[0]'
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4876227807000541500, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}

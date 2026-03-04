@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Code.Data.Pawns;
 using Code.Runtime.Container;
 using Code.Runtime.Container.Items;
@@ -10,49 +9,61 @@ using UnityEngine;
 
 namespace Code.Runtime
 {
-    public sealed class Pawn : MonoBehaviour, IDamageable
+    public sealed class Pawn : MonoBehaviour, IPawn
     {
-        [SerializeField] private PawnConfig config;
-        [SerializeField] public PawnStats stats;
-        
-        [SerializeField, ReadOnly, PreviewIcon] private Sprite icon;
-        
-        [SerializeField] public TetrisContainer inventory;
-        [SerializeField] public PawnEffect pawnEffects;
-        
-        private void OnValidate() => SpawnPawn();
-        private void Awake() => SpawnPawn();
+        [SerializeField] private PawnConfig _config;
+        [SerializeField, ReadOnly, PreviewIcon] private Sprite _icon;
+        [SerializeField] private PawnEffect _pawnEffects;
+
+        public IPawnStats            Stats            { get; private set; }
+        public ITetrisContainer      Inventory        { get; private set; }
+        public IPawnEffect           PawnEffects      { get; private set; }
+        public IPawnCombatController CombatController { get; private set; }
+
+        private void Awake()
+        {
+            SpawnPawn();
+            CombatController = new PawnCombatController(Inventory);
+        }
 
         [ContextMenu("Spawn")]
         private void SpawnPawn()
         {
-            if( !config )
+            if (!_config)
             {
                 Debug.LogError("Missing Config to draw from");
                 return;
             }
-            
-            icon = config.icon;
-            stats = new PawnStats( config );
-            inventory = new TetrisContainer( new Vector2Int( 6, 3 ), stats );
-            
-            stats.health.OnDepleted += DespawnPawn;
+
+            _icon       = _config.icon;
+            Stats       = new PawnStats(_config);
+            Inventory   = new TetrisContainer(new Vector2Int(6, 3), Stats);
+            PawnEffects = _pawnEffects;
+
+            Stats.health.OnDepleted += DespawnPawn;
         }
 
         private void DespawnPawn()
         {
-            Debug.Log( $"{gameObject.name} has been defeated!" );
+            Debug.Log($"{gameObject.name} has been defeated!");
             gameObject.SetActive(false);
         }
-        
-        // TODO: transform into command pattern
-        public void TakeDamage( float damage ) => stats.health.ReduceCurrent( damage );
 
-        public void EquipItem( TetrisItem item ) => inventory.TryAdd( item );
+        public void TakeDamage(float damage) => Stats.health.ReduceCurrent(damage);
+        public void EquipItem(TetrisItem item) => Inventory.TryAdd(item);
+    }
+
+    public interface IPawn : IDamageable
+    {
+        IPawnStats            Stats            { get; }
+        ITetrisContainer      Inventory        { get; }
+        IPawnEffect           PawnEffects      { get; }
+        IPawnCombatController CombatController { get; }
+        void EquipItem(TetrisItem item);
     }
 
     public interface IDamageable
     {
-        void TakeDamage( float damage );
+        void TakeDamage(float damage);
     }
 }
