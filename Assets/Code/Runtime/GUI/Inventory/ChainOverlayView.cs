@@ -109,39 +109,40 @@ namespace Code.Runtime.GUI.Inventory
         // ── Connection resolution ─────────────────────────────────────────
 
         /// <summary>
-        /// BFS from every weapon. Queue carries the arrival direction so we skip only
-        /// the one connector pointing back the way we came — not all connectors sharing
-        /// the same slotPos (which broke 1-cell items where all connectors share the anchor).
+        /// BFS from every weapon. Visited tracks anchor positions (not item references)
+        /// to avoid false "already visited" caused by reference equality issues.
+        /// Queue carries arrival direction to skip only the back-facing connector.
         /// </summary>
         private HashSet<(Vector2Int, Vector2Int)> FindValidConnections()
         {
+            if (_container == null)
+                return new HashSet<(Vector2Int, Vector2Int)>();
+
             var result  = new HashSet<(Vector2Int, Vector2Int)>();
-            var visited = new HashSet<ITetrisItem>();
+            var visited = new HashSet<Vector2Int>(); // anchor positions — no reference equality issues
 
             foreach (var kvp in _container.Contents)
             {
-                if (kvp.Value is not IWeaponItem weapon)
+                if (kvp.Value is not IWeaponItem)
                     continue;
 
-                if (visited.Contains(weapon))
+                var weaponAnchor = kvp.Key;
+
+                if (visited.Contains(weaponAnchor))
                     continue;
 
-                visited.Add(weapon);
+                visited.Add(weaponAnchor);
 
                 // Queue: (item, anchor pos, direction we arrived FROM — zero for weapon start)
                 var queue = new Queue<(ITetrisItem item, Vector2Int pos, Vector2Int arrivalDir)>();
-                queue.Enqueue((weapon, kvp.Key, Vector2Int.zero));
+                queue.Enqueue((kvp.Value, weaponAnchor, Vector2Int.zero));
 
                 while (queue.Count > 0)
                 {
                     var (current, currentPos, arrivalDir) = queue.Dequeue();
 
-                    Debug.Log($"[Chain] Dequeued {current.Name} @ {currentPos} | arrivalDir:{arrivalDir}");
-
                     foreach (var (slotPos, direction) in current.GetGridConnectors(currentPos))
                     {
-                        Debug.Log($"  connector slotPos:{slotPos} dir:{direction} | skipBack:{direction == -arrivalDir}");
-
                         // Skip the connector pointing back the way we came
                         if (direction == -arrivalDir)
                             continue;
@@ -154,17 +155,14 @@ namespace Code.Runtime.GUI.Inventory
                         if (!_container.Contents.TryGetValue(neighbourOrigin, out var neighbour))
                             continue;
 
-                        if (visited.Contains(neighbour))
+                        if (visited.Contains(neighbourOrigin))
                             continue;
 
-                        var matches = HasMatchingConnector(neighbour, neighbourOrigin, targetCell, -direction);
-                        Debug.Log($"  → neighbour:{neighbour.Name} @ {neighbourOrigin} | HasMatchingConnector:{matches}");
-
-                        if (!matches)
+                        if (!HasMatchingConnector(neighbour, neighbourOrigin, targetCell, -direction))
                             continue;
 
                         result.Add(MakeKey(slotPos, targetCell));
-                        visited.Add(neighbour);
+                        visited.Add(neighbourOrigin);
                         queue.Enqueue((neighbour, neighbourOrigin, direction));
                     }
                 }
