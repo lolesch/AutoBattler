@@ -135,23 +135,26 @@ namespace Code.Runtime.Container
             return true;
         }
 
-        private bool CanAddAt(Vector2Int position, ITetrisItem item, out List<Vector2Int> other)
+        // Public so the drag controller can query overlap state without modifying container contents.
+        // Returns false when out of bounds (overlapping = null) or when more than one item overlaps
+        // (overlapping.Count > 1). Returns true with overlapping.Count == 0 (free) or == 1 (swap candidate).
+        public bool CanAddAt(Vector2Int position, ITetrisItem item, out List<Vector2Int> overlapping)
         {
             var pointers = item.GetPointers(position);
             if (pointers.Any(pointer => !IsValidPointer(pointer)))
             {
-                other = null;
+                overlapping = null;
                 return false;
             }
 
-            other = new List<Vector2Int>();
+            overlapping = new List<Vector2Int>();
 
             foreach (var pointer in pointers)
                 if (IsOccupied(pointer, out var contentKey))
-                    other.Add(contentKey);
+                    overlapping.Add(contentKey);
 
-            other = other.Distinct().ToList();
-            return other.Count <= 1;
+            overlapping = overlapping.Distinct().ToList();
+            return overlapping.Count <= 1;
         }
 
         private bool IsEmpty(Vector2Int pointer)    => IsValidPointer(pointer) && !_contentPointer.ContainsKey(pointer);
@@ -171,5 +174,8 @@ namespace Code.Runtime.Container
         bool TryAddAt(Vector2Int position, ref ITetrisItem arrival);
         bool TryRemove(Vector2Int position, out ITetrisItem removed);
         bool TryRemove(ITetrisItem item);
+
+        // Exposed for read-only overlap queries (e.g. drag preview) without mutating state.
+        bool CanAddAt(Vector2Int position, ITetrisItem item, out List<Vector2Int> overlapping);
     }
 }

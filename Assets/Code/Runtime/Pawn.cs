@@ -50,7 +50,11 @@ namespace Code.Runtime
         }
 
         public void TakeDamage(float damage) => Stats.health.ReduceCurrent(damage);
-        public void EquipItem(TetrisItem item) => Inventory.TryAdd(item);
+        public void EquipItem(TetrisItem item)
+        {
+            if( Inventory.TryAdd(item) )
+                Debug.Log($"{item.Name} has been equipped!");
+        }
     }
 
     public interface IPawn : IDamageable

@@ -34,9 +34,9 @@ namespace Code.Data.Items
             direction switch
             {
                 ConnectorDirection.Right => new Vector2Int( 1,  0),
-                ConnectorDirection.Up    => new Vector2Int( 0,  1),
+                ConnectorDirection.Up    => new Vector2Int( 0, -1),
                 ConnectorDirection.Left  => new Vector2Int(-1,  0),
-                ConnectorDirection.Down  => new Vector2Int( 0, -1),
+                ConnectorDirection.Down  => new Vector2Int( 0,  1),
                 _                        => throw new ArgumentOutOfRangeException(nameof(direction), direction, null),
             };
     }

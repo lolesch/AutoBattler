@@ -61,6 +61,13 @@ namespace Code.Runtime.Container.Items
             var height     = normalized.Max(p => p.y) - normalized.Min(p => p.y) + 1;
             return new Vector2Int(width, height);
         }
+        
+        public Vector2Int GetVisualDimensions()
+        {
+            var dims         = GetDimensions();
+            var isTransposed = rotation is RotationType.CCW90 or RotationType.CCW270;
+            return isTransposed ? new Vector2Int(dims.y, dims.x) : dims;
+        }
 
         // ── Chain connectors ──────────────────────────────────────────────
 
@@ -110,13 +117,16 @@ namespace Code.Runtime.Container.Items
     public interface ITetrisItem : IItem
     {
         string       Name       { get; }
-        RotationType rotation   { get; }
+        // Setter exposed so the drag controller can rotate an in-flight item without casting.
+        RotationType rotation   { get; set; }
         RarityType   RarityType { get; }
 
         List<Vector2Int> GetPointers(Vector2Int position);
         List<Vector2Int> GetNormalizedShape();
         Vector2Int       GetShapeOrigin(List<Vector2Int> normalized = null);
         Vector2Int       GetDimensions();
+        // Returns dimensions with x/y swapped for 90°/270° rotations — the visual footprint.
+        Vector2Int GetVisualDimensions();
 
         List<(Vector2Int slotPos, Vector2Int direction)> GetGridConnectors(Vector2Int placement);
     }
@@ -130,9 +140,9 @@ namespace Code.Runtime.Container.Items
     [Serializable]
     public enum RotationType
     {
-        None  = 0,
-        CW90  = 1,
-        CW180 = 2,
-        CW270 = 3,
+        None   = 0,
+        CCW90  = 1,
+        CCW180 = 2,
+        CCW270 = 3,
     }
 }
