@@ -22,7 +22,9 @@ MonoBehaviour:
     - row: 000100
   connectors:
   - <LocalPosition>k__BackingField: {x: 2, y: 1}
-    <Direction>k__BackingField: 0
+    <Direction>k__BackingField: 1
+  - <LocalPosition>k__BackingField: {x: 2, y: 1}
+    <Direction>k__BackingField: 3
   <BaseDamage>k__BackingField: 5
   <AttackSpeed>k__BackingField: 1
   <ResourceCost>k__BackingField: 0

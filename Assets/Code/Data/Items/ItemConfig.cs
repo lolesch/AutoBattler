@@ -18,10 +18,32 @@ namespace Code.Data.Items
         [field: SerializeField]              public RectGridBool Shape { get; private set; }
 
         [Header("Chain Connectors")]
-        [Tooltip("Connection points on this item. Each defines a local cell and the direction it reaches toward.")]
+        [Tooltip("Length is fixed to MaxConnectors. Add/remove via subclass override.")]
         [SerializeField] private List<ChainConnector> connectors = new();
 
-        public IReadOnlyList<ChainConnector> Connectors => connectors;
+        public IReadOnlyList<ChainConnector> Connectors   => connectors;
+        protected abstract int               MaxConnectors { get; }
+
+        protected virtual void OnValidate()
+        {
+            connectors ??= new List<ChainConnector>();
+
+            while (connectors.Count < MaxConnectors)
+                connectors.Add(new ChainConnector());
+
+            while (connectors.Count > MaxConnectors)
+                connectors.RemoveAt(connectors.Count - 1);
+
+            var shapeCells = Shape != null ? Shape.GetVec2Ints() : null;
+            for (var i = 0; i < connectors.Count; i++)
+            {
+                var c = connectors[i];
+                if (shapeCells != null && !shapeCells.Contains(c.LocalPosition))
+                    Debug.LogWarning($"[{name}] Connector {i}: LocalPosition {c.LocalPosition} is not part of the item shape.", this);
+                if (c.Direction.ToVector2Int() == Vector2Int.zero)
+                    Debug.LogWarning($"[{name}] Connector {i}: Direction is (0,0) — set a valid unit vector.", this);
+            }
+        }
     }
 
     /// <summary>
@@ -37,7 +59,7 @@ namespace Code.Data.Items
 
         [SerializeField, HideInInspector] private string debugStatModifierString;
 
-        protected void OnValidate()
+        protected virtual void OnValidate()
         {
             var mod = ModifierType switch
             {

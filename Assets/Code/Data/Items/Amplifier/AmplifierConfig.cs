@@ -15,7 +15,9 @@ namespace Code.Data.Items.Amplifier
 
         [SerializeField, HideInInspector] private string debugWeaponModifierString;
 
-        private new void OnValidate()
+        protected override int MaxConnectors => 2;
+
+        protected override void OnValidate()
         {
             base.OnValidate();
 

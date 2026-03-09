@@ -10,5 +10,7 @@ namespace Code.Data.Items.Weapon
         [field: SerializeField] public float BaseDamage   { get; private set; }
         [field: SerializeField] public float AttackSpeed  { get; private set; }
         [field: SerializeField] public float ResourceCost { get; private set; }
+
+        protected override int MaxConnectors => 2;
     }
 }

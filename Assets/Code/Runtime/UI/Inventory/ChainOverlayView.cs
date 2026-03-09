@@ -14,8 +14,8 @@ namespace Code.Runtime.UI.Inventory
         private IReadOnlyList<ISlotView>           _slots;
         private HashSet<(Vector2Int, Vector2Int)> _validConnections = new();
 
-        private static readonly Color ColorConnected   = new(1.00f, 0.85f, 0.00f, 1f);
-        private static readonly Color ColorUnconnected = new(1.00f, 0.20f, 0.20f, 1f);
+        private static readonly Color ColorConnected   = Color.yellow;
+        private static readonly Color ColorUnconnected = Color.red;
         private static readonly Color ColorDot         = Color.white;
 
         private const float DotRadius   = 4f;
@@ -62,10 +62,33 @@ namespace Code.Runtime.UI.Inventory
 
             foreach (var kvp in _container.Contents)
             {
-                var item = kvp.Value;
-                var pos  = kvp.Key;
+                var item       = kvp.Value;
+                var pos        = kvp.Key;
+                var connectors = item.GetGridConnectors(pos);
 
-                foreach (var (slotPos, direction) in item.GetGridConnectors(pos))
+                // Draw internal connector-to-connector lines within the same item
+                for (var i = 0; i < connectors.Count; i++)
+                {
+                    for (var j = i + 1; j < connectors.Count; j++)
+                    {
+                        var (slotA, _) = connectors[i];
+                        var (slotB, _) = connectors[j];
+
+                        if (slotA == slotB)
+                            continue;
+
+                        var worldA = GetWorldPos(slotA);
+                        var worldB = GetWorldPos(slotB);
+
+                        if (!worldA.HasValue || !worldB.HasValue)
+                            continue;
+
+                        Gizmos.color = ColorConnected;
+                        Gizmos.DrawLine(worldA.Value, worldB.Value);
+                    }
+                }
+
+                foreach (var (slotPos, direction) in connectors)
                 {
                     var dotWorld = GetWorldPos(slotPos);
                     if (!dotWorld.HasValue) continue;

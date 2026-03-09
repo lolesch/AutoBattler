@@ -20,9 +20,9 @@ MonoBehaviour:
     - row: 01
   connectors:
   - <LocalPosition>k__BackingField: {x: 0, y: 0}
-    <Direction>k__BackingField: 0
+    <Direction>k__BackingField: 1
   - <LocalPosition>k__BackingField: {x: 0, y: 0}
-    <Direction>k__BackingField: 2
+    <Direction>k__BackingField: 0
   <StatType>k__BackingField: 3
   <Value>k__BackingField: 5
   <ModifierType>k__BackingField: 2
