@@ -136,19 +136,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 5931159786323204307}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 701dc6fa688adea48af1d00b4e8b72e6, type: 3}
+  m_Script: {fileID: 11500000, guid: 3c7a441a53eb2f74f99cbad39bf989b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pawn
-  _config: {fileID: 11400000, guid: 4525cc981333f3e429fcc6aff9c4caaa, type: 2}
+  <Config>k__BackingField: {fileID: 11400000, guid: 4525cc981333f3e429fcc6aff9c4caaa, type: 2}
+  <Team>k__BackingField: 1
   _icon: {fileID: 21300000, guid: 9e735fd97a3956f499e8da8a5708e7a6, type: 3}
   _pawnEffects:
     shape:
       radius: 1
       cellSize: {x: 16, y: 16}
       rows:
-      - row: 010101
-      - row: 010001
-      - row: 010101
+      - row: 000000
+      - row: 000000
+      - row: 000000
     rotation: 0
     <Effect>k__BackingField: 
 --- !u!114 &211134515494925660

@@ -1,0 +1,409 @@
+using System.Collections.Generic;
+using Code.Data;
+using Code.Runtime.Inventory;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace Code.Runtime.UI.Inventory
+{
+    /// <summary>
+    /// Single drag controller shared across all active ITetrisContainers.
+    /// InventoryViews register/unregister on OnEnable/OnDisable.
+    /// Cancel always attempts to restore the held item to its source position;
+    /// if that slot is occupied the displaced item becomes the new held item (player must resolve).
+    /// Items are never deleted — an invalid drop always cancels.
+    /// </summary>
+    public sealed class InventoryDragController : MonoBehaviour, IInventoryDragController
+    {
+        [SerializeField] private Image                _ghostImage;
+        [SerializeField] private Canvas               _canvas;
+
+        // ── Registered containers ─────────────────────────────────────────
+
+        private sealed class ContainerBinding
+        {
+            public IReadOnlyList<ISlotView> Slots;
+        }
+
+        private readonly Dictionary<ITetrisContainer, ContainerBinding> _bindings        = new();
+        private readonly Dictionary<ISlotView, ITetrisContainer>        _slotToContainer = new();
+
+        // ── Drag state ────────────────────────────────────────────────────
+
+        private ITetrisContainer _sourceContainer;
+        private ISlotView        _hoveredSlot;
+
+        private ITetrisItem _heldItem;
+        private Vector2Int  _grabOffset;
+        private Vector2Int  _grabOrigin;
+        private Vector2Int  _pickupAnchor;
+        private Vector2     _grabSubCellOffset;
+
+        private bool _dropProcessed;
+
+        private enum GestureMode { Idle, Click, Drag }
+        private GestureMode _gesture;
+
+        // ── Unity ─────────────────────────────────────────────────────────
+
+        private void Start()
+        {
+            if (_ghostImage != null)
+                _ghostImage.gameObject.SetActive(false);
+        }
+
+        private void Update()
+        {
+            if (_heldItem == null) return;
+
+            UpdateGhostPosition(Input.mousePosition);
+            UpdatePreview();
+
+            if (Input.GetKeyDown(KeyCode.Q))      Rotate(clockwise: false);
+            if (Input.GetKeyDown(KeyCode.E))      Rotate(clockwise: true);
+            if (Input.GetKeyDown(KeyCode.Escape)) Cancel();
+        }
+
+        // ── IInventoryDragController ───────────────────────────────────────
+
+        public void Register(ITetrisContainer container, IReadOnlyList<ISlotView> slots)
+        {
+            if (_bindings.ContainsKey(container))
+                Unregister(container);
+
+            _bindings[container] = new ContainerBinding { Slots = slots };
+
+            foreach (var slot in slots)
+                _slotToContainer[slot] = container;
+        }
+
+        public void Unregister(ITetrisContainer container)
+        {
+            if (!_bindings.TryGetValue(container, out var binding))
+                return;
+
+            foreach (var slot in binding.Slots)
+                _slotToContainer.Remove(slot);
+
+            _bindings.Remove(container);
+
+            if (_heldItem != null && _sourceContainer == container)
+                Cancel();
+        }
+
+        public void OnSlotPointerClick(ISlotView slot, Vector2 screenPos)
+        {
+            switch (_gesture)
+            {
+                case GestureMode.Idle:
+                    if (TryPickUp(slot, screenPos))
+                        _gesture = GestureMode.Click;
+                    break;
+
+                case GestureMode.Click:
+                    DropAt(slot);
+                    break;
+            }
+        }
+
+        public void OnSlotBeginDrag(ISlotView slot, Vector2 screenPos)
+        {
+            _dropProcessed = false;
+
+            switch (_gesture)
+            {
+                case GestureMode.Idle:
+                    if (TryPickUp(slot, screenPos))
+                        _gesture = GestureMode.Drag;
+                    break;
+
+                case GestureMode.Click:
+                    _gesture = GestureMode.Drag;
+                    break;
+            }
+        }
+
+        public void OnSlotEndDrag(Vector2 screenPos)
+        {
+            if (_gesture != GestureMode.Drag) return;
+
+            if (_dropProcessed)
+            {
+                _dropProcessed = false;
+                return;
+            }
+
+            Cancel();
+        }
+
+        public void OnSlotDrop(ISlotView slot)
+        {
+            if (_gesture != GestureMode.Drag) return;
+
+            _dropProcessed = true;
+            DropAt(slot);
+        }
+
+        public void SetHovered(ISlotView slot)
+        {
+            _hoveredSlot = slot;
+            UpdatePreview();
+        }
+
+        public void Cancel()
+        {
+            if (_heldItem == null) return;
+
+            ITetrisItem returning = _heldItem;
+            _sourceContainer.TryAddAt(_pickupAnchor, ref returning);
+
+            if (ReferenceEquals(returning, _heldItem))
+                EndDrag();
+            else
+                ContinueHolding(returning);
+        }
+
+        // ── Pickup ────────────────────────────────────────────────────────
+
+        private bool TryPickUp(ISlotView slot, Vector2 screenPos)
+        {
+            if (!_slotToContainer.TryGetValue(slot, out var container)) return false;
+
+            var clickedCell = slot.GridPosition;
+
+            if (!container.ContentPointer.TryGetValue(clickedCell, out var anchor)) return false;
+            if (!container.TryRemove(anchor, out var item))                          return false;
+
+            _heldItem        = item;
+            _sourceContainer = container;
+            _pickupAnchor    = anchor;
+            _grabOffset      = clickedCell - anchor;
+            _grabOrigin      = item.GetShapeOrigin();
+
+            _grabSubCellOffset = (Vector2)slot.RectTransform.position - screenPos;
+
+            RefreshGhostImage();
+            _ghostImage.gameObject.SetActive(true);
+            return true;
+        }
+
+        // ── Drop ──────────────────────────────────────────────────────────
+
+        private void DropAt(ISlotView slot)
+        {
+            if (!_slotToContainer.TryGetValue(slot, out var targetContainer)) { Cancel(); return; }
+
+            var targetAnchor = slot.GridPosition - _grabOffset;
+
+            // Cross-container occupied slot is the only case requiring manual routing.
+            if (targetContainer != _sourceContainer)
+            {
+                targetContainer.CanAddAt(targetAnchor, _heldItem, out var overlapping);
+                if (overlapping is { Count: 1 } &&
+                    targetContainer.Contents.TryGetValue(overlapping[0], out var displaced))
+                {
+                    DropCrossContainerSwap(targetContainer, targetAnchor, overlapping[0], displaced);
+                    return;
+                }
+            }
+
+            // Same-container (any overlap), or cross-container empty slot.
+            ITetrisItem arrival = _heldItem;
+            if (!targetContainer.TryAddAt(targetAnchor, ref arrival)) { Cancel(); return; }
+
+            if (!ReferenceEquals(arrival, _heldItem))
+                ContinueHolding(arrival, targetContainer);
+            else
+                EndDrag();
+        }
+
+        private void DropCrossContainerSwap(
+            ITetrisContainer targetContainer,
+            Vector2Int       targetAnchor,
+            Vector2Int       displacedAnchor,
+            ITetrisItem      displaced)
+        {
+            targetContainer.TryRemove(displacedAnchor, out _);
+
+            ITetrisItem arrival = _heldItem;
+            if (!targetContainer.TryAddAt(targetAnchor, ref arrival))
+            {
+                // Failed to place A — restore B and cancel.
+                ITetrisItem restoredB = displaced;
+                targetContainer.TryAddAt(displacedAnchor, ref restoredB);
+                Cancel();
+                return;
+            }
+
+            if (_sourceContainer.CanAddAt(_pickupAnchor, displaced, out _))
+            {
+                // B fits in source — full swap, done.
+                ITetrisItem restoredDisplaced = displaced;
+                _sourceContainer.TryAddAt(_pickupAnchor, ref restoredDisplaced);
+                EndDrag();
+            }
+            else
+            {
+                // B doesn't fit in source — force-pickup B, player must resolve.
+                ContinueHolding(displaced, targetContainer);
+                _pickupAnchor = displacedAnchor;
+            }
+        }
+
+        private void ContinueHolding(ITetrisItem item, ITetrisContainer newSource = null)
+        {
+            _heldItem          = item;
+            if (newSource != null) _sourceContainer = newSource;
+            _grabOrigin        = _heldItem.GetShapeOrigin();
+            var dims           = _heldItem.GetDimensions();
+            _grabOffset        = new Vector2Int(dims.x / 2, dims.y / 2) - _grabOrigin;
+            _grabSubCellOffset = Vector2.zero;
+            _gesture           = GestureMode.Click;
+            RefreshGhostImage();
+        }
+
+        private void EndDrag()
+        {
+            _heldItem        = null;
+            _sourceContainer = null;
+            _gesture         = GestureMode.Idle;
+            _ghostImage.gameObject.SetActive(false);
+            ClearAllHighlights();
+        }
+
+        // ── Rotation ──────────────────────────────────────────────────────
+
+        private void Rotate(bool clockwise)
+        {
+            var grabFromCenter = GrabFromCenter();
+
+            var steps = clockwise ? 3 : 1;
+            _heldItem.rotation = (RotationType)(((int)_heldItem.rotation + steps) % 4);
+
+            _grabOrigin = _heldItem.GetShapeOrigin();
+            var newDims = _heldItem.GetDimensions();
+
+            var grabOffsetFloat = new Vector2(
+                 grabFromCenter.x / Const.InventoryCellSize - _grabOrigin.x - 0.5f + newDims.x * 0.5f,
+                -grabFromCenter.y / Const.InventoryCellSize - _grabOrigin.y - 0.5f + newDims.y * 0.5f);
+
+            _grabOffset = new Vector2Int(
+                Mathf.RoundToInt(grabOffsetFloat.x),
+                Mathf.RoundToInt(grabOffsetFloat.y));
+
+            var remainder = grabOffsetFloat - new Vector2(_grabOffset.x, _grabOffset.y);
+            _grabSubCellOffset = new Vector2(remainder.x * _canvas.scaleFactor, -remainder.y * _canvas.scaleFactor) * Const.InventoryCellSize;
+
+            RefreshGhostImage();
+        }
+
+        // ── Ghost ─────────────────────────────────────────────────────────
+
+        private void RefreshGhostImage()
+        {
+            if (_heldItem == null || _ghostImage == null) return;
+
+            var visual = _heldItem.GetVisualDimensions();
+
+            var ghostRT              = _ghostImage.rectTransform;
+            ghostRT.pivot            = new Vector2(0.5f, 0.5f);
+            ghostRT.sizeDelta        = new Vector2( visual.x, visual.y) * Const.InventoryCellSize;
+            ghostRT.localEulerAngles = new Vector3(0f, 0f, (int)_heldItem.rotation * 90f);
+
+            _ghostImage.sprite = _heldItem.Icon;
+            _ghostImage.color  = new Color(1f, 1f, 1f, 0.70f);
+        }
+
+        private void UpdateGhostPosition(Vector2 screenPos)
+        {
+            if (_heldItem == null || _ghostImage == null) return;
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                (RectTransform)_canvas.transform, screenPos, null, out var canvasLocal);
+
+            _ghostImage.rectTransform.anchoredPosition =
+                canvasLocal - GrabFromCenter() + _grabSubCellOffset / _canvas.scaleFactor;
+        }
+
+        private Vector2 GrabFromCenter()
+        {
+            var dims = _heldItem.GetDimensions();
+            return new Vector2(
+                _grabOffset.x + _grabOrigin.x + 0.5f - dims.x * 0.5f, 
+                dims.y * 0.5f - _grabOffset.y - _grabOrigin.y - 0.5f) * Const.InventoryCellSize;
+        }
+
+        // ── Preview ───────────────────────────────────────────────────────
+
+        private void UpdatePreview()
+        {
+            ClearAllHighlights();
+
+            if (_heldItem == null) return;
+
+            if (_hoveredSlot == null || !_slotToContainer.TryGetValue(_hoveredSlot, out var targetContainer))
+            {
+                _ghostImage.color = new Color(1f, 0.40f, 0.40f, 0.70f);
+                return;
+            }
+
+            _ghostImage.color = new Color(1f, 1f, 1f, 0.70f);
+
+            var targetAnchor = _hoveredSlot.GridPosition - _grabOffset;
+            var canAdd       = targetContainer.CanAddAt(targetAnchor, _heldItem, out var overlapping);
+
+            if (!canAdd)
+            {
+                HighlightCells(targetContainer, targetAnchor, SlotHighlight.Invalid);
+                return;
+            }
+
+            HighlightCells(targetContainer, targetAnchor, SlotHighlight.Valid);
+
+            if (overlapping is { Count: 1 } &&
+                targetContainer.Contents.TryGetValue(overlapping[0], out var swapItem))
+                HighlightCells(targetContainer, overlapping[0], SlotHighlight.Swap, swapItem);
+        }
+
+        private void HighlightCells(ITetrisContainer container, Vector2Int anchor,
+            SlotHighlight highlight, ITetrisItem item = null)
+        {
+            item ??= _heldItem;
+            foreach (var ptr in item.GetPointers(anchor))
+                GetSlotAt(container, ptr)?.SetHighlight(highlight);
+        }
+
+        private void ClearAllHighlights()
+        {
+            foreach (var binding in _bindings.Values)
+                foreach (var slot in binding.Slots)
+                    slot.SetHighlight(SlotHighlight.None);
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────
+
+        private ISlotView GetSlotAt(ITetrisContainer container, Vector2Int gridPos)
+        {
+            if (!_bindings.TryGetValue(container, out var binding)) return null;
+
+            if (gridPos.x < 0 || gridPos.x >= container.GridSize.x ||
+                gridPos.y < 0 || gridPos.y >= container.GridSize.y)
+                return null;
+
+            var index = gridPos.y * container.GridSize.x + gridPos.x;
+            return index < binding.Slots.Count ? binding.Slots[index] : null;
+        }
+    }
+
+    public interface IInventoryDragController
+    {
+        void Register(ITetrisContainer container, IReadOnlyList<ISlotView> slots);
+        void Unregister(ITetrisContainer container);
+        void OnSlotPointerClick(ISlotView slot, Vector2 screenPos);
+        void OnSlotBeginDrag(ISlotView  slot,   Vector2 screenPos);
+        void OnSlotEndDrag(Vector2 screenPos);
+        void OnSlotDrop(ISlotView slot);
+        void SetHovered(ISlotView slot);
+        void Cancel();
+    }
+}

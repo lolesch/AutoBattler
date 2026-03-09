@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using Code.Data.Enums;
-using Code.Data.Items.Amplifier;
 
 namespace Code.Runtime.Statistics
 {

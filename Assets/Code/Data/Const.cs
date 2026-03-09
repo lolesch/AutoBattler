@@ -1,7 +1,9 @@
 namespace Code.Data
 {
-    internal static class Const
+    public static class Const
     {
-        internal const string ConfigRoot = "Configs/";
+        public const string ConfigRoot = "Configs/";
+        public const int InventoryCellSize = 64;
+        public const int InventoryPadding = 8;
     }
 }
