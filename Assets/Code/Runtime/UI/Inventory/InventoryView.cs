@@ -26,14 +26,14 @@ namespace Code.Runtime.UI.Inventory
 
         private void Awake()
         {
-            _grid.cellSize        = Const.InventoryCellSize.ToVector2();
-            _grid.spacing         = Vector2.zero;
-            _grid.padding.left    = Const.InventoryPadding;
-            _grid.padding.right   = Const.InventoryPadding;
-            _grid.padding.top     = Const.InventoryPadding;
-            _grid.padding.bottom  = Const.InventoryPadding;
+            _grid.cellSize       = Const.InventoryCellSize.ToVector2();
+            _grid.spacing        = Vector2.zero;
+            _grid.padding.left   = Const.InventoryPadding;
+            _grid.padding.right  = Const.InventoryPadding;
+            _grid.padding.top    = Const.InventoryPadding;
+            _grid.padding.bottom = Const.InventoryPadding;
         }
-        
+
         private void OnEnable()
         {
             if (_container != null)
@@ -52,17 +52,8 @@ namespace Code.Runtime.UI.Inventory
                 _container.OnContentsChanged -= OnContentsChanged;
         }
 
-        /// <summary>
-        /// Binds to a pawn's inventory. Subscribes to inventory change events on the pawn.
-        /// Shorthand for RefreshView(pawn.Inventory) that keeps pawn-inventory event wiring clean.
-        /// </summary>
         public void RefreshView(IPawn pawn) => RefreshView(pawn.Inventory);
 
-        /// <summary>
-        /// Binds directly to any ITetrisContainer — pawn inventory or player stash.
-        /// The stash has no pawn; chain overlay still renders for experimentation,
-        /// but chain resolution has no combat impact outside of a pawn inventory.
-        /// </summary>
         public void RefreshView(ITetrisContainer container)
         {
             if (_container != container)
@@ -122,6 +113,22 @@ namespace Code.Runtime.UI.Inventory
 
                 _slots[i].RefreshView(
                     _container.Contents.TryGetValue(pos, out var item) ? item : null);
+            }
+
+            var topology = ChainResolver.ResolveTopology(_container);
+
+            _chainOverlay?.UpdateTopology(topology);
+
+            foreach (var (anchor, item) in _container.Contents)
+            {
+                if (!topology.DownstreamConnectors.TryGetValue(item, out var downstreamSet))
+                    continue;
+
+                var slotIndex = anchor.y * _container.GridSize.x + anchor.x;
+                if (slotIndex < 0 || slotIndex >= _slots.Length) continue;
+
+                foreach (var (slotPos, direction) in downstreamSet)
+                    _slots[slotIndex].SetPipState(slotPos, direction, PipState.Arrow);
             }
         }
     }

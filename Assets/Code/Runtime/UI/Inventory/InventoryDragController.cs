@@ -275,24 +275,22 @@ namespace Code.Runtime.UI.Inventory
 
         private void Rotate(bool clockwise)
         {
-            var grabFromCenter = GrabFromCenter();
+            var dims    = _heldItem.GetDimensions();
+            var pClicked = _grabOffset + _grabOrigin;
+
+            var pNew = clockwise
+                ? new Vector2Int(dims.y - 1 - pClicked.y, pClicked.x)
+                : new Vector2Int(pClicked.y, dims.x - 1 - pClicked.x);
 
             var steps = clockwise ? 3 : 1;
             _heldItem.rotation = (RotationType)(((int)_heldItem.rotation + steps) % 4);
 
             _grabOrigin = _heldItem.GetShapeOrigin();
-            var newDims = _heldItem.GetDimensions();
+            _grabOffset = pNew - _grabOrigin;
 
-            var grabOffsetFloat = new Vector2(
-                 grabFromCenter.x / Const.InventoryCellSize - _grabOrigin.x - 0.5f + newDims.x * 0.5f,
-                -grabFromCenter.y / Const.InventoryCellSize - _grabOrigin.y - 0.5f + newDims.y * 0.5f);
-
-            _grabOffset = new Vector2Int(
-                Mathf.RoundToInt(grabOffsetFloat.x),
-                Mathf.RoundToInt(grabOffsetFloat.y));
-
-            var remainder = grabOffsetFloat - new Vector2(_grabOffset.x, _grabOffset.y);
-            _grabSubCellOffset = new Vector2(remainder.x * _canvas.scaleFactor, -remainder.y * _canvas.scaleFactor) * Const.InventoryCellSize;
+            _grabSubCellOffset = clockwise
+                ? new Vector2( _grabSubCellOffset.y, -_grabSubCellOffset.x)
+                : new Vector2(-_grabSubCellOffset.y,  _grabSubCellOffset.x);
 
             RefreshGhostImage();
         }
@@ -347,22 +345,24 @@ namespace Code.Runtime.UI.Inventory
                 return;
             }
 
-            _ghostImage.color = new Color(1f, 1f, 1f, 0.70f);
-
             var targetAnchor = _hoveredSlot.GridPosition - _grabOffset;
             var canAdd       = targetContainer.CanAddAt(targetAnchor, _heldItem, out var overlapping);
 
             if (!canAdd)
             {
-                HighlightCells(targetContainer, targetAnchor, SlotHighlight.Invalid);
+                _ghostImage.color = new Color(1f, 0.40f, 0.40f, 0.70f);
                 return;
             }
 
-            HighlightCells(targetContainer, targetAnchor, SlotHighlight.Valid);
-
             if (overlapping is { Count: 1 } &&
                 targetContainer.Contents.TryGetValue(overlapping[0], out var swapItem))
-                HighlightCells(targetContainer, overlapping[0], SlotHighlight.Swap, swapItem);
+            {
+                //HighlightCells(targetContainer, overlapping[0], SlotHighlight.Swap, swapItem);
+                _ghostImage.color = new Color(1.00f, 0.80f, 0.00f, 0.70f);
+                return;
+            }
+
+            _ghostImage.color = new Color(1f, 1f, 1f, 0.70f);
         }
 
         private void HighlightCells(ITetrisContainer container, Vector2Int anchor,

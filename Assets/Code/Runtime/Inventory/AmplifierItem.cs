@@ -11,7 +11,7 @@ namespace Code.Runtime.Inventory
 
         private readonly List<PawnStatModifier> _affixes = new();
 
-        public AmplifierItem(AmplifierConfig config, RotationType rotation) : base(config, rotation)
+        public AmplifierItem(AmplifierConfig config, RotationType rotation = RotationType.None) : base(config, rotation)
         {
             WeaponModifier = new WeaponStatModifier(
                 config.WeaponStat,

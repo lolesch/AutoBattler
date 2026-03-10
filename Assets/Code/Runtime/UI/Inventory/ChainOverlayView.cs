@@ -11,43 +11,32 @@ namespace Code.Runtime.UI.Inventory
         [SerializeField] private InventoryView _inventoryView;
 
         private ITetrisContainer                  _container;
-        private IReadOnlyList<ISlotView>           _slots;
-        private HashSet<(Vector2Int, Vector2Int)> _validConnections = new();
+        private IReadOnlyList<ISlotView>          _slots;
+        private ChainTopology                     _topology = ChainTopology.Empty;
 
         private static readonly Color ColorConnected   = Color.yellow;
         private static readonly Color ColorUnconnected = Color.red;
         private static readonly Color ColorDot         = Color.white;
 
         private const float DotRadius   = 4f;
-        private const float ArrowLength = 0.6f;
+        private const float ArrowLength = 0.5f;
 
         public void Bind(ITetrisContainer container)
         {
-            if (_container != null)
-                _container.OnContentsChanged -= OnContentsChanged;
-
             _container = container;
             _slots     = _inventoryView.Slots;
-
-            if (_container != null)
-                _container.OnContentsChanged += OnContentsChanged;
-
-            _validConnections = FindValidConnections();
         }
 
-        private void OnContentsChanged(IReadOnlyDictionary<Vector2Int, ITetrisItem> _)
+        // Called by InventoryView after every Refresh() — single source of truth for topology.
+        public void UpdateTopology(ChainTopology topology)
         {
-            _slots            = _inventoryView.Slots;
-            _validConnections = FindValidConnections();
+            _topology = topology;
         }
 
         private void OnDrawGizmos()
         {
             if (_container == null || _slots == null) return;
 
-            // Measure world-space cell size and axis directions from actual slot positions.
-            // GetWorldPos is called once here while positions are guaranteed correct.
-            // GetArrowTip previously re-called GetWorldPos and received stale values — removed.
             var o = GetWorldPos(new Vector2Int(0, 0));
             var r = GetWorldPos(new Vector2Int(1, 0));
             var d = GetWorldPos(new Vector2Int(0, 1));
@@ -66,25 +55,31 @@ namespace Code.Runtime.UI.Inventory
                 var pos        = kvp.Key;
                 var connectors = item.GetGridConnectors(pos);
 
-                // Draw internal connector-to-connector lines within the same item
                 for (var i = 0; i < connectors.Count; i++)
                 {
                     for (var j = i + 1; j < connectors.Count; j++)
                     {
-                        var (slotA, _) = connectors[i];
-                        var (slotB, _) = connectors[j];
+                        var (slotA, dirA) = connectors[i];
+                        var (slotB, dirB) = connectors[j];
 
-                        if (slotA == slotB)
-                            continue;
+                        if (slotA == slotB) continue;
 
                         var worldA = GetWorldPos(slotA);
                         var worldB = GetWorldPos(slotB);
 
-                        if (!worldA.HasValue || !worldB.HasValue)
-                            continue;
+                        if (!worldA.HasValue || !worldB.HasValue) continue;
 
-                        Gizmos.color = ColorConnected;
-                        Gizmos.DrawLine(worldA.Value, worldB.Value);
+                        var dist      = Vector2.Distance(worldA.Value, worldB.Value);
+                        var handleLen = dist * 0.5f;
+                        var wDirA     = (dirA.x * worldRight + dirA.y * worldDown).normalized;
+                        var wDirB     = (dirB.x * worldRight + dirB.y * worldDown).normalized;
+                        var p0 = worldA.Value + wDirA * DotRadius;
+                        var p3 = worldB.Value + wDirB * DotRadius;
+                        var p1 = p0 - wDirA * handleLen;
+                        var p2 = p3 - wDirB * handleLen;
+
+                        Gizmos.color = ColorDot;
+                        DrawBezier(p0, p1, p2, p3, 20);
                     }
                 }
 
@@ -99,96 +94,45 @@ namespace Code.Runtime.UI.Inventory
                     var targetCell = slotPos + direction;
                     var key        = MakeKey(slotPos, targetCell);
 
-                    if (_validConnections.Contains(key))
+                    if (_topology.ConnectedEdges.Contains(key))
                     {
                         if (!IsLowerSide(slotPos, targetCell)) continue;
 
                         var targetWorld = GetWorldPos(targetCell);
                         if (!targetWorld.HasValue) continue;
 
+                        var ab = (targetWorld.Value - dotWorld.Value).normalized * DotRadius;
                         Gizmos.color = ColorConnected;
-                        Gizmos.DrawLine(dotWorld.Value, targetWorld.Value);
+                        Gizmos.DrawLine(dotWorld.Value + ab, targetWorld.Value - ab);
                     }
                     else
                     {
                         Gizmos.color = ColorUnconnected;
-                        Vector2 dir = (direction.x * worldRight + direction.y * worldDown) * cellSize * ArrowLength;
-                        GizmosExtensions.DrawArrow2D(dotWorld.Value, dir, DotRadius * 2f);
+                        var worldDir   = (direction.x * worldRight + direction.y * worldDown).normalized;
+                        var arrowStart = dotWorld.Value + worldDir * DotRadius;
+                        var arrowVec   = worldDir * cellSize * ArrowLength;
+                        GizmosExtensions.DrawArrow2D(arrowStart, arrowVec, DotRadius * 2f);
                     }
                 }
             }
         }
 
-        private HashSet<(Vector2Int, Vector2Int)> FindValidConnections()
+        private static void DrawBezier(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, int segments)
         {
-            if (_container == null)
-                return new HashSet<(Vector2Int, Vector2Int)>();
-
-            var result  = new HashSet<(Vector2Int, Vector2Int)>();
-            var visited = new HashSet<Vector2Int>();
-
-            foreach (var kvp in _container.Contents)
+            var prev = p0;
+            for (var i = 1; i <= segments; i++)
             {
-                if (kvp.Value is not IWeaponItem)
-                    continue;
-
-                var weaponAnchor = kvp.Key;
-
-                if (visited.Contains(weaponAnchor))
-                    continue;
-
-                visited.Add(weaponAnchor);
-
-                var queue = new Queue<(ITetrisItem item, Vector2Int pos, Vector2Int arrivalDir)>();
-                queue.Enqueue((kvp.Value, weaponAnchor, Vector2Int.zero));
-
-                while (queue.Count > 0)
-                {
-                    var (current, currentPos, arrivalDir) = queue.Dequeue();
-
-                    foreach (var (slotPos, direction) in current.GetGridConnectors(currentPos))
-                    {
-                        if (direction == -arrivalDir)
-                            continue;
-
-                        var targetCell = slotPos + direction;
-
-                        if (!_container.ContentPointer.TryGetValue(targetCell, out var neighbourOrigin))
-                            continue;
-
-                        if (!_container.Contents.TryGetValue(neighbourOrigin, out var neighbour))
-                            continue;
-
-                        if (visited.Contains(neighbourOrigin))
-                            continue;
-
-                        if (!HasMatchingConnector(neighbour, neighbourOrigin, targetCell, -direction))
-                            continue;
-
-                        result.Add(MakeKey(slotPos, targetCell));
-                        visited.Add(neighbourOrigin);
-                        queue.Enqueue((neighbour, neighbourOrigin, direction));
-                    }
-                }
+                var t    = i / (float)segments;
+                var inv  = 1f - t;
+                var next = inv * inv * inv * p0
+                         + 3f * inv * inv * t * p1
+                         + 3f * inv * t  * t * p2
+                         + t  * t  * t      * p3;
+                Gizmos.DrawLine(prev, next);
+                prev = next;
             }
-
-            return result;
         }
 
-        private static bool HasMatchingConnector(
-            ITetrisItem item,
-            Vector2Int  placement,
-            Vector2Int  expectedSlotPos,
-            Vector2Int  expectedDirection)
-        {
-            foreach (var (slotPos, direction) in item.GetGridConnectors(placement))
-                if (slotPos == expectedSlotPos && direction == expectedDirection)
-                    return true;
-
-            return false;
-        }
-
-        // Returns screen-space position as Vector2 — Z from rt.position is meaningless for UI overlays.
         private Vector2? GetWorldPos(Vector2Int gridPos)
         {
             if (_container == null || _slots == null) return null;
@@ -196,7 +140,7 @@ namespace Code.Runtime.UI.Inventory
             var index = gridPos.x + gridPos.y * _container.GridSize.x;
             if (index < 0 || index >= _slots.Count) return null;
 
-            var rt = (_slots[index] as SlotView)?.GetComponent<RectTransform>();
+            var rt = _slots[index].RectTransform;
             return rt != null ? (Vector2)rt.position : (Vector2?)null;
         }
 

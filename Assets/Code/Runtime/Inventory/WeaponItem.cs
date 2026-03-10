@@ -8,7 +8,7 @@ namespace Code.Runtime.Inventory
         public float AttackSpeed  { get; }
         public float ResourceCost { get; }
 
-        public WeaponItem(WeaponConfig config, RotationType rotation) : base(config, rotation)
+        public WeaponItem(WeaponConfig config, RotationType rotation = RotationType.None) : base(config, rotation)
         {
             BaseDamage   = config.BaseDamage;
             AttackSpeed  = config.AttackSpeed;

@@ -1,5 +1,8 @@
 using System;
 using Code.Data.Items;
+using Code.Data.Items.Amplifier;
+using Code.Data.Items.Weapon;
+using Code.Runtime.Inventory;
 using Code.Runtime.Pawns;
 using Code.Runtime.UI.Inventory;
 using NaughtyAttributes;
@@ -85,6 +88,21 @@ namespace Code.Runtime.GameLoop
             GamePhase.Loot      => _lootPhase,
             _                   => null,
         };
+        
+        [ContextMenu("AddItems")]
+        private void AddItems()
+        {
+            foreach (var item in itemPool)
+                switch (item)
+                {
+                    case AmplifierConfig config:
+                        PlayerData.Stash.TryAdd(new AmplifierItem(config));
+                        break;
+                    case WeaponConfig config:
+                        PlayerData.Stash.TryAdd(new WeaponItem(config));
+                        break;
+                }
+        }
     }
 
     public interface IGamePhase
