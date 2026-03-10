@@ -10,6 +10,7 @@ using UnityEngine.UI;
 
 namespace Code.Runtime.UI.Inventory
 {
+    [RequireComponent(typeof(GridLayoutGroup))]
     public sealed class InventoryView : MonoBehaviour, IInventoryView
     {
         [SerializeField] private SlotView                _slotPrefab;
@@ -26,6 +27,12 @@ namespace Code.Runtime.UI.Inventory
 
         private void Awake()
         {
+            if (_grid == null)
+            {
+                _grid = GetComponent<GridLayoutGroup>();
+                Debug.LogWarning("Assign _grid in Inspector.", this);
+            }
+            
             _grid.cellSize       = Const.InventoryCellSize.ToVector2();
             _grid.spacing        = Vector2.zero;
             _grid.padding.left   = Const.InventoryPadding;
@@ -121,14 +128,16 @@ namespace Code.Runtime.UI.Inventory
 
             foreach (var (anchor, item) in _container.Contents)
             {
-                if (!topology.DownstreamConnectors.TryGetValue(item, out var downstreamSet))
-                    continue;
-
                 var slotIndex = anchor.y * _container.GridSize.x + anchor.x;
                 if (slotIndex < 0 || slotIndex >= _slots.Length) continue;
 
-                foreach (var (slotPos, direction) in downstreamSet)
-                    _slots[slotIndex].SetPipState(slotPos, direction, PipState.Arrow);
+                if (topology.DownstreamConnectors.TryGetValue(item, out var downstreamSet))
+                    foreach (var (slotPos, direction) in downstreamSet)
+                        _slots[slotIndex].SetPipState(slotPos, direction, PipState.Arrow);
+
+                if (topology.UpstreamConnectors.TryGetValue(item, out var upstreamSet))
+                    foreach (var (slotPos, direction) in upstreamSet)
+                        _slots[slotIndex].SetPipState(slotPos, direction, PipState.Dash);
             }
         }
     }

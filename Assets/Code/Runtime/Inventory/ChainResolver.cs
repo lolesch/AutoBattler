@@ -7,22 +7,27 @@ namespace Code.Runtime.Inventory
     {
         public IReadOnlyList<IItemChain>                                           Chains               { get; }
         public HashSet<(Vector2Int, Vector2Int)>                                   ConnectedEdges       { get; }
-        // Keyed by (connectorSlotPos, connectorDirection) on the downstream item.
+        // Downstream: (connectorSlotPos, connectorDirection) on the item further from the root.
         public IReadOnlyDictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>> DownstreamConnectors { get; }
+        // Upstream: (connectorSlotPos, connectorDirection) on the item closer to the root.
+        public IReadOnlyDictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>> UpstreamConnectors   { get; }
 
         public ChainTopology(
             IReadOnlyList<IItemChain>                                        chains,
             HashSet<(Vector2Int, Vector2Int)>                                connectedEdges,
-            Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>       downstreamConnectors)
+            Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>       downstreamConnectors,
+            Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>       upstreamConnectors)
         {
             Chains               = chains;
             ConnectedEdges       = connectedEdges;
             DownstreamConnectors = downstreamConnectors;
+            UpstreamConnectors   = upstreamConnectors;
         }
 
         public static readonly ChainTopology Empty = new(
             System.Array.Empty<IItemChain>(),
             new HashSet<(Vector2Int, Vector2Int)>(),
+            new Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>(),
             new Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>());
     }
 
@@ -33,114 +38,145 @@ namespace Code.Runtime.Inventory
 
         public static ChainTopology ResolveTopology(ITetrisContainer container)
         {
-            var weapons = FindAllWeapons(container);
-            if (weapons.Count == 0)
+            var allRoots = FindAllRoots(container);
+            if (allRoots.Count == 0)
                 return ChainTopology.Empty;
 
-            // ── Phase 1: chain resolution ──────────────────────────────────
-            // Global node-visited set — each item belongs to at most one chain.
-            // Builds connectedEdges as a side effect.
+            var overriddenWeapons = FindOverriddenWeapons(container, allRoots);
 
-            var chains         = new List<IItemChain>(weapons.Count);
-            var visitedGlobal  = new HashSet<ITetrisItem>();
-            var connectedEdges = new HashSet<(Vector2Int, Vector2Int)>();
-
-            foreach (var (weapon, _) in weapons)
-                visitedGlobal.Add(weapon);
-
-            foreach (var (weapon, weaponPos) in weapons)
-            {
-                var modifiers = new List<ITetrisItem>();
-                var queue     = new Queue<(ITetrisItem item, Vector2Int pos)>();
-                queue.Enqueue((weapon, weaponPos));
-
-                while (queue.Count > 0)
-                {
-                    var (current, currentPos) = queue.Dequeue();
-
-                    foreach (var (slotPos, direction) in current.GetGridConnectors(currentPos))
-                    {
-                        var targetCell = slotPos + direction;
-
-                        if (!container.ContentPointer.TryGetValue(targetCell, out var neighbourOrigin))
-                            continue;
-
-                        if (!container.Contents.TryGetValue(neighbourOrigin, out var neighbour))
-                            continue;
-
-                        if (!HasMatchingConnector(neighbour, neighbourOrigin, targetCell, -direction))
-                            continue;
-
-                        connectedEdges.Add(MakeKey(slotPos, targetCell));
-
-                        if (visitedGlobal.Contains(neighbour))
-                            continue;
-
-                        visitedGlobal.Add(neighbour);
-                        modifiers.Add(neighbour);
-                        queue.Enqueue((neighbour, neighbourOrigin));
-                    }
-                }
-
-                chains.Add(new ItemChain(weapon, modifiers));
-            }
-
-            // ── Phase 2: downstream marking ────────────────────────────────
-            // One BFS per weapon. Uses directed-edge visited set instead of node
-            // visited set. This allows a node to be reached from multiple directions
-            // so all its incoming connectors get marked — critical for cycles.
-            // Each directed edge (source→target) is only traversed once per pass,
-            // which is sufficient to prevent infinite loops in any graph topology.
-            // Only the root weapon of each pass is never marked downstream —
-            // all other items including payload weapons are valid downstream targets.
-
+            var chains               = new List<IItemChain>();
+            var connectedEdges       = new HashSet<(Vector2Int, Vector2Int)>();
             var downstreamConnectors = new Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>();
+            var upstreamConnectors   = new Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>();
 
-            foreach (var (weapon, weaponPos) in weapons)
+            foreach (var (root, rootPos) in allRoots)
             {
-                // Directed edge key: (sourceItem, targetItem)
-                var visitedEdges = new HashSet<(ITetrisItem, ITetrisItem)>();
-                var queue        = new Queue<(ITetrisItem item, Vector2Int pos)>();
-                queue.Enqueue((weapon, weaponPos));
+                if (root is IWeaponItem w && overriddenWeapons.Contains(w))
+                    continue;
 
-                while (queue.Count > 0)
+                foreach (var (rootSlotPos, rootDirection) in root.GetGridConnectors(rootPos))
                 {
-                    var (current, currentPos) = queue.Dequeue();
+                    var targetCell = rootSlotPos + rootDirection;
 
-                    foreach (var (slotPos, direction) in current.GetGridConnectors(currentPos))
+                    if (!container.ContentPointer.TryGetValue(targetCell, out var firstOrigin))
+                        continue;
+
+                    if (!container.Contents.TryGetValue(firstOrigin, out var firstNeighbour))
+                        continue;
+
+                    if (!HasMatchingConnector(firstNeighbour, firstOrigin, targetCell, -rootDirection))
+                        continue;
+
+                    connectedEdges.Add(MakeKey(rootSlotPos, targetCell));
+
+                    // Root's outgoing connector is upstream.
+                    MarkConnector(upstreamConnectors, root, rootSlotPos, rootDirection);
+
+                    var modifiers = new List<ITetrisItem>();
+                    var visited   = new HashSet<ITetrisItem> { root };
+                    var queue     = new Queue<(ITetrisItem item, Vector2Int pos, Vector2Int inSlotPos, Vector2Int inDirection)>();
+                    queue.Enqueue((firstNeighbour, firstOrigin, targetCell, -rootDirection));
+
+                    while (queue.Count > 0)
                     {
-                        var targetCell = slotPos + direction;
+                        var (current, currentPos, inSlotPos, inDirection) = queue.Dequeue();
 
-                        if (!connectedEdges.Contains(MakeKey(slotPos, targetCell)))
+                        if (visited.Contains(current))
                             continue;
 
-                        if (!container.ContentPointer.TryGetValue(targetCell, out var neighbourOrigin))
-                            continue;
+                        visited.Add(current);
+                        modifiers.Add(current);
 
-                        if (!container.Contents.TryGetValue(neighbourOrigin, out var neighbour))
-                            continue;
+                        // The connector this item was arrived at is downstream.
+                        MarkConnector(downstreamConnectors, current, inSlotPos, inDirection);
 
-                        // Skip if this directed edge has already been traversed this pass.
-                        if (!visitedEdges.Add((current, neighbour)))
-                            continue;
-
-                        // Root weapon of this pass is never downstream.
-                        if (neighbour != weapon)
+                        foreach (var (slotPos, direction) in current.GetGridConnectors(currentPos))
                         {
-                            if (!downstreamConnectors.TryGetValue(neighbour, out var set))
-                            {
-                                set = new HashSet<(Vector2Int, Vector2Int)>();
-                                downstreamConnectors[neighbour] = set;
-                            }
-                            set.Add((targetCell, -direction));
-                        }
+                            var nextCell = slotPos + direction;
 
-                        queue.Enqueue((neighbour, neighbourOrigin));
+                            if (!container.ContentPointer.TryGetValue(nextCell, out var nextOrigin))
+                                continue;
+
+                            if (!container.Contents.TryGetValue(nextOrigin, out var next))
+                                continue;
+
+                            if (!HasMatchingConnector(next, nextOrigin, nextCell, -direction))
+                                continue;
+
+                            if (visited.Contains(next))
+                                continue;
+
+                            connectedEdges.Add(MakeKey(slotPos, nextCell));
+
+                            // The outgoing connector on current toward next is upstream.
+                            MarkConnector(upstreamConnectors, current, slotPos, direction);
+
+                            queue.Enqueue((next, nextOrigin, nextCell, -direction));
+                        }
                     }
+
+                    chains.Add(new ItemChain(root, modifiers));
                 }
             }
 
-            return new ChainTopology(chains, connectedEdges, downstreamConnectors);
+            return new ChainTopology(chains, connectedEdges, downstreamConnectors, upstreamConnectors);
+        }
+
+        private static void MarkConnector(
+            Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>> dict,
+            ITetrisItem item,
+            Vector2Int  slotPos,
+            Vector2Int  direction)
+        {
+            if (!dict.TryGetValue(item, out var set))
+            {
+                set = new HashSet<(Vector2Int, Vector2Int)>();
+                dict[item] = set;
+            }
+            set.Add((slotPos, direction));
+        }
+
+        private static HashSet<IWeaponItem> FindOverriddenWeapons(
+            ITetrisContainer                        container,
+            List<(IChainRoot root, Vector2Int pos)> allRoots)
+        {
+            var overridden = new HashSet<IWeaponItem>();
+
+            foreach (var (root, rootPos) in allRoots)
+            {
+                if (root is IWeaponItem)
+                    continue;
+
+                foreach (var (slotPos, direction) in root.GetGridConnectors(rootPos))
+                {
+                    var targetCell = slotPos + direction;
+
+                    if (!container.ContentPointer.TryGetValue(targetCell, out var neighbourOrigin))
+                        continue;
+
+                    if (!container.Contents.TryGetValue(neighbourOrigin, out var neighbour))
+                        continue;
+
+                    if (neighbour is not IWeaponItem weapon)
+                        continue;
+
+                    if (!HasMatchingConnector(neighbour, neighbourOrigin, targetCell, -direction))
+                        continue;
+
+                    overridden.Add(weapon);
+                }
+            }
+
+            return overridden;
+        }
+
+        private static List<(IChainRoot root, Vector2Int pos)> FindAllRoots(ITetrisContainer container)
+        {
+            var roots = new List<(IChainRoot, Vector2Int)>();
+            foreach (var kvp in container.Contents)
+                if (kvp.Value is IChainRoot root)
+                    roots.Add((root, kvp.Key));
+            return roots;
         }
 
         private static bool HasMatchingConnector(
@@ -154,15 +190,6 @@ namespace Code.Runtime.Inventory
                     return true;
 
             return false;
-        }
-
-        private static List<(IWeaponItem weapon, Vector2Int pos)> FindAllWeapons(ITetrisContainer container)
-        {
-            var weapons = new List<(IWeaponItem, Vector2Int)>();
-            foreach (var kvp in container.Contents)
-                if (kvp.Value is IWeaponItem weapon)
-                    weapons.Add((weapon, kvp.Key));
-            return weapons;
         }
 
         private static (Vector2Int, Vector2Int) MakeKey(Vector2Int a, Vector2Int b) =>

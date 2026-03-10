@@ -1,28 +1,36 @@
 using System.Collections.Generic;
+using System.Linq;
 using Code.Data.Items.Amplifier;
 using Code.Runtime.Statistics;
 using UnityEngine;
 
 namespace Code.Runtime.Inventory
 {
+    /// <summary>
+    /// Marker interface for items that can root a chain — Weapon, Activator, Reactor.
+    /// A root item starts one traversal per connected connector.
+    /// Will gain firing behaviour when Activators and Reactors are implemented.
+    /// </summary>
+    public interface IChainRoot : ITetrisItem { }
+
     public sealed class ItemChain : IItemChain
     {
         public static readonly IItemChain Empty = new ItemChain(null, new List<ITetrisItem>());
 
-        public IWeaponItem               Weapon    { get; }
+        public IChainRoot                Root      { get; }
         public IReadOnlyList<ITetrisItem> Modifiers { get; }
-        public bool                      IsValid   => Weapon != null;
+        public bool                      IsValid   => Root != null;
 
-        public ItemChain(IWeaponItem weapon, List<ITetrisItem> modifiers)
+        public ItemChain(IChainRoot root, List<ITetrisItem> modifiers)
         {
-            Weapon    = weapon;
+            Root      = root;
             Modifiers = modifiers;
         }
 
         /// <summary>
-        /// Resolves the chain by feeding each amplifier's WeaponStatModifier into
-        /// a MutableFloat per stat. MutableFloat.ApplyModifiers handles all modifier
-        /// math — no duplication of that logic here.
+        /// Finds the first weapon in the chain (root or modifiers) and resolves
+        /// stats by feeding amplifiers into MutableFloat per stat.
+        /// Root may be an Activator/Reactor — the weapon is then in Modifiers.
         /// </summary>
         public IResolvedWeaponStats Resolve()
         {
@@ -32,9 +40,18 @@ namespace Code.Runtime.Inventory
                 return new ResolvedWeaponStats(0f, 0f, 0f);
             }
 
-            var damage       = new MutableFloat(Weapon.BaseDamage);
-            var attackSpeed  = new MutableFloat(Weapon.AttackSpeed);
-            var resourceCost = new MutableFloat(Weapon.ResourceCost);
+            var weapon = Root as IWeaponItem
+                      ?? Modifiers.OfType<IWeaponItem>().FirstOrDefault();
+
+            if (weapon == null)
+            {
+                Debug.LogWarning("ItemChain.Resolve() found no weapon in chain.");
+                return new ResolvedWeaponStats(0f, 0f, 0f);
+            }
+
+            var damage       = new MutableFloat(weapon.BaseDamage);
+            var attackSpeed  = new MutableFloat(weapon.AttackSpeed);
+            var resourceCost = new MutableFloat(weapon.ResourceCost);
 
             foreach (var item in Modifiers)
             {
@@ -56,7 +73,7 @@ namespace Code.Runtime.Inventory
 
     public interface IItemChain
     {
-        IWeaponItem               Weapon    { get; }
+        IChainRoot                Root      { get; }
         IReadOnlyList<ITetrisItem> Modifiers { get; }
         bool                      IsValid   { get; }
         IResolvedWeaponStats      Resolve();

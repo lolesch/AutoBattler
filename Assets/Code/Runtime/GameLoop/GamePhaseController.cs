@@ -97,6 +97,7 @@ namespace Code.Runtime.GameLoop
                 {
                     case AmplifierConfig config:
                         PlayerData.Stash.TryAdd(new AmplifierItem(config));
+                        PlayerData.Stash.TryAdd(new AmplifierItem(config));
                         break;
                     case WeaponConfig config:
                         PlayerData.Stash.TryAdd(new WeaponItem(config));

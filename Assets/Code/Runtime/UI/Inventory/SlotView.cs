@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 namespace Code.Runtime.UI.Inventory
 {
+    [RequireComponent(typeof(Canvas), typeof(GraphicRaycaster))]
     public sealed class SlotView : MonoBehaviour, ISlotView,
         IPointerClickHandler,
         IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler,
@@ -16,24 +17,34 @@ namespace Code.Runtime.UI.Inventory
         [SerializeField] private Image      _icon;
         [SerializeField] private Image      _highlight;
         [SerializeField] private GameObject _pipPrefab;
-        [SerializeField] private Sprite     _dashSprite;
         [SerializeField] private Sprite     _arrowSprite;
+        [SerializeField] private Sprite     _dashSprite;
+        [SerializeField] private Sprite     _deadEndSprite;
 
         [SerializeField, ReadOnly] private Vector2Int _gridPosition;
+        [SerializeField] private Canvas     _canvas;
 
         private IInventoryDragController _dragController;
 
-        // Keyed by (connectorSlotPos, connectorDirection) — direction is required because
-        // a 1x1 item can have multiple connectors at the same cell pointing different ways.
-        private readonly Dictionary<(Vector2Int, Vector2Int), Image> _pips = new();
+        private readonly Dictionary<(Vector2Int, Vector2Int), Image>    _pips      = new();
+        private readonly Dictionary<(Vector2Int, Vector2Int), PipState> _pipStates = new();
 
         public RectTransform RectTransform => (RectTransform)transform;
         public Vector2Int    GridPosition  => _gridPosition;
 
+        private void Awake()
+        {
+            if (_canvas == null)
+            {
+                _canvas = GetComponent<Canvas>();
+                Debug.LogWarning("Assign _canvas in Inspector.", this);
+            }
+        }
+
         public void Initialize(Vector2Int gridPosition, IInventoryDragController dragController)
         {
-            _gridPosition   = gridPosition;
-            _dragController = dragController;
+            _gridPosition      = gridPosition;
+            _dragController    = dragController;
         }
 
         public void SetHighlight(SlotHighlight highlight)
@@ -47,8 +58,17 @@ namespace Code.Runtime.UI.Inventory
 
         public void SetPipState(Vector2Int connectorSlotPos, Vector2Int connectorDirection, PipState state)
         {
-            if (!_pips.TryGetValue((connectorSlotPos, connectorDirection), out var pip)) return;
-            pip.sprite = state == PipState.Arrow ? _arrowSprite : _dashSprite;
+            var key = (connectorSlotPos, connectorDirection);
+            if (!_pips.TryGetValue(key, out var pip)) return;
+            if (_pipStates.TryGetValue(key, out var current) && current >= state) return;
+
+            _pipStates[key] = state;
+            pip.sprite = state switch
+            {
+                PipState.Arrow => _arrowSprite,
+                PipState.Dash  => _dashSprite,
+                _              => _deadEndSprite,
+            };
         }
 
         // ── UGUI event handlers ───────────────────────────────────────────
@@ -108,8 +128,10 @@ namespace Code.Runtime.UI.Inventory
                 _icon.rectTransform.anchoredPosition = Vector2.zero;
                 _icon.rectTransform.pivot            = Vector2.up;
             }
-
+            
             _icon.color = hasItem ? Color.white : Color.clear;
+            _canvas.overrideSorting = hasItem;
+            _canvas.sortingOrder    = hasItem ? 1 : 0;
         }
 
         private void BuildPips(ITetrisItem item)
@@ -135,7 +157,7 @@ namespace Code.Runtime.UI.Inventory
                 pipRT.localEulerAngles = new Vector3(0f, 0f,
                     Mathf.Atan2(-direction.y, direction.x) * Mathf.Rad2Deg);
 
-                pip.sprite        = _dashSprite;
+                pip.sprite = _deadEndSprite;
                 pip.raycastTarget = false;
 
                 _pips[(slotPos, direction)] = pip;
@@ -147,6 +169,7 @@ namespace Code.Runtime.UI.Inventory
             foreach (var pip in _pips.Values)
                 if (pip != null) Destroy(pip.gameObject);
             _pips.Clear();
+            _pipStates.Clear();
         }
 
         private static Vector2 CalculatePivot(Vector2Int origin, Vector2Int dims, RotationType rotation) =>
@@ -171,5 +194,5 @@ namespace Code.Runtime.UI.Inventory
     }
 
     public enum SlotHighlight { None, Swap }
-    public enum PipState      { Dash, Arrow }
+    public enum PipState { DeadEnd, Dash, Arrow }
 }

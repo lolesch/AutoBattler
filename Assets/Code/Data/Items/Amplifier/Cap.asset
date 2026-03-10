@@ -10,25 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d060ed5024e85774688ee7253264f230, type: 3}
-  m_Name: TestAmplifierConfig1
+  m_Name: Cap
   m_EditorClassIdentifier: Data::Code.Data.Items.Amplifier.AmplifierConfig
-  <Icon>k__BackingField: {fileID: 21300000, guid: 8cfb414278ae5c84887810399cfff44b, type: 3}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 9e735fd97a3956f499e8da8a5708e7a6, type: 3}
   <Shape>k__BackingField:
-    gridSize: {x: 2, y: 2}
+    gridSize: {x: 1, y: 2}
     cellSize: {x: 16, y: 16}
     rows:
-    - row: 0100
-    - row: 0101
+    - row: 01
+    - row: 01
   connectors:
   - <LocalPosition>k__BackingField: {x: 0, y: 0}
-    <Direction>k__BackingField: 1
-  - <LocalPosition>k__BackingField: {x: 1, y: 1}
+    <Direction>k__BackingField: 2
+  - <LocalPosition>k__BackingField: {x: 0, y: 0}
     <Direction>k__BackingField: 0
-  <StatType>k__BackingField: 1
-  <Value>k__BackingField: 5
-  <ModifierType>k__BackingField: 2
-  debugStatModifierString: Damage +5 %
-  <WeaponStat>k__BackingField: 0
-  <WeaponValue>k__BackingField: 5
+  <StatType>k__BackingField: 2
+  <Value>k__BackingField: 10
+  <ModifierType>k__BackingField: 3
+  debugStatModifierString: Max Life * 10 %
+  <WeaponStat>k__BackingField: 2
+  <WeaponValue>k__BackingField: 1
   <WeaponModifierType>k__BackingField: 1
-  debugWeaponModifierString: Damage +5
+  debugWeaponModifierString: ResourceCost +1

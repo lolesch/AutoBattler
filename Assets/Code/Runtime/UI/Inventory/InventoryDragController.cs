@@ -6,13 +6,7 @@ using UnityEngine.UI;
 
 namespace Code.Runtime.UI.Inventory
 {
-    /// <summary>
-    /// Single drag controller shared across all active ITetrisContainers.
-    /// InventoryViews register/unregister on OnEnable/OnDisable.
-    /// Cancel always attempts to restore the held item to its source position;
-    /// if that slot is occupied the displaced item becomes the new held item (player must resolve).
-    /// Items are never deleted — an invalid drop always cancels.
-    /// </summary>
+    [RequireComponent(typeof(Canvas))]
     public sealed class InventoryDragController : MonoBehaviour, IInventoryDragController
     {
         [SerializeField] private Image                _ghostImage;
@@ -45,7 +39,19 @@ namespace Code.Runtime.UI.Inventory
         private GestureMode _gesture;
 
         // ── Unity ─────────────────────────────────────────────────────────
-
+        
+        private void Awake()
+        {
+            if (_ghostImage == null)
+                Debug.LogWarning("Assign _ghostImage in Inspector.", this);
+            
+            if (_canvas == null)
+            {
+                _canvas = GetComponent<Canvas>();
+                Debug.LogWarning("Assign _canvas in Inspector.", this);
+            }
+        }
+        
         private void Start()
         {
             if (_ghostImage != null)

@@ -3,6 +3,7 @@ using Code.Data.Pawns;
 using Code.Runtime.Combat;
 using Code.Runtime.Inventory;
 using Code.Runtime.Statistics;
+using Code.Runtime.UI;
 using NaughtyAttributes;
 using Submodules.Utility.Attributes;
 using UnityEngine;
@@ -15,6 +16,8 @@ namespace Code.Runtime.Pawns
         [field: SerializeField] public PawnTeam   Team   { get; private set; }
         [SerializeField, ReadOnly, PreviewIcon] private Sprite _icon;
         [SerializeField] private PawnEffect _pawnEffects;
+        [SerializeField] private PawnResourceView  _healthView;
+        [SerializeField] private PawnResourceView  _manaView;
 
         public IPawnStats            Stats            { get; private set; }
         public ITetrisContainer      Inventory        { get; private set; }
@@ -45,6 +48,8 @@ namespace Code.Runtime.Pawns
             PawnEffects = _pawnEffects;
 
             Stats.health.OnDepleted += DespawnPawn;
+            _healthView.SetPawn(Stats.health);
+            _manaView.SetPawn(Stats.mana);
         }
 
         private void DespawnPawn()

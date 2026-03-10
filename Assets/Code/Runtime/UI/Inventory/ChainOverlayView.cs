@@ -20,7 +20,15 @@ namespace Code.Runtime.UI.Inventory
 
         private const float DotRadius   = 4f;
         private const float ArrowLength = 0.5f;
-
+        
+        private void Awake()
+        {
+            if (_inventoryView == null)
+            {
+                _inventoryView = GetComponent<InventoryView>();
+                Debug.LogWarning("Assign _inventoryView in Inspector.", this);
+            }
+        }
         public void Bind(ITetrisContainer container)
         {
             _container = container;

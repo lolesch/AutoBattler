@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Enemy
   m_EditorClassIdentifier: Data::Code.Data.SO.PawnConfig
   icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  baseHealth: 50
+  baseHealth: 100
+  baseMana: 60
   baseDamage: 10
-  baseAttackSpeed: 2
+  baseAttackSpeed: 1

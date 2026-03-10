@@ -1,14 +1,21 @@
 using Code.Runtime.Statistics;
+using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Code.Runtime.UI
 {
-    //[RequireComponent(typeof( Image ))]
+    [RequireComponent(typeof(Image))]
     public sealed class PawnResourceView : MonoBehaviour
     {
-        [SerializeField] private Resource resource;
-        [SerializeField] private Image healthbar;
+        [SerializeField, ReadOnly] private Resource resource;
+        [FormerlySerializedAs("healthbar")] [SerializeField]           private Image    bar;
+
+        private void Awake()
+        {
+            if (bar == null) { bar = GetComponent<Image>(); Debug.LogWarning("Assign resource bar in Inspector.", this); }
+        }
         
         public void SetPawn( Resource res )
         {
@@ -23,6 +30,6 @@ namespace Code.Runtime.UI
             resource.OnCurrentChanged += UpdateView;
         }
 
-        private void UpdateView( float prev, float curr, float max ) => healthbar.fillAmount = resource.Percentage;
+        private void UpdateView( float prev, float curr, float max ) => bar.fillAmount = resource.Percentage;
     }
 }
