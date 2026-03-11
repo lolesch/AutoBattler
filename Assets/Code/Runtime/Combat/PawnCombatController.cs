@@ -72,13 +72,38 @@ namespace Code.Runtime.Combat
                 timer.OnRewind += () =>
                 {
                     if (_target == null) return;
+
+                    var sb = new System.Text.StringBuilder();
+                    sb.Append($"[Combat] Weapon({capturedChain.Root.Name}) fired");
+                    foreach (var item in capturedChain.Modifiers)
+                    {
+                        if (item is IWeaponItem payload)
+                            sb.Append($" → Payload({payload.Name})[{payload.PayloadCondition}]");
+                        else
+                            sb.Append($" → {GetSemanticLabel(item, false)}({item.Name})");
+                    }
+                    sb.Append($" | dmg:{capturedDamage:F1} spd:{resolved.AttackSpeed:F1}");
+                    Debug.Log(sb.ToString());
+
                     _target.TakeDamage(capturedDamage);
                     FirePayloads(capturedChain, capturedDamage);
                 };
+
                 timer.Start();
                 _weaponTimers.Add(timer);
             }
         }
+        
+        // Similar to ChainResolver.GetSemanticLabel -> could live in a static helper class
+        private static string GetSemanticLabel(ITetrisItem item, bool isRoot) => item switch
+        {
+            IWeaponItem    when isRoot  => "Weapon",
+            IWeaponItem                 => "Payload",
+            IAmplifierItem              => "Amplifier",
+            IConverterItem              => "Converter",
+            _ when isRoot               => "Trigger",
+            _                           => item.GetType().Name,
+        };
 
         private void StopAllTimers()
         {

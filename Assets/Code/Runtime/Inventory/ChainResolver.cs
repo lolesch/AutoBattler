@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace Code.Runtime.Inventory
@@ -115,12 +116,51 @@ namespace Code.Runtime.Inventory
                         }
                     }
 
-                    chains.Add(new ItemChain(root, modifiers));
+                    var chain = new ItemChain(root, modifiers);
+                    chains.Add(chain);
+                    //LogChain(chain);
+                    LogChainDetails(chain);
                 }
             }
 
             return new ChainTopology(chains, connectedEdges, downstreamConnectors, upstreamConnectors);
         }
+        
+        private static void LogChain(IItemChain chain)
+        {
+            if (!chain.IsValid) return;
+
+            var sb = new StringBuilder();
+            sb.Append($"[Chain] {chain.Root.GetType().Name}({chain.Root.Name})");
+
+            foreach (var item in chain.Modifiers)
+                sb.Append($" → {item.GetType().Name}({item.Name})");
+
+            Debug.Log(sb.ToString());
+        }
+        
+        private static void LogChainDetails(IItemChain chain)
+        {
+            if (!chain.IsValid) return;
+
+            var sb = new StringBuilder();
+            sb.Append($"[Chain] {GetSemanticLabel(chain.Root, true)}({chain.Root.Name})");
+            foreach (var item in chain.Modifiers)
+                sb.Append($" → {GetSemanticLabel(item, false)}({item.Name})");
+            
+            Debug.Log(sb.ToString());
+        }
+        
+        // Similar to PawnCombatController.GetSemanticLabel -> could live in a static helper class
+        private static string GetSemanticLabel(ITetrisItem item, bool isRoot) => item switch
+        {
+            IWeaponItem    when isRoot  => "Weapon",
+            IWeaponItem                 => "Payload",
+            IAmplifierItem              => "Amplifier",
+            IConverterItem              => "Converter",
+            _ when isRoot               => "Trigger",
+            _                           => item.GetType().Name,
+        };
 
         private static void MarkConnector(
             Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>> dict,

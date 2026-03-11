@@ -59,8 +59,9 @@ namespace Code.Data.Items
 
         [SerializeField, HideInInspector] private string debugStatModifierString;
 
-        protected virtual void OnValidate()
+        protected override  void OnValidate()
         {
+            base.OnValidate();
             var mod = ModifierType switch
             {
                 ModifierType.Overwrite   => $"= {Value:0.###;-0.###}",
