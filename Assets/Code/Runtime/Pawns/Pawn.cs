@@ -30,7 +30,7 @@ namespace Code.Runtime.Pawns
         private void Awake()
         {
             SpawnPawn();
-            CombatController = new PawnCombatController(Inventory);
+            CombatController = new PawnCombatController(this);
         }
 
         [ContextMenu("Spawn")]

@@ -17,6 +17,7 @@ namespace Code.Runtime.UI.Inventory
         [SerializeField] private Image      _icon;
         [SerializeField] private Image      _highlight;
         [SerializeField] private GameObject _pipPrefab;
+        [SerializeField] private Sprite     _rootDashSprite;
         [SerializeField] private Sprite     _arrowSprite;
         [SerializeField] private Sprite     _dashSprite;
         [SerializeField] private Sprite     _deadEndSprite;
@@ -65,12 +66,15 @@ namespace Code.Runtime.UI.Inventory
             _pipStates[key] = state;
             pip.sprite = state switch
             {
+                PipState.RootDash => _rootDashSprite,
                 PipState.Arrow => _arrowSprite,
                 PipState.Dash  => _dashSprite,
                 _              => _deadEndSprite,
             };
+            //pip.color = Color.white;
         }
 
+        #region Unity Methods
         // ── UGUI event handlers ───────────────────────────────────────────
 
         public void OnPointerClick(PointerEventData eventData)
@@ -103,6 +107,7 @@ namespace Code.Runtime.UI.Inventory
             _icon.rectTransform.anchorMax        = new Vector2(0, 1);
             _icon.rectTransform.anchoredPosition = Vector2.zero;
         }
+        #endregion
 
         public void RefreshView(ITetrisItem item)
         {
@@ -194,5 +199,5 @@ namespace Code.Runtime.UI.Inventory
     }
 
     public enum SlotHighlight { None, Swap }
-    public enum PipState { DeadEnd, Dash, Arrow }
+    public enum PipState { DeadEnd, Dash, Arrow, RootDash }
 }

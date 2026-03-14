@@ -245,6 +245,7 @@ MonoBehaviour:
   _icon: {fileID: 4141773371939373180}
   _highlight: {fileID: 873808455342427823}
   _pipPrefab: {fileID: 7079614172049600976, guid: eaff545460e03c0428cd39042b51b7aa, type: 3}
+  _rootDashSprite: {fileID: 21300000, guid: 9980c1956b7517847baf7a6d64d8a74a, type: 3}
   _arrowSprite: {fileID: 21300000, guid: a6dcb8568ab7c01428e5cf5793e85430, type: 3}
   _dashSprite: {fileID: 21300000, guid: b1c2483f7ae767447bf079327356215e, type: 3}
   _deadEndSprite: {fileID: 21300000, guid: c721f093f97ddea42a0eb21283b85849, type: 3}

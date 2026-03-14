@@ -40,3 +40,6 @@ namespace Code.Data.Items.Amplifier
         ResourceCost,
     }
 }
+namespace Code.Data.Items.Activator
+{
+}

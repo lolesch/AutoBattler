@@ -25,7 +25,7 @@ namespace Code.Runtime.Inventory
         public override void Use() { }
     }
 
-    public interface IWeaponItem : ITetrisItem, IChainRoot
+    public interface IWeaponItem : ITetrisItem
     {
         float                BaseDamage                { get; }
         float                AttackSpeed               { get; }

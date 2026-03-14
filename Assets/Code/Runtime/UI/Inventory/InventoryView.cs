@@ -138,6 +138,11 @@ namespace Code.Runtime.UI.Inventory
                 if (topology.UpstreamConnectors.TryGetValue(item, out var upstreamSet))
                     foreach (var (slotPos, direction) in upstreamSet)
                         _slots[slotIndex].SetPipState(slotPos, direction, PipState.Dash);
+
+                if (topology.Roots.Contains(item) &&
+                    topology.UpstreamConnectors.TryGetValue(item, out var rootUpstream))
+                    foreach (var (slotPos, direction) in rootUpstream)
+                        _slots[slotIndex].SetPipState(slotPos, direction, PipState.RootDash);
             }
         }
     }

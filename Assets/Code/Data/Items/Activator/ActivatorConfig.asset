@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9fac261344d4e8da39abc2ae0a9c7ee, type: 3}
+  m_Name: ActivatorConfig
+  m_EditorClassIdentifier: Data::Code.Data.Items.Activator.ActivatorConfig
+  <Icon>k__BackingField: {fileID: -1471225376, guid: f53c29de7123b714d9b24a977fb43f39, type: 3}
+  <Shape>k__BackingField:
+    gridSize: {x: 1, y: 1}
+    cellSize: {x: 16, y: 16}
+    rows:
+    - row: 01
+  connectors:
+  - <LocalPosition>k__BackingField: {x: 0, y: 0}
+    <Direction>k__BackingField: 0
+  - <LocalPosition>k__BackingField: {x: 0, y: 0}
+    <Direction>k__BackingField: 2
+  <ActivatorType>k__BackingField: 0
+  <CooldownMultiplier>k__BackingField: 0.5

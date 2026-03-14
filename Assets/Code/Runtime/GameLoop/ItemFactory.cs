@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
 using Code.Data.Items;
+using Code.Data.Items.Activator;
 using Code.Data.Items.Amplifier;
+using Code.Data.Items.Reactor;
 using Code.Data.Items.Weapon;
 using Code.Runtime.Inventory;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Code.Runtime.GameLoop
 {
@@ -27,29 +31,13 @@ namespace Code.Runtime.GameLoop
             return Create(config);
         }
 
-        public static ITetrisItem Create(ItemConfig config)
+        public static ITetrisItem Create(ItemConfig config) => config switch
         {
-            if (config == null)
-            {
-                Debug.LogWarning("[ItemFactory] Null config passed — no item created.");
-                return null;
-            }
-
-            // Rotation is None by default; randomize here when visual variety is desired.
-            const RotationType rotation = RotationType.None;
-
-            return config switch
-            {
-                WeaponConfig    weapon => new WeaponItem(weapon, rotation),
-                AmplifierConfig amp    => new AmplifierItem(amp, rotation),
-                _ => LogUnknown(config),
-            };
-        }
-
-        private static ITetrisItem LogUnknown(ItemConfig config)
-        {
-            Debug.LogWarning($"[ItemFactory] Unknown ItemConfig type: {config.GetType().Name}. Add a case to ItemFactory.Create().");
-            return null;
-        }
+            WeaponConfig    c => new WeaponItem(c),
+            AmplifierConfig c => new AmplifierItem(c),
+            ActivatorConfig c => new ActivatorItem(c),
+            ReactorConfig   c => new ReactorItem(c),
+            _                 => throw new ArgumentOutOfRangeException(nameof(config), config.GetType().Name, "No factory mapping found.")
+        };
     }
 }

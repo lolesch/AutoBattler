@@ -17,11 +17,11 @@ namespace Code.Runtime.Inventory
     {
         public static readonly IItemChain Empty = new ItemChain(null, new List<ITetrisItem>());
 
-        public IChainRoot                Root      { get; }
+        public ITetrisItem                Root      { get; }
         public IReadOnlyList<ITetrisItem> Modifiers { get; }
         public bool                      IsValid   => Root != null;
 
-        public ItemChain(IChainRoot root, List<ITetrisItem> modifiers)
+        public ItemChain(ITetrisItem root, List<ITetrisItem> modifiers)
         {
             Root      = root;
             Modifiers = modifiers;
@@ -73,7 +73,7 @@ namespace Code.Runtime.Inventory
 
     public interface IItemChain
     {
-        IChainRoot                Root      { get; }
+        ITetrisItem                Root      { get; }
         IReadOnlyList<ITetrisItem> Modifiers { get; }
         bool                      IsValid   { get; }
         IResolvedWeaponStats      Resolve();

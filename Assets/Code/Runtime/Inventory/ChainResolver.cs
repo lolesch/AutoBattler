@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using UnityEngine;
 
 namespace Code.Runtime.Inventory
@@ -8,28 +8,31 @@ namespace Code.Runtime.Inventory
     {
         public IReadOnlyList<IItemChain>                                           Chains               { get; }
         public HashSet<(Vector2Int, Vector2Int)>                                   ConnectedEdges       { get; }
-        // Downstream: (connectorSlotPos, connectorDirection) on the item further from the root.
         public IReadOnlyDictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>> DownstreamConnectors { get; }
-        // Upstream: (connectorSlotPos, connectorDirection) on the item closer to the root.
         public IReadOnlyDictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>> UpstreamConnectors   { get; }
+        /// <summary>Items resolved as chain roots by first-pass BFS position, not interface marker.</summary>
+        public IReadOnlyCollection<ITetrisItem>                                    Roots                { get; }
 
         public ChainTopology(
             IReadOnlyList<IItemChain>                                        chains,
             HashSet<(Vector2Int, Vector2Int)>                                connectedEdges,
             Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>       downstreamConnectors,
-            Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>       upstreamConnectors)
+            Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>       upstreamConnectors,
+            HashSet<ITetrisItem>                                             roots)
         {
             Chains               = chains;
             ConnectedEdges       = connectedEdges;
             DownstreamConnectors = downstreamConnectors;
             UpstreamConnectors   = upstreamConnectors;
+            Roots                = roots;
         }
 
         public static readonly ChainTopology Empty = new(
             System.Array.Empty<IItemChain>(),
             new HashSet<(Vector2Int, Vector2Int)>(),
             new Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>(),
-            new Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>());
+            new Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>(),
+            new HashSet<ITetrisItem>());
     }
 
     public static class ChainResolver
@@ -39,134 +42,226 @@ namespace Code.Runtime.Inventory
 
         public static ChainTopology ResolveTopology(ITetrisContainer container)
         {
-            var allRoots = FindAllRoots(container);
-            if (allRoots.Count == 0)
-                return ChainTopology.Empty;
+            var adjacency     = BuildAdjacency(container);
+            var resolvedRoots = ResolveRoots(container, adjacency);
 
-            var overriddenWeapons = FindOverriddenWeapons(container, allRoots);
+            if (resolvedRoots.Count == 0)
+                return ChainTopology.Empty;
 
             var chains               = new List<IItemChain>();
             var connectedEdges       = new HashSet<(Vector2Int, Vector2Int)>();
             var downstreamConnectors = new Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>();
             var upstreamConnectors   = new Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>>();
+            var rootSet              = new HashSet<ITetrisItem>(resolvedRoots.Select(r => r.root));
 
-            foreach (var (root, rootPos) in allRoots)
+            foreach (var (root, rootPos) in resolvedRoots)
             {
-                if (root is IWeaponItem w && overriddenWeapons.Contains(w))
-                    continue;
-
                 foreach (var (rootSlotPos, rootDirection) in root.GetGridConnectors(rootPos))
                 {
-                    var targetCell = rootSlotPos + rootDirection;
-
-                    if (!container.ContentPointer.TryGetValue(targetCell, out var firstOrigin))
+                    if (!TryGetValidNeighbour(adjacency, container, root, rootSlotPos, rootDirection,
+                            out var firstNeighbour, out var firstOrigin))
                         continue;
 
-                    if (!container.Contents.TryGetValue(firstOrigin, out var firstNeighbour))
-                        continue;
-
-                    if (!HasMatchingConnector(firstNeighbour, firstOrigin, targetCell, -rootDirection))
-                        continue;
-
-                    connectedEdges.Add(MakeKey(rootSlotPos, targetCell));
-
-                    // Root's outgoing connector is upstream.
+                    connectedEdges.Add(MakeKey(rootSlotPos, rootSlotPos + rootDirection));
                     MarkConnector(upstreamConnectors, root, rootSlotPos, rootDirection);
 
                     var modifiers = new List<ITetrisItem>();
                     var visited   = new HashSet<ITetrisItem> { root };
                     var queue     = new Queue<(ITetrisItem item, Vector2Int pos, Vector2Int inSlotPos, Vector2Int inDirection)>();
-                    queue.Enqueue((firstNeighbour, firstOrigin, targetCell, -rootDirection));
+                    queue.Enqueue((firstNeighbour, firstOrigin, rootSlotPos + rootDirection, -rootDirection));
 
                     while (queue.Count > 0)
                     {
                         var (current, currentPos, inSlotPos, inDirection) = queue.Dequeue();
-
-                        if (visited.Contains(current))
-                            continue;
-
+                        if (visited.Contains(current)) continue;
                         visited.Add(current);
                         modifiers.Add(current);
 
-                        // The connector this item was arrived at is downstream.
                         MarkConnector(downstreamConnectors, current, inSlotPos, inDirection);
 
                         foreach (var (slotPos, direction) in current.GetGridConnectors(currentPos))
                         {
-                            var nextCell = slotPos + direction;
+                            if (!TryGetValidNeighbour(adjacency, container, current, slotPos, direction,
+                                    out var next, out var nextOrigin)) continue;
+                            if (visited.Contains(next)) continue;
+                            if (IsTrigger(next) && !IsTrigger(current)) continue;
 
-                            if (!container.ContentPointer.TryGetValue(nextCell, out var nextOrigin))
-                                continue;
-
-                            if (!container.Contents.TryGetValue(nextOrigin, out var next))
-                                continue;
-
-                            if (!HasMatchingConnector(next, nextOrigin, nextCell, -direction))
-                                continue;
-
-                            if (visited.Contains(next))
-                                continue;
-
-                            connectedEdges.Add(MakeKey(slotPos, nextCell));
-
-                            // The outgoing connector on current toward next is upstream.
+                            connectedEdges.Add(MakeKey(slotPos, slotPos + direction));
                             MarkConnector(upstreamConnectors, current, slotPos, direction);
-
-                            queue.Enqueue((next, nextOrigin, nextCell, -direction));
+                            queue.Enqueue((next, nextOrigin, slotPos + direction, -direction));
                         }
+                    }
+
+                    var hasWeapon = root is IWeaponItem || modifiers.Exists(m => m is IWeaponItem);
+                    if (!hasWeapon)
+                    {
+                        Debug.LogWarning($"[ChainResolver] Root '{root.Name}' has no weapon in chain — skipped.");
+                        continue;
                     }
 
                     var chain = new ItemChain(root, modifiers);
                     chains.Add(chain);
-                    //LogChain(chain);
-                    LogChainDetails(chain);
+                    LogChain(chain);
                 }
             }
 
-            return new ChainTopology(chains, connectedEdges, downstreamConnectors, upstreamConnectors);
+            return new ChainTopology(chains, connectedEdges, downstreamConnectors, upstreamConnectors, rootSet);
+        }
+
+        // ── First pass ────────────────────────────────────────────────────
+
+        private static List<(ITetrisItem root, Vector2Int pos)> ResolveRoots(
+            ITetrisContainer                           container,
+            Dictionary<ITetrisItem, List<ITetrisItem>> adjacency)
+        {
+            var positionOf    = container.Contents.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+            var assignedRoots = new HashSet<ITetrisItem>();
+            var roots         = new List<(ITetrisItem, Vector2Int)>();
+
+            foreach (var kvp in container.Contents)
+            {
+                if (kvp.Value is not IWeaponItem weapon) continue;
+
+                var visited = new HashSet<ITetrisItem> { weapon };
+                var queue   = new Queue<(ITetrisItem item, int depth)>();
+
+                var weaponPos = kvp.Key;
+                if (adjacency.TryGetValue(weapon, out var weaponNeighbors))
+                    foreach (var neighbor in weaponNeighbors)
+                        if (IsTrigger(neighbor) && IsUpstreamOf(neighbor, weapon, weaponPos, container))
+                            queue.Enqueue((neighbor, 1));
+
+                ITetrisItem furthestTrigger = null;
+                var         maxDepth        = 0;
+
+                while (queue.Count > 0)
+                {
+                    var (current, depth) = queue.Dequeue();
+                    if (visited.Contains(current)) continue;
+                    visited.Add(current);
+
+                    if (depth > maxDepth) { maxDepth = depth; furthestTrigger = current; }
+
+                    if (!adjacency.TryGetValue(current, out var neighbors)) continue;
+                    foreach (var neighbor in neighbors)
+                        if (IsTrigger(neighbor) && !visited.Contains(neighbor))
+                            queue.Enqueue((neighbor, depth + 1));
+                }
+
+                var resolvedRoot = furthestTrigger ?? weapon;
+                if (assignedRoots.Add(resolvedRoot))
+                    roots.Add((resolvedRoot, positionOf[resolvedRoot]));
+            }
+
+            return roots;
         }
         
-        private static void LogChain(IItemChain chain)
+        private static bool IsUpstreamOf(
+            ITetrisItem      trigger,
+            ITetrisItem      weapon,
+            Vector2Int       weaponOrigin,
+            ITetrisContainer container)
         {
-            if (!chain.IsValid) return;
+            var triggerOrigin = container.Contents.First(kvp => kvp.Value == trigger).Key;
+            var weaponCells   = new HashSet<Vector2Int>(weapon.GetPointers(weaponOrigin));
 
-            var sb = new StringBuilder();
-            sb.Append($"[Chain] {chain.Root.GetType().Name}({chain.Root.Name})");
+            foreach (var (slotPos, direction) in trigger.GetGridConnectors(triggerOrigin))
+                if (weaponCells.Contains(slotPos + direction))
+                    return true;
 
-            foreach (var item in chain.Modifiers)
-                sb.Append($" → {item.GetType().Name}({item.Name})");
-
-            Debug.Log(sb.ToString());
+            return false;
         }
-        
-        private static void LogChainDetails(IItemChain chain)
-        {
-            if (!chain.IsValid) return;
 
-            var sb = new StringBuilder();
-            sb.Append($"[Chain] {GetSemanticLabel(chain.Root, true)}({chain.Root.Name})");
-            foreach (var item in chain.Modifiers)
-                sb.Append($" → {GetSemanticLabel(item, false)}({item.Name})");
-            
-            Debug.Log(sb.ToString());
-        }
-        
-        // Similar to PawnCombatController.GetSemanticLabel -> could live in a static helper class
-        private static string GetSemanticLabel(ITetrisItem item, bool isRoot) => item switch
+        /// <summary>
+        /// Builds an undirected connection graph filtered by connection validity rules.
+        /// Only valid bidirectional connector pairs produce edges.
+        /// </summary>
+        private static Dictionary<ITetrisItem, List<ITetrisItem>> BuildAdjacency(ITetrisContainer container)
         {
-            IWeaponItem    when isRoot  => "Weapon",
-            IWeaponItem                 => "Payload",
-            IAmplifierItem              => "Amplifier",
-            IConverterItem              => "Converter",
-            _ when isRoot               => "Trigger",
-            _                           => item.GetType().Name,
+            var adj = new Dictionary<ITetrisItem, List<ITetrisItem>>();
+
+            foreach (var item in container.Contents.Values)
+                adj[item] = new List<ITetrisItem>();
+
+            foreach (var (pos, item) in container.Contents)
+            {
+                foreach (var (slotPos, direction) in item.GetGridConnectors(pos))
+                {
+                    var targetCell = slotPos + direction;
+                    if (!container.ContentPointer.TryGetValue(targetCell, out var neighborOrigin)) continue;
+                    if (!container.Contents.TryGetValue(neighborOrigin, out var neighbor)) continue;
+                    if (!HasMatchingConnector(neighbor, neighborOrigin, targetCell, -direction)) continue;
+                    if (!IsValidConnection(item, neighbor))
+                    {
+                        Debug.LogWarning($"[ChainResolver] Invalid connection: {item.GetType().Name}({item.Name}) ↔ {neighbor.GetType().Name}({neighbor.Name}) — skipped.");
+                        continue;
+                    }
+                    if (adj[item].Contains(neighbor)) continue;
+
+                    adj[item].Add(neighbor);
+                    adj[neighbor].Add(item);
+                }
+            }
+
+            return adj;
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Returns true if slotPos+direction points to a neighbour that is both
+        /// connector-matched and present in the validated adjacency graph.
+        /// Single check point used by both root→first and BFS inner loop.
+        /// </summary>
+        private static bool TryGetValidNeighbour(
+            Dictionary<ITetrisItem, List<ITetrisItem>> adjacency,
+            ITetrisContainer                           container,
+            ITetrisItem                                from,
+            Vector2Int                                 slotPos,
+            Vector2Int                                 direction,
+            out ITetrisItem                            neighbour,
+            out Vector2Int                             neighbourOrigin)
+        {
+            neighbour       = null;
+            neighbourOrigin = default;
+
+            var targetCell = slotPos + direction;
+            if (!container.ContentPointer.TryGetValue(targetCell, out neighbourOrigin)) return false;
+            if (!container.Contents.TryGetValue(neighbourOrigin, out neighbour)) return false;
+            if (!HasMatchingConnector(neighbour, neighbourOrigin, targetCell, -direction)) return false;
+            if (!adjacency.TryGetValue(from, out var validNeighbors)) return false;
+            return validNeighbors.Contains(neighbour);
+        }
+
+        private static bool IsValidConnection(ITetrisItem a, ITetrisItem b) => (a, b) switch
+        {
+            (IReactorItem,   IReactorItem)   => false,
+            (IReactorItem,   IAmplifierItem) => false,
+            (IReactorItem,   IConverterItem) => false,
+            (IAmplifierItem, IReactorItem)   => false,
+            (IConverterItem, IReactorItem)   => false,
+            (IActivatorItem, IAmplifierItem) => false,
+            (IActivatorItem, IConverterItem) => false,
+            (IAmplifierItem, IActivatorItem) => false,
+            (IConverterItem, IActivatorItem) => false,
+            _                                => true,
         };
+
+        private static bool IsTrigger(ITetrisItem item) => item is IActivatorItem or IReactorItem;
+
+        private static bool HasMatchingConnector(
+            ITetrisItem item, Vector2Int placement,
+            Vector2Int  expectedSlotPos, Vector2Int expectedDirection)
+        {
+            foreach (var (slotPos, direction) in item.GetGridConnectors(placement))
+                if (slotPos == expectedSlotPos && direction == expectedDirection)
+                    return true;
+            return false;
+        }
 
         private static void MarkConnector(
             Dictionary<ITetrisItem, HashSet<(Vector2Int, Vector2Int)>> dict,
-            ITetrisItem item,
-            Vector2Int  slotPos,
-            Vector2Int  direction)
+            ITetrisItem item, Vector2Int slotPos, Vector2Int direction)
         {
             if (!dict.TryGetValue(item, out var set))
             {
@@ -176,66 +271,105 @@ namespace Code.Runtime.Inventory
             set.Add((slotPos, direction));
         }
 
-        private static HashSet<IWeaponItem> FindOverriddenWeapons(
-            ITetrisContainer                        container,
-            List<(IChainRoot root, Vector2Int pos)> allRoots)
-        {
-            var overridden = new HashSet<IWeaponItem>();
-
-            foreach (var (root, rootPos) in allRoots)
-            {
-                if (root is IWeaponItem)
-                    continue;
-
-                foreach (var (slotPos, direction) in root.GetGridConnectors(rootPos))
-                {
-                    var targetCell = slotPos + direction;
-
-                    if (!container.ContentPointer.TryGetValue(targetCell, out var neighbourOrigin))
-                        continue;
-
-                    if (!container.Contents.TryGetValue(neighbourOrigin, out var neighbour))
-                        continue;
-
-                    if (neighbour is not IWeaponItem weapon)
-                        continue;
-
-                    if (!HasMatchingConnector(neighbour, neighbourOrigin, targetCell, -direction))
-                        continue;
-
-                    overridden.Add(weapon);
-                }
-            }
-
-            return overridden;
-        }
-
-        private static List<(IChainRoot root, Vector2Int pos)> FindAllRoots(ITetrisContainer container)
-        {
-            var roots = new List<(IChainRoot, Vector2Int)>();
-            foreach (var kvp in container.Contents)
-                if (kvp.Value is IChainRoot root)
-                    roots.Add((root, kvp.Key));
-            return roots;
-        }
-
-        private static bool HasMatchingConnector(
-            ITetrisItem item,
-            Vector2Int  placement,
-            Vector2Int  expectedSlotPos,
-            Vector2Int  expectedDirection)
-        {
-            foreach (var (slotPos, direction) in item.GetGridConnectors(placement))
-                if (slotPos == expectedSlotPos && direction == expectedDirection)
-                    return true;
-
-            return false;
-        }
-
         private static (Vector2Int, Vector2Int) MakeKey(Vector2Int a, Vector2Int b) =>
             IsLowerSide(a, b) ? (a, b) : (b, a);
 
         private static bool IsLowerSide(Vector2Int a, Vector2Int b) =>
             a.y < b.y || (a.y == b.y && a.x < b.x);
+
+        // ── Logging ───────────────────────────────────────────────────────
+
+        private static void LogChain(IItemChain chain)
+        {
+            if (!chain.IsValid) return;
+            Debug.Log(FormatDetailed(chain));
+        }
+
+        private static string FormatCompact(IItemChain chain)
+        {
+            var sb = new System.Text.StringBuilder("[Chain:A]");
+            sb.Append($" {VerbCompact(chain.Root, true)}({chain.Root.Name})");
+            foreach (var item in chain.Modifiers)
+                sb.Append($" → {VerbCompact(item, false)}({item.Name})");
+            return sb.ToString();
+        }
+
+        private static string FormatNatural(IItemChain chain)
+        {
+            var sb = new System.Text.StringBuilder("[Chain:B]");
+            sb.Append($" {VerbNatural(chain.Root, true)} {chain.Root.Name}");
+            foreach (var item in chain.Modifiers)
+                sb.Append($", {VerbNatural(item, false)} {item.Name}");
+            return sb.ToString();
+        }
+
+        private static string FormatHybrid(IItemChain chain)
+        {
+            var sb = new System.Text.StringBuilder("[Chain:C]");
+            sb.Append($" {chain.Root.Name}→{VerbHybrid(chain.Root, true)}→");
+            foreach (var item in chain.Modifiers)
+                sb.Append($" {item.Name}→{VerbHybrid(item, false)}→");
+            return sb.ToString();
+        }
+
+        private static string FormatDetailed(IItemChain chain)
+        {
+            var resolved      = chain.Resolve();
+            var primaryWeapon = chain.Root as IWeaponItem
+                                ?? chain.Modifiers.OfType<IWeaponItem>().FirstOrDefault();
+            var sb            = new System.Text.StringBuilder("[Chain:D]");
+            sb.Append($" {GetSemanticLabel(chain.Root, true)}({chain.Root.Name})");
+            sb.Append($" dmg:{resolved.Damage:F1} spd:{resolved.AttackSpeed:F1} cost:{resolved.ResourceCost:F1}");
+            foreach (var item in chain.Modifiers)
+            {
+                var isPayload = item is IWeaponItem w && w != primaryWeapon;
+                sb.Append($" → {GetSemanticLabel(item, false, isPayload)}({item.Name}");
+                if (isPayload)
+                    sb.Append($"|{((IWeaponItem)item).PayloadCondition}");
+                sb.Append(")");
+            }
+            return sb.ToString();
+        }
+
+        private static string VerbCompact(ITetrisItem item, bool isRoot) => item switch
+        {
+            IWeaponItem    when isRoot => "strike",
+            IWeaponItem                => "burst",
+            IAmplifierItem             => "harder",
+            IConverterItem             => "as",
+            _              when isRoot => "when",
+            _                          => "on",
+        };
+
+        private static string VerbNatural(ITetrisItem item, bool isRoot) => item switch
+        {
+            IWeaponItem    when isRoot => "strike with",
+            IWeaponItem                => "burst via",
+            IAmplifierItem             => "harder via",
+            IConverterItem             => "as",
+            _              when isRoot => "when",
+            _                          => "on",
+        };
+
+        private static string VerbHybrid(ITetrisItem item, bool isRoot) => item switch
+        {
+            IWeaponItem    when isRoot => "fires",
+            IWeaponItem                => "bursts",
+            IAmplifierItem             => "scales",
+            IConverterItem             => "converts",
+            _              when isRoot => "activates",
+            _                          => "reacts",
+        };
+
+        private static string GetSemanticLabel(ITetrisItem item, bool isRoot, bool isPayload = false) => item switch
+        {
+            IWeaponItem    when isRoot    => "Weapon",
+            IWeaponItem    when isPayload => "Payload",
+            IWeaponItem                   => "Weapon",
+            IAmplifierItem             => "Amplifier",
+            IConverterItem             => "Converter",
+            _              when isRoot => "Trigger",
+            _                          => item.GetType().Name,
+        };
     }
 }

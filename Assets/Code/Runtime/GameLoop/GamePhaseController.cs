@@ -1,6 +1,8 @@
 using System;
 using Code.Data.Items;
+using Code.Data.Items.Activator;
 using Code.Data.Items.Amplifier;
+using Code.Data.Items.Reactor;
 using Code.Data.Items.Weapon;
 using Code.Runtime.Inventory;
 using Code.Runtime.Pawns;
@@ -92,17 +94,11 @@ namespace Code.Runtime.GameLoop
         [ContextMenu("AddItems")]
         private void AddItems()
         {
-            foreach (var item in itemPool)
-                switch (item)
-                {
-                    case AmplifierConfig config:
-                        PlayerData.Stash.TryAdd(new AmplifierItem(config));
-                        PlayerData.Stash.TryAdd(new AmplifierItem(config));
-                        break;
-                    case WeaponConfig config:
-                        PlayerData.Stash.TryAdd(new WeaponItem(config));
-                        break;
-                }
+            foreach (var config in itemPool)
+            {
+                PlayerData.Stash.TryAdd(ItemFactory.Create(config));
+                PlayerData.Stash.TryAdd(ItemFactory.Create(config));
+            }
         }
     }
 

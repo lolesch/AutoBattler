@@ -1,4 +1,5 @@
 ﻿using Code.Data.Items;
+using Code.Data.Enums;
 
 namespace Code.Runtime.Inventory
 {
