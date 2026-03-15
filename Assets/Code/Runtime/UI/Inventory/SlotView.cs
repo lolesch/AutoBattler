@@ -24,8 +24,10 @@ namespace Code.Runtime.UI.Inventory
 
         [SerializeField, ReadOnly] private Vector2Int _gridPosition;
         [SerializeField] private Canvas     _canvas;
-
+        
         private IInventoryDragController _dragController;
+        private ITetrisContainer         _container;
+        private IItemTooltipController   _tooltipController;
 
         private readonly Dictionary<(Vector2Int, Vector2Int), Image>    _pips      = new();
         private readonly Dictionary<(Vector2Int, Vector2Int), PipState> _pipStates = new();
@@ -42,10 +44,13 @@ namespace Code.Runtime.UI.Inventory
             }
         }
 
-        public void Initialize(Vector2Int gridPosition, IInventoryDragController dragController)
+        public void Initialize(Vector2Int gridPosition, IInventoryDragController dragController,
+            ITetrisContainer container, IItemTooltipController tooltipController)
         {
             _gridPosition      = gridPosition;
             _dragController    = dragController;
+            _container         = container;
+            _tooltipController = tooltipController;
         }
 
         public void SetHighlight(SlotHighlight highlight)
@@ -78,10 +83,16 @@ namespace Code.Runtime.UI.Inventory
         // ── UGUI event handlers ───────────────────────────────────────────
 
         public void OnPointerClick(PointerEventData eventData)
-            => _dragController?.OnSlotPointerClick(this, eventData.position);
+        {
+            _tooltipController?.Hide();
+            _dragController?.OnSlotPointerClick(this, eventData.position);
+        }
 
         public void OnBeginDrag(PointerEventData eventData)
-            => _dragController?.OnSlotBeginDrag(this, eventData.position);
+        {
+            _tooltipController?.Hide();
+            _dragController?.OnSlotBeginDrag(this, eventData.position);
+        }
 
         // Required by Unity for OnBeginDrag to fire.
         public void OnDrag(PointerEventData eventData) { }
@@ -91,12 +102,29 @@ namespace Code.Runtime.UI.Inventory
 
         public void OnDrop(PointerEventData eventData)
             => _dragController?.OnSlotDrop(this);
-
+        
         public void OnPointerEnter(PointerEventData eventData)
-            => _dragController?.SetHovered(this);
+        {
+            _dragController?.SetHovered(this);
+
+            var item = ResolveItem();
+            if (item != null)
+                _tooltipController?.Show(item, _container);
+        }
 
         public void OnPointerExit(PointerEventData eventData)
-            => _dragController?.SetHovered(null);
+        {
+            _dragController?.SetHovered(null);
+            _tooltipController?.Hide();
+        }
+
+        private ITetrisItem ResolveItem()
+        {
+            if (_container == null) return null;
+            if (!_container.ContentPointer.TryGetValue(_gridPosition, out var anchor)) return null;
+            _container.Contents.TryGetValue(anchor, out var item);
+            return item;
+        }
 
         // ── Item display ──────────────────────────────────────────────────
 
@@ -192,7 +220,8 @@ namespace Code.Runtime.UI.Inventory
     {
         RectTransform RectTransform { get; }
         Vector2Int    GridPosition  { get; }
-        void Initialize(Vector2Int gridPosition, IInventoryDragController dragController);
+        void Initialize(Vector2Int gridPosition, IInventoryDragController dragController,
+            ITetrisContainer container, IItemTooltipController tooltipController);
         void RefreshView(ITetrisItem item);
         void SetHighlight(SlotHighlight highlight);
         void SetPipState(Vector2Int connectorSlotPos, Vector2Int connectorDirection, PipState state);

@@ -17,6 +17,7 @@ namespace Code.Runtime.UI.Inventory
         [SerializeField] private GridLayoutGroup         _grid;
         [SerializeField] private ChainOverlayView        _chainOverlay;
         [SerializeField] private InventoryDragController _dragController;
+        [SerializeField] private ItemTooltipController _tooltipController;
 
         [SerializeField, ReadOnly, AllowNesting] private SlotView[] _slots;
 
@@ -98,7 +99,7 @@ namespace Code.Runtime.UI.Inventory
             {
                 var gridPos = new Vector2Int(i % gridSize.x, i / gridSize.x);
                 var slot    = Instantiate(_slotPrefab, _grid.transform);
-                slot.Initialize(gridPos, _dragController);
+                slot.Initialize(gridPos, _dragController, _container, _tooltipController);
                 _slots[i] = slot;
             }
 
