@@ -8,12 +8,12 @@ namespace Code.Runtime.Inventory
     [Serializable]
     public abstract class AbstractItem : IItem
     {
-        public Guid guid { get; }
+        public Guid Guid { get; }
         [field: SerializeField] public Sprite Icon { get; private set; }
 
         protected AbstractItem( IItemData itemData )
         {
-            guid = Guid.NewGuid();
+            Guid = Guid.NewGuid();
             Icon = itemData.Icon;
         }
         
@@ -25,7 +25,7 @@ namespace Code.Runtime.Inventory
     
     public interface IItem
     {
-        Guid guid { get; }
+        Guid Guid { get; }
         Sprite Icon { get; }
         void Use();
     }

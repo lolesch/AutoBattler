@@ -98,7 +98,7 @@ namespace Code.Runtime.Inventory
                         Debug.LogWarning($"[ChainResolver] Root '{root.Name}' has no weapon in chain — skipped.");
                         continue;
                     }
-
+                    
                     var chain = new ItemChain(root, modifiers);
                     chains.Add(chain);
                     LogChain(chain);
@@ -191,11 +191,7 @@ namespace Code.Runtime.Inventory
                     if (!container.ContentPointer.TryGetValue(targetCell, out var neighborOrigin)) continue;
                     if (!container.Contents.TryGetValue(neighborOrigin, out var neighbor)) continue;
                     if (!HasMatchingConnector(neighbor, neighborOrigin, targetCell, -direction)) continue;
-                    if (!IsValidConnection(item, neighbor))
-                    {
-                        Debug.LogWarning($"[ChainResolver] Invalid connection: {item.GetType().Name}({item.Name}) ↔ {neighbor.GetType().Name}({neighbor.Name}) — skipped.");
-                        continue;
-                    }
+                    if (!IsValidConnection(item, neighbor)) continue;
                     if (adj[item].Contains(neighbor)) continue;
 
                     adj[item].Add(neighbor);
@@ -205,7 +201,44 @@ namespace Code.Runtime.Inventory
 
             return adj;
         }
+        
+        // ── Logging ───────────────────────────────────────────────────────
 
+        public static void LogChain(IItemChain chain)
+        {
+            if (!chain.IsValid) return;
+            Debug.Log(FormatDetailed(chain));
+        }
+        
+        private static string FormatDetailed(IItemChain chain)
+        {
+            var weapon = chain.Weapon;
+            var sb     = new System.Text.StringBuilder("[Chain]");
+            sb.Append($" {GetSemanticLabel(chain.Root, true)}({chain.Root.Name})");
+            if (weapon != null)
+                sb.Append($" dmg:{(float)weapon.Damage:F1} spd:{(float)weapon.AttackSpeed:F1} cost:{(float)weapon.ResourceCost:F1}");
+            foreach (var item in chain.Modifiers)
+            {
+                var isPayload = item is IWeaponItem w && w != weapon;
+                sb.Append($" → {GetSemanticLabel(item, false, isPayload)}({item.Name}");
+                if (isPayload)
+                    sb.Append($"|{((IWeaponItem)item).PayloadCondition}");
+                sb.Append(")");
+            }
+            return sb.ToString();
+        }
+
+        private static string GetSemanticLabel(ITetrisItem item, bool isRoot, bool isPayload = false) => item switch
+        {
+            IWeaponItem    when isRoot    => "Weapon",
+            IWeaponItem    when isPayload => "Payload",
+            IWeaponItem                   => "Weapon",
+            IAmplifierItem             => "Amplifier",
+            IConverterItem             => "Converter",
+            _              when isRoot => "Trigger",
+            _                          => item.GetType().Name,
+        };
+        
         // ── Helpers ───────────────────────────────────────────────────────
 
         /// <summary>
@@ -276,100 +309,5 @@ namespace Code.Runtime.Inventory
 
         private static bool IsLowerSide(Vector2Int a, Vector2Int b) =>
             a.y < b.y || (a.y == b.y && a.x < b.x);
-
-        // ── Logging ───────────────────────────────────────────────────────
-
-        private static void LogChain(IItemChain chain)
-        {
-            if (!chain.IsValid) return;
-            Debug.Log(FormatDetailed(chain));
-        }
-
-        private static string FormatCompact(IItemChain chain)
-        {
-            var sb = new System.Text.StringBuilder("[Chain:A]");
-            sb.Append($" {VerbCompact(chain.Root, true)}({chain.Root.Name})");
-            foreach (var item in chain.Modifiers)
-                sb.Append($" → {VerbCompact(item, false)}({item.Name})");
-            return sb.ToString();
-        }
-
-        private static string FormatNatural(IItemChain chain)
-        {
-            var sb = new System.Text.StringBuilder("[Chain:B]");
-            sb.Append($" {VerbNatural(chain.Root, true)} {chain.Root.Name}");
-            foreach (var item in chain.Modifiers)
-                sb.Append($", {VerbNatural(item, false)} {item.Name}");
-            return sb.ToString();
-        }
-
-        private static string FormatHybrid(IItemChain chain)
-        {
-            var sb = new System.Text.StringBuilder("[Chain:C]");
-            sb.Append($" {chain.Root.Name}→{VerbHybrid(chain.Root, true)}→");
-            foreach (var item in chain.Modifiers)
-                sb.Append($" {item.Name}→{VerbHybrid(item, false)}→");
-            return sb.ToString();
-        }
-
-        private static string FormatDetailed(IItemChain chain)
-        {
-            var resolved      = chain.Resolve();
-            var primaryWeapon = chain.Root as IWeaponItem
-                                ?? chain.Modifiers.OfType<IWeaponItem>().FirstOrDefault();
-            var sb            = new System.Text.StringBuilder("[Chain:D]");
-            sb.Append($" {GetSemanticLabel(chain.Root, true)}({chain.Root.Name})");
-            sb.Append($" dmg:{resolved.Damage:F1} spd:{resolved.AttackSpeed:F1} cost:{resolved.ResourceCost:F1}");
-            foreach (var item in chain.Modifiers)
-            {
-                var isPayload = item is IWeaponItem w && w != primaryWeapon;
-                sb.Append($" → {GetSemanticLabel(item, false, isPayload)}({item.Name}");
-                if (isPayload)
-                    sb.Append($"|{((IWeaponItem)item).PayloadCondition}");
-                sb.Append(")");
-            }
-            return sb.ToString();
-        }
-
-        private static string VerbCompact(ITetrisItem item, bool isRoot) => item switch
-        {
-            IWeaponItem    when isRoot => "strike",
-            IWeaponItem                => "burst",
-            IAmplifierItem             => "harder",
-            IConverterItem             => "as",
-            _              when isRoot => "when",
-            _                          => "on",
-        };
-
-        private static string VerbNatural(ITetrisItem item, bool isRoot) => item switch
-        {
-            IWeaponItem    when isRoot => "strike with",
-            IWeaponItem                => "burst via",
-            IAmplifierItem             => "harder via",
-            IConverterItem             => "as",
-            _              when isRoot => "when",
-            _                          => "on",
-        };
-
-        private static string VerbHybrid(ITetrisItem item, bool isRoot) => item switch
-        {
-            IWeaponItem    when isRoot => "fires",
-            IWeaponItem                => "bursts",
-            IAmplifierItem             => "scales",
-            IConverterItem             => "converts",
-            _              when isRoot => "activates",
-            _                          => "reacts",
-        };
-
-        private static string GetSemanticLabel(ITetrisItem item, bool isRoot, bool isPayload = false) => item switch
-        {
-            IWeaponItem    when isRoot    => "Weapon",
-            IWeaponItem    when isPayload => "Payload",
-            IWeaponItem                   => "Weapon",
-            IAmplifierItem             => "Amplifier",
-            IConverterItem             => "Converter",
-            _              when isRoot => "Trigger",
-            _                          => item.GetType().Name,
-        };
     }
 }

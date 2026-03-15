@@ -37,7 +37,7 @@ namespace Code.Runtime.Inventory
             return normalized.Select(p => position + p - GetShapeOrigin(normalized)).ToList();
         }
 
-        public List<Vector2Int> GetNormalizedShape()
+        private List<Vector2Int> GetNormalizedShape()
         {
             var parts   = _shape.GetVec2Ints();
             var pivot   = parts[0];
@@ -117,15 +117,12 @@ namespace Code.Runtime.Inventory
     public interface ITetrisItem : IItem
     {
         string       Name       { get; }
-        // Setter exposed so the drag controller can rotate an in-flight item without casting.
         RotationType rotation   { get; set; }
         RarityType   RarityType { get; }
 
         List<Vector2Int> GetPointers(Vector2Int position);
-        List<Vector2Int> GetNormalizedShape();
         Vector2Int       GetShapeOrigin(List<Vector2Int> normalized = null);
         Vector2Int       GetDimensions();
-        // Returns dimensions with x/y swapped for 90°/270° rotations — the visual footprint.
         Vector2Int GetVisualDimensions();
 
         List<(Vector2Int slotPos, Vector2Int direction)> GetGridConnectors(Vector2Int placement);

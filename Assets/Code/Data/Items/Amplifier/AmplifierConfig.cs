@@ -9,7 +9,7 @@ namespace Code.Data.Items.Amplifier
     {
         [Header("Chain Effect")]
         [Tooltip("Which weapon stat this amplifier modifies when connected in a chain.")]
-        [field: SerializeField] public WeaponStatType WeaponStat          { get; private set; }
+        [field: SerializeField] public AttackStatType WeaponStat { get; private set; }
         [field: SerializeField] public float          WeaponValue         { get; private set; }
         [field: SerializeField] public ModifierType   WeaponModifierType  { get; private set; }
 
@@ -32,14 +32,4 @@ namespace Code.Data.Items.Amplifier
             debugWeaponModifierString = $"{WeaponStat} {mod}";
         }
     }
-
-    public enum WeaponStatType
-    {
-        Damage,
-        AttackSpeed,
-        ResourceCost,
-    }
-}
-namespace Code.Data.Items.Activator
-{
 }

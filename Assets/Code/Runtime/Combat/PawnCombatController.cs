@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Code.Data.Enums;
+using Code.Data.Items.Activator;
 using Code.Runtime.Inventory;
 using Code.Runtime.Pawns;
+using Code.Runtime.Statistics;
 using Submodules.Utility.Tools.Timer;
 using UnityEngine;
 
@@ -10,8 +12,9 @@ namespace Code.Runtime.Combat
 {
     /// <summary>
     /// Owns all combat state for a single pawn.
-    /// Handles three chain root types: Weapon (timer), Activator (timer or event),
-    /// Reactor (event subscription). All cleanup routes through _cleanupActions.
+    /// Weapon stats are live MutableFloat objects — amplifier mods are applied once per chain
+    /// build, activator mods are added/removed each cycle based on condition state.
+    /// All cleanup routes through _cleanupActions.
     /// </summary>
     public sealed class PawnCombatController : IPawnCombatController
     {
@@ -51,7 +54,6 @@ namespace Code.Runtime.Combat
             if (!_isRunning) return;
 
             var chains = ChainResolver.Resolve(_inventory);
-
             if (chains.Count == 0)
             {
                 Debug.Log("[Combat] No weapons — pawn is not attacking.");
@@ -60,70 +62,95 @@ namespace Code.Runtime.Combat
 
             foreach (var chain in chains)
             {
-                var resolved = chain.Resolve();
-                Debug.Log($"[Combat:{chain.Root.Name}] " +
-                          $"Damage:{resolved.Damage} | " +
-                          $"Speed:{resolved.AttackSpeed} | " +
-                          $"Cost:{resolved.ResourceCost}");
+                chain.ApplyChainModifiers();
+                _cleanupActions.Add(chain.RemoveChainModifiers);
+                ChainResolver.LogChain(chain);
 
                 switch (chain.Root)
                 {
                     case IWeaponItem:
-                        BuildWeaponTimer(chain, resolved.AttackSpeed, resolved.Damage);
-                        break;
-                    case IActivatorItem activator:
-                        BuildActivator(activator, chain, resolved);
+                    case IActivatorItem:
+                        BuildTimedChain(chain);
                         break;
                     case IReactorItem reactor:
-                        BuildReactor(reactor, chain, resolved.Damage);
+                        BuildReactor(reactor, chain);
                         break;
                 }
             }
         }
 
-        private void BuildWeaponTimer(IItemChain chain, float interval, float damage)
+        /// <summary>
+        /// Builds a single timer for the chain. Activator conditions are re-evaluated
+        /// on each rewind — modifier is added when condition becomes true, removed when
+        /// it falls off. Duration is updated after condition evaluation so the next
+        /// cycle reflects the current attack speed.
+        /// </summary>
+        private void BuildTimedChain(IItemChain chain)
         {
-            var timer = new Timer(interval, true);
-            timer.OnRewind += () => Fire(chain, damage);
-            timer.Start();
-            _cleanupActions.Add(() => timer.Stop());
-        }
+            var weapon     = chain.Weapon;
+            var activators = GetActivators(chain);
+            var applied    = new HashSet<IActivatorItem>();
 
-        private void BuildActivator(IActivatorItem activator, IItemChain chain, IResolvedWeaponStats resolved)
-        {
-            switch (activator.ActivatorType)
+            void EvaluateActivators()
             {
-                case ActivatorType.ModifyCooldown:
+                foreach (var act in activators)
                 {
-                    BuildWeaponTimer(chain, resolved.AttackSpeed * activator.CooldownMultiplier, resolved.Damage);
-                    break;
-                }
-                case ActivatorType.FireWhenManaFull:
-                {
-                    var damage = resolved.Damage;
-                    void OnManaRecharged() => Fire(chain, damage);
-                    _pawn.Stats.mana.OnRecharged += OnManaRecharged;
-                    _cleanupActions.Add(() => _pawn.Stats.mana.OnRecharged -= OnManaRecharged);
-                    break;
+                    var stat         = GetFiringStat(weapon, act.WeaponStat);
+                    var conditionMet = EvaluateActivatorCondition(act);
+                    var isApplied    = applied.Contains(act);
+
+                    if (conditionMet && !isApplied)
+                    {
+                        stat.AddModifier(new Modifier(act.Value, act.ModifierType, act.Guid));
+                        applied.Add(act);
+                    }
+                    else if (!conditionMet && isApplied)
+                    {
+                        stat.TryRemoveAllModifiersBySource(act.Guid);
+                        applied.Remove(act);
+                    }
                 }
             }
+
+            EvaluateActivators();
+
+            var timer = new Timer(weapon.AttackSpeed, true);
+            timer.OnRewind += () =>
+            {
+                EvaluateActivators();
+                timer.Duration = weapon.AttackSpeed;
+
+                if (CanFire(weapon))
+                    Fire(chain, weapon);
+            };
+            timer.Start();
+
+            _cleanupActions.Add(() =>
+            {
+                timer.Stop();
+                foreach (var act in applied)
+                    GetFiringStat(weapon, act.WeaponStat).TryRemoveAllModifiersBySource(act.Guid);
+                applied.Clear();
+            });
         }
 
-        private void BuildReactor(IReactorItem reactor, IItemChain chain, float damage)
+        private void BuildReactor(IReactorItem reactor, IItemChain chain)
         {
+            var weapon = chain.Weapon;
+
             switch (reactor.ReactorType)
             {
                 case ReactorType.OnSelfHit:
                 {
                     void OnHealthChanged(float prev, float curr, float _)
-                    { if (curr < prev) Fire(chain, damage); }
+                    { if (curr < prev) Fire(chain, weapon); }
                     _pawn.Stats.health.OnCurrentChanged += OnHealthChanged;
                     _cleanupActions.Add(() => _pawn.Stats.health.OnCurrentChanged -= OnHealthChanged);
                     break;
                 }
                 case ReactorType.OnManaDeplete:
                 {
-                    void OnManaDeplete() => Fire(chain, damage);
+                    void OnManaDeplete() => Fire(chain, weapon);
                     _pawn.Stats.mana.OnDepleted += OnManaDeplete;
                     _cleanupActions.Add(() => _pawn.Stats.mana.OnDepleted -= OnManaDeplete);
                     break;
@@ -131,19 +158,26 @@ namespace Code.Runtime.Combat
                 case ReactorType.OnEnemyDeath:
                 {
                     if (_target == null) break;
-                    void OnEnemyDefeated() => Fire(chain, damage);
+                    void OnEnemyDefeated() => Fire(chain, weapon);
                     _target.OnDefeated += OnEnemyDefeated;
                     _cleanupActions.Add(() => _target.OnDefeated -= OnEnemyDefeated);
                     break;
                 }
+                case ReactorType.OnAllyAttacks:
+                case ReactorType.OnAllyKills:
+                case ReactorType.OnNearbyEnemyDies:
+                    Debug.LogWarning($"[Combat] Reactor {reactor.ReactorType} requires coordinator — not yet wired.");
+                    break;
             }
         }
 
-        private void Fire(IItemChain chain, float rootDamage)
+        private void Fire(IItemChain chain, IWeaponItem weapon)
         {
             if (_target == null) return;
-            _target.TakeDamage(rootDamage);
-            FirePayloads(chain, rootDamage);
+            _target.TakeDamage(weapon.Damage);
+            // TODO: spend ResourceCost from _pawn.Stats.mana
+            // TODO: apply ResourceGenOnHit to _pawn.Stats.mana
+            FirePayloads(chain, weapon.Damage);
         }
 
         private void FirePayloads(IItemChain chain, float rootDamage)
@@ -151,20 +185,64 @@ namespace Code.Runtime.Combat
             foreach (var item in chain.Modifiers)
             {
                 if (item is not IWeaponItem payload) continue;
-                if (EvaluatePayloadCondition(payload))
+                if (EvaluatePayloadCondition(payload, rootDamage))
                     _target?.TakeDamage(rootDamage * payload.PayloadDamageMultiplier);
             }
         }
 
-        private bool EvaluatePayloadCondition(IWeaponItem payload) => payload.PayloadCondition switch
+        private bool EvaluatePayloadCondition(IWeaponItem payload, float rootDamage) =>
+            payload.PayloadCondition switch
+            {
+                PayloadConditionType.None                  => true,
+                PayloadConditionType.HealthBelow           => _pawn.Stats.health.Percentage < payload.PayloadConditionThreshold,
+                PayloadConditionType.HealthAbove           => _pawn.Stats.health.Percentage > payload.PayloadConditionThreshold,
+                PayloadConditionType.ResourceFull          => _pawn.Stats.mana.IsFull,
+                PayloadConditionType.ResourceBelow         => _pawn.Stats.mana.Percentage < payload.PayloadConditionThreshold,
+                PayloadConditionType.ResourceAbove         => _pawn.Stats.mana.Percentage > payload.PayloadConditionThreshold,
+                PayloadConditionType.RootDamageAbove       => rootDamage >= payload.PayloadConditionThreshold,
+                PayloadConditionType.RootKilledTarget      => _target.Stats.health.IsDepleted,
+                PayloadConditionType.TargetHealthBelow     => _target.Stats.health.Percentage < payload.PayloadConditionThreshold,
+                PayloadConditionType.TargetHealthAbove     => _target.Stats.health.Percentage > payload.PayloadConditionThreshold,
+                PayloadConditionType.TargetHasStatusEffect => false,
+                _                                          => false,
+            };
+
+        private bool EvaluateActivatorCondition(IActivatorItem activator)
         {
-            PayloadConditionType.OnHit        => true,
-            PayloadConditionType.OnKill       => _target.Stats.health.IsDepleted,
-            PayloadConditionType.HealthBelow  => _target.Stats.health.Percentage < payload.PayloadConditionThreshold,
-            // TODO: should check owning pawn's resource, not target's — needs pawn resource ref
-            PayloadConditionType.ResourceFull => _target.Stats.mana.IsFull,
-            _                                 => false,
+            var t = activator.ConditionThreshold;
+            return activator.ConditionType switch
+            {
+                ActivatorConditionType.Always          => true,
+                ActivatorConditionType.HpBelow         => _pawn.Stats.health.Percentage < t,
+                ActivatorConditionType.HpAbove         => _pawn.Stats.health.Percentage > t,
+                ActivatorConditionType.ResourceBelow   => _pawn.Stats.mana.Percentage < t,
+                ActivatorConditionType.ResourceAbove   => _pawn.Stats.mana.Percentage > t,
+                ActivatorConditionType.FirstXSeconds   => false, // TODO: needs combat start timestamp
+                ActivatorConditionType.EnemyCountBelow => false, // TODO: needs coordinator
+                ActivatorConditionType.AllyCountBelow  => false, // TODO: needs coordinator
+                ActivatorConditionType.HasStatusEffect => false,
+                _                                      => false,
+            };
+        }
+
+        private bool CanFire(IWeaponItem weapon) =>
+            weapon.ResourceCost <= 0 || _pawn.Stats.mana.CanSpend(weapon.ResourceCost);
+
+        private static MutableFloat GetFiringStat(IWeaponItem weapon, FiringStatType stat) => stat switch
+        {
+            FiringStatType.AttackSpeed  => weapon.AttackSpeed,
+            FiringStatType.ResourceCost => weapon.ResourceCost,
+            _                           => throw new ArgumentOutOfRangeException(nameof(stat), stat, null),
         };
+
+        private static List<IActivatorItem> GetActivators(IItemChain chain)
+        {
+            var list = new List<IActivatorItem>();
+            if (chain.Root is IActivatorItem root) list.Add(root);
+            foreach (var item in chain.Modifiers)
+                if (item is IActivatorItem act) list.Add(act);
+            return list;
+        }
 
         private void Cleanup()
         {

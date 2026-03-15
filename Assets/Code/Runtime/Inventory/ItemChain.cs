@@ -1,25 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
-using Code.Data.Items.Amplifier;
+using Code.Data.Enums;
 using Code.Runtime.Statistics;
 using UnityEngine;
 
 namespace Code.Runtime.Inventory
 {
-    /// <summary>
-    /// Marker interface for items that can root a chain — Weapon, Activator, Reactor.
-    /// A root item starts one traversal per connected connector.
-    /// Will gain firing behaviour when Activators and Reactors are implemented.
-    /// </summary>
-    public interface IChainRoot : ITetrisItem { }
-
     public sealed class ItemChain : IItemChain
     {
         public static readonly IItemChain Empty = new ItemChain(null, new List<ITetrisItem>());
 
         public ITetrisItem                Root      { get; }
         public IReadOnlyList<ITetrisItem> Modifiers { get; }
-        public bool                      IsValid   => Root != null;
+        public bool                       IsValid   => Root != null;
+        public IWeaponItem                Weapon    => Root as IWeaponItem
+                                                    ?? Modifiers.OfType<IWeaponItem>().FirstOrDefault();
+
+        private bool _modifiersApplied;
 
         public ItemChain(ITetrisItem root, List<ITetrisItem> modifiers)
         {
@@ -28,54 +25,60 @@ namespace Code.Runtime.Inventory
         }
 
         /// <summary>
-        /// Finds the first weapon in the chain (root or modifiers) and resolves
-        /// stats by feeding amplifiers into MutableFloat per stat.
-        /// Root may be an Activator/Reactor — the weapon is then in Modifiers.
+        /// Applies amplifier modifiers to the weapon's attack stats.
+        /// Idempotent — safe to call multiple times; applies once until RemoveChainModifiers is called.
         /// </summary>
-        public IResolvedWeaponStats Resolve()
+        public void ApplyChainModifiers()
         {
-            if (!IsValid)
-            {
-                Debug.LogWarning("ItemChain.Resolve() called on an empty chain.");
-                return new ResolvedWeaponStats(0f, 0f, 0f);
-            }
+            if (_modifiersApplied) return;
 
-            var weapon = Root as IWeaponItem
-                      ?? Modifiers.OfType<IWeaponItem>().FirstOrDefault();
-
+            var weapon = Weapon;
             if (weapon == null)
             {
-                Debug.LogWarning("ItemChain.Resolve() found no weapon in chain.");
-                return new ResolvedWeaponStats(0f, 0f, 0f);
+                Debug.LogWarning("ItemChain.ApplyChainModifiers: no weapon in chain.");
+                return;
             }
-
-            var damage       = new MutableFloat(weapon.BaseDamage);
-            var attackSpeed  = new MutableFloat(weapon.AttackSpeed);
-            var resourceCost = new MutableFloat(weapon.ResourceCost);
 
             foreach (var item in Modifiers)
             {
-                if (item is not IAmplifierItem amp)
-                    continue;
-
+                if (item is not IAmplifierItem amp) continue;
                 var mod = amp.WeaponModifier;
-                switch (mod.WeaponStat)
+                switch (mod.AttackStat)
                 {
-                    case WeaponStatType.Damage:       damage.AddModifier(mod.Modifier);       break;
-                    case WeaponStatType.AttackSpeed:  attackSpeed.AddModifier(mod.Modifier);  break;
-                    case WeaponStatType.ResourceCost: resourceCost.AddModifier(mod.Modifier); break;
+                    case AttackStatType.Damage:           weapon.Damage.AddModifier(mod.Modifier);           break;
+                    case AttackStatType.ResourceGenOnHit: weapon.ResourceGenOnHit.AddModifier(mod.Modifier); break;
                 }
             }
 
-            return new ResolvedWeaponStats(damage, attackSpeed, resourceCost);
+            _modifiersApplied = true;
+        }
+
+        /// <summary>Removes all amplifier modifiers from the weapon's attack stats.</summary>
+        public void RemoveChainModifiers()
+        {
+            if (!_modifiersApplied) return;
+
+            var weapon = Weapon;
+            if (weapon == null) return;
+
+            foreach (var item in Modifiers)
+            {
+                if (item is not IAmplifierItem amp) continue;
+                weapon.Damage.TryRemoveAllModifiersBySource(amp.Guid);
+                weapon.ResourceGenOnHit.TryRemoveAllModifiersBySource(amp.Guid);
+            }
+
+            _modifiersApplied = false;
         }
     }
 
     public interface IItemChain
     {
-        ITetrisItem                Root      { get; }
+        ITetrisItem               Root      { get; }
         IReadOnlyList<ITetrisItem> Modifiers { get; }
         bool                      IsValid   { get; }
-        IResolvedWeaponStats      Resolve();
+        IWeaponItem               Weapon    { get; }
+        void ApplyChainModifiers();
+        void RemoveChainModifiers();
     }
 }

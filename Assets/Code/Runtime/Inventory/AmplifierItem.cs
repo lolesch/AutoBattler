@@ -15,11 +15,11 @@ namespace Code.Runtime.Inventory
         {
             WeaponModifier = new WeaponStatModifier(
                 config.WeaponStat,
-                new Modifier(config.WeaponValue, config.WeaponModifierType, guid));
+                new Modifier(config.WeaponValue, config.WeaponModifierType, Guid));
 
             _affixes.Add(new PawnStatModifier(
                 config.StatType,
-                new Modifier(config.Value, config.ModifierType, guid)));
+                new Modifier(config.Value, config.ModifierType, Guid)));
         }
 
         public override void Use() { }

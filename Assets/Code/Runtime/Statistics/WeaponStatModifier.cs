@@ -1,5 +1,5 @@
 using System;
-using Code.Data.Items.Amplifier;
+using Code.Data.Enums;
 using UnityEngine;
 
 namespace Code.Runtime.Statistics
@@ -11,19 +11,19 @@ namespace Code.Runtime.Statistics
     [Serializable]
     public struct WeaponStatModifier : IWeaponStatModifier
     {
-        [field: SerializeField] public WeaponStatType WeaponStat { get; private set; }
+        [field: SerializeField] public AttackStatType AttackStat { get; private set; }
         [field: SerializeField] public Modifier       Modifier   { get; private set; }
 
-        public WeaponStatModifier(WeaponStatType weaponStat, Modifier modifier)
+        public WeaponStatModifier(AttackStatType attackStat, Modifier modifier)
         {
-            WeaponStat = weaponStat;
+            AttackStat = attackStat;
             Modifier   = modifier;
         }
     }
 
     public interface IWeaponStatModifier
     {
-        WeaponStatType WeaponStat { get; }
+        AttackStatType AttackStat { get; }
         Modifier       Modifier   { get; }
     }
 }

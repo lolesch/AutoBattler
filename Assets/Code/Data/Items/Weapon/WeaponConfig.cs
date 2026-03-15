@@ -1,5 +1,4 @@
 using Code.Data.Enums;
-using Code.Data.Items;
 using UnityEngine;
 
 namespace Code.Data.Items.Weapon
@@ -9,7 +8,9 @@ namespace Code.Data.Items.Weapon
     {
         [Header("Weapon Properties")]
         [field: SerializeField] public float BaseDamage   { get; private set; }
-        [field: SerializeField] public float AttackSpeed  { get; private set; }[field: SerializeField] public float ResourceCost { get; private set; }
+        [field: SerializeField] public float AttackSpeed  { get; private set; }
+        [field: SerializeField] public float ResourceCost { get; private set; }
+        [field: SerializeField] public float ResourceGenOnHit { get; private set; }
 
         [Header("Payload")]
         [Tooltip("Condition that must be met for this weapon to fire as a mid-chain payload.")]

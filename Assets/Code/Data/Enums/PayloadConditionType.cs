@@ -2,9 +2,22 @@ namespace Code.Data.Enums
 {
     public enum PayloadConditionType
     {
-        OnHit,
-        OnKill,
-        HealthBelow,   // fires if target HP% is below PayloadConditionThreshold at time of hit
-        ResourceFull,  // fires if firing pawn's resource is full at time of hit
+        None,              // always fires as payload
+
+        // Owning unit state
+        HealthBelow,       // owning unit HP% < threshold
+        HealthAbove,       // owning unit HP% > threshold
+        ResourceFull,      // owning unit resource is full
+        ResourceBelow,     // owning unit resource% < threshold
+        ResourceAbove,     // owning unit resource% > threshold
+
+        // Root weapon outcome (this chain pass)
+        RootDamageAbove,   // root weapon dealt >= threshold damage this hit
+        RootKilledTarget,  // root weapon killed the target
+
+        // Target state
+        TargetHealthBelow,    // target HP% < threshold — execute condition
+        TargetHealthAbove,    // target HP% > threshold — opening condition
+        TargetHasStatusEffect, // stub — always false until status system exists
     }
 }

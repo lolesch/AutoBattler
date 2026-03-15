@@ -108,7 +108,7 @@ namespace Code.Runtime.Statistics
         }
     }
 
-    internal interface IMutable<out T>
+    public interface IMutable<out T>
     {
         void AddModifier( Modifier modifier );
         bool TryRemoveModifier( Modifier modifier );
