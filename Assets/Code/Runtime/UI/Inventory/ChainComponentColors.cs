@@ -1,7 +1,8 @@
 using Code.Data;
+using Code.Runtime.Inventory;
 using UnityEngine;
 
-namespace Code.Runtime.Inventory
+namespace Code.Runtime.UI.Inventory
 {
     public static class ChainComponentColors
     {

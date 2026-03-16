@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq;
 using System.Text;
 using Code.Runtime.Inventory;
@@ -11,9 +12,17 @@ namespace Code.Runtime.UI.Inventory
     public sealed class ItemTooltipController : MonoBehaviour, IItemTooltipController
     {
         [SerializeField] private RectTransform _panel;
+        [SerializeField] private Image         _panelFrame;
         [SerializeField] private TMP_Text      _text;
         [SerializeField] private Canvas        _canvas;
-        [SerializeField] private Vector2       _cursorOffset = new(16f, -16f);
+        [SerializeField] private float         _showDelay = 0.4f;
+
+        private float       _anchoredX;
+        private Coroutine   _pendingShow;
+        private ITetrisItem _pendingItem;
+        private ITetrisItem _visibleItem;
+        private ITetrisItem _pendingHideItem;
+        private bool        _hideScheduled;
 
         private void Awake()
         {
@@ -25,41 +34,108 @@ namespace Code.Runtime.UI.Inventory
             _panel.gameObject.SetActive(false);
         }
 
-        private void Update()
+        private void LateUpdate()
         {
-            if (!_panel.gameObject.activeSelf) return;
+            if (_hideScheduled)
+            {
+                _hideScheduled = false;
+                ExecuteHide(_pendingHideItem);
+                _pendingHideItem = null;
+            }
 
-            var canvasRT = (RectTransform)_canvas.transform;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                canvasRT, Input.mousePosition, null, out var local);
-
-            var pos       = local + _cursorOffset;
-            var half      = canvasRT.rect.size * 0.5f;
-
-            var onRightHalf = local.x > 0f;
-            _panel.pivot = new Vector2(onRightHalf ? 1f : 0f, 1f);
-            // Flip offset direction so the panel always opens away from the cursor.
-            var offsetX = onRightHalf ? -_cursorOffset.x : _cursorOffset.x;
-            pos = local + new Vector2(offsetX, _cursorOffset.y);
-
-            var panelSize = _panel.rect.size;
-            pos.x = Mathf.Clamp(pos.x, -half.x, half.x);
-            pos.y = Mathf.Clamp(pos.y, -half.y + panelSize.y, half.y);
-
-            _panel.anchoredPosition = pos;
+            if (_panel.gameObject.activeSelf)
+                _panel.anchoredPosition = ClampedPosition();
         }
 
-        public void Show(ITetrisItem item, ITetrisContainer container)
+        // ── IItemTooltipController ────────────────────────────────────────
+
+        public void RequestShow(ITetrisItem item, ITetrisContainer container, float anchorScreenX, bool onRight)
         {
-            if (item == null) { Hide(); return; }
-            _text.text = BuildTooltip(item, ChainResolver.ResolveTopology(container));
+            if (item == null) { Hide(null); return; }
+
+            _hideScheduled   = false;
+            _pendingHideItem = null;
+
+            if (item == _visibleItem || item == _pendingItem) return;
+
+            if (_pendingShow != null) StopCoroutine(_pendingShow);
+            _pendingItem = item;
+            _pendingShow = StartCoroutine(ShowAfterDelay(item, container, anchorScreenX, onRight));
+        }
+
+        public void Hide(ITetrisItem leavingItem)
+        {
+            if (leavingItem != null && leavingItem != _visibleItem && leavingItem != _pendingItem) return;
+
+            _pendingHideItem = leavingItem;
+            _hideScheduled   = true;
+        }
+
+        // ── Internals ─────────────────────────────────────────────────────
+
+        private IEnumerator ShowAfterDelay(ITetrisItem item, ITetrisContainer container,
+            float anchorScreenX, bool onRight)
+        {
+            if (_visibleItem == null)
+                yield return new WaitForSeconds(_showDelay);
+
+            _pendingShow = null;
+            _pendingItem = null;
+            _visibleItem = item;
+
+            var topology = ChainResolver.ResolveTopology(container);
+            _text.text   = BuildTooltip(item, topology);
+
+            var isRoot = topology.Roots.Contains(item);
+            _panelFrame.color = ChainComponentColors.GetColor(item, isRoot);
+
+            _panel.pivot = new Vector2(onRight ? 1f : 0f, 1f);
             _panel.gameObject.SetActive(true);
             LayoutRebuilder.ForceRebuildLayoutImmediate(_panel);
+
+            _anchoredX           = CanvasX(anchorScreenX);
+            _panel.anchoredPosition = ClampedPosition();
         }
 
-        public void Hide() => _panel.gameObject.SetActive(false);
+        private void ExecuteHide(ITetrisItem leavingItem)
+        {
+            if (leavingItem != null && leavingItem != _visibleItem && leavingItem != _pendingItem) return;
 
-        // ── Formatting ────────────────────────────────────────────────────
+            if (_pendingShow != null)
+            {
+                StopCoroutine(_pendingShow);
+                _pendingShow = null;
+                _pendingItem = null;
+            }
+            _visibleItem = null;
+            _panel.gameObject.SetActive(false);
+        }
+
+        // ── Position helpers ──────────────────────────────────────────────
+
+        private Vector2 ClampedPosition()
+        {
+            var canvasRT = (RectTransform)_canvas.transform;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvasRT, Input.mousePosition, null, out var mouse);
+
+            var half      = canvasRT.rect.size * 0.5f;
+            var panelSize = _panel.rect.size;
+            var clampedY  = Mathf.Clamp(mouse.y, Mathf.Min(-half.y + panelSize.y, half.y), half.y);
+
+            return new Vector2(_anchoredX, clampedY);
+        }
+
+        private float CanvasX(float screenX)
+        {
+            var canvasRT = (RectTransform)_canvas.transform;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvasRT, new Vector2(screenX, 0f), null, out var local);
+
+            return Mathf.Clamp(local.x, -canvasRT.rect.width * 0.5f, canvasRT.rect.width * 0.5f);
+        }
+
+        // ── Tooltip text ──────────────────────────────────────────────────
 
         private static string BuildTooltip(ITetrisItem item, ChainTopology topology)
         {
@@ -78,8 +154,7 @@ namespace Code.Runtime.UI.Inventory
                 return sb.ToString().TrimEnd();
             }
 
-            var isPayload = item is IWeaponItem && item != chain.Root;
-            if (isPayload)
+            if (item is IWeaponItem && item != chain.Root)
                 sb.AppendLine($"  payload condition: {((IWeaponItem)item).PayloadCondition}");
 
             sb.AppendLine();
@@ -94,10 +169,8 @@ namespace Code.Runtime.UI.Inventory
             switch (item)
             {
                 case IWeaponItem w:
-                    sb.AppendLine($"  dmg  {(float)w.Damage:F1}   " +
-                                  $"spd  {(float)w.AttackSpeed:F1}");
-                    sb.AppendLine($"  cost {(float)w.ResourceCost:F1}   " +
-                                  $"gen  {(float)w.ResourceGenOnHit:F1}");
+                    sb.AppendLine($"  dmg  {(float)w.Damage:F1}   spd  {(float)w.AttackSpeed:F1}");
+                    sb.AppendLine($"  cost {(float)w.ResourceCost:F1}   gen  {(float)w.ResourceGenOnHit:F1}");
                     break;
                 case IAmplifierItem amp:
                     var mod = amp.WeaponModifier;
@@ -116,8 +189,7 @@ namespace Code.Runtime.UI.Inventory
 
             sb.AppendLine();
             sb.AppendLine("<b>Chain output:</b>");
-            sb.AppendLine($"  dmg  {(float)weapon.Damage:F1}   " +
-                          $"spd  {(float)weapon.AttackSpeed:F1}");
+            sb.AppendLine($"  dmg  {(float)weapon.Damage:F1}   spd  {(float)weapon.AttackSpeed:F1}");
             sb.AppendLine($"  cost {(float)weapon.ResourceCost:F1}");
         }
 
@@ -151,7 +223,7 @@ namespace Code.Runtime.UI.Inventory
 
     public interface IItemTooltipController
     {
-        void Show(ITetrisItem item, ITetrisContainer container);
-        void Hide();
+        void RequestShow(ITetrisItem item, ITetrisContainer container, float anchorScreenX, bool onRight);
+        void Hide(ITetrisItem leavingItem);
     }
 }

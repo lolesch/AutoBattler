@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Code.Data;
 using Code.Runtime.Inventory;
 using NaughtyAttributes;
@@ -28,6 +29,7 @@ namespace Code.Runtime.UI.Inventory
         private IInventoryDragController _dragController;
         private ITetrisContainer         _container;
         private IItemTooltipController   _tooltipController;
+        private bool                     _isHovered;
 
         private readonly Dictionary<(Vector2Int, Vector2Int), Image>    _pips      = new();
         private readonly Dictionary<(Vector2Int, Vector2Int), PipState> _pipStates = new();
@@ -49,9 +51,11 @@ namespace Code.Runtime.UI.Inventory
         {
             _gridPosition      = gridPosition;
             _dragController    = dragController;
-            _container         = container;
             _tooltipController = tooltipController;
+            SetContainer(container);
         }
+
+        public void SetContainer(ITetrisContainer container) => _container = container;
 
         public void SetHighlight(SlotHighlight highlight)
         {
@@ -84,13 +88,13 @@ namespace Code.Runtime.UI.Inventory
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            _tooltipController?.Hide();
+            _tooltipController?.Hide(null);
             _dragController?.OnSlotPointerClick(this, eventData.position);
         }
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            _tooltipController?.Hide();
+            _tooltipController?.Hide(null);
             _dragController?.OnSlotBeginDrag(this, eventData.position);
         }
 
@@ -105,17 +109,39 @@ namespace Code.Runtime.UI.Inventory
         
         public void OnPointerEnter(PointerEventData eventData)
         {
+            _isHovered = true;
             _dragController?.SetHovered(this);
-
-            var item = ResolveItem();
-            if (item != null)
-                _tooltipController?.Show(item, _container);
+            RequestTooltip();
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            _isHovered = false;
             _dragController?.SetHovered(null);
-            _tooltipController?.Hide();
+            _tooltipController?.Hide(ResolveItem());
+        }
+
+        private void RequestTooltip()
+        {
+            var item = ResolveItem();
+            if (item == null) return;
+            if (!_container.ContentPointer.TryGetValue(_gridPosition, out var anchor)) return;
+
+            var (screenX, onRight) = ComputeTooltipAnchor(item, anchor);
+            _tooltipController?.RequestShow(item, _container, screenX, onRight);
+        }
+
+        private (float screenX, bool onRight) ComputeTooltipAnchor(ITetrisItem item, Vector2Int anchor)
+        {
+            var pointers  = item.GetPointers(anchor);
+            var cellWorld = Const.InventoryCellSize * transform.lossyScale.x;
+            var slotPos   = (Vector2)RectTransform.position;
+            var onRight   = slotPos.x > Screen.width * 0.5f;
+
+            int edgeCol = onRight ? pointers.Min(p => p.x) : pointers.Max(p => p.x);
+            float x = slotPos.x + (edgeCol - _gridPosition.x + (onRight ? -0.5f : 0.5f)) * cellWorld;
+
+            return (x, onRight);
         }
 
         private ITetrisItem ResolveItem()
@@ -136,9 +162,14 @@ namespace Code.Runtime.UI.Inventory
             _icon.rectTransform.anchoredPosition = Vector2.zero;
         }
         #endregion
-
+        
         public void RefreshView(ITetrisItem item)
         {
+            if (_isHovered)
+            {
+                _tooltipController?.Hide(null);
+                RequestTooltip();
+            }
             ClearPips();
 
             var hasItem = item != null;
@@ -222,6 +253,7 @@ namespace Code.Runtime.UI.Inventory
         Vector2Int    GridPosition  { get; }
         void Initialize(Vector2Int gridPosition, IInventoryDragController dragController,
             ITetrisContainer container, IItemTooltipController tooltipController);
+        void SetContainer(ITetrisContainer container);
         void RefreshView(ITetrisItem item);
         void SetHighlight(SlotHighlight highlight);
         void SetPipState(Vector2Int connectorSlotPos, Vector2Int connectorDirection, PipState state);
