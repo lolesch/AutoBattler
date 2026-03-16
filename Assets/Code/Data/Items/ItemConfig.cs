@@ -42,6 +42,11 @@ namespace Code.Data.Items
                     Debug.LogWarning($"[{name}] Connector {i}: LocalPosition {c.LocalPosition} is not part of the item shape.", this);
                 if (c.Direction.ToVector2Int() == Vector2Int.zero)
                     Debug.LogWarning($"[{name}] Connector {i}: Direction is (0,0) — set a valid unit vector.", this);
+                if (shapeCells != null && shapeCells.Contains(c.LocalPosition + c.Direction.ToVector2Int()))
+                    Debug.LogWarning($"[{name}] Connector {i}: Direction points inward — target cell {c.LocalPosition + c.Direction.ToVector2Int()} is part of the item shape.", this);
+                for (var j = i + 1; j < connectors.Count; j++)
+                    if (c.LocalPosition == connectors[j].LocalPosition && c.Direction.ToVector2Int() == connectors[j].Direction.ToVector2Int())
+                        Debug.LogWarning($"[{name}] Connectors {i} and {j} are identical (position {c.LocalPosition}, direction {c.Direction}) — remove the duplicate.", this);
             }
         }
     }

@@ -73,7 +73,11 @@ namespace Code.Runtime.GameLoop
                 () => TransitionTo(GamePhase.Placement));
         }
 
-        private void Start() => TransitionTo(GamePhase.Placement);
+        private void Start()
+        {
+            TransitionTo(GamePhase.Placement);
+            AddItems();
+        }
 
         public void TransitionTo(GamePhase next)
         {

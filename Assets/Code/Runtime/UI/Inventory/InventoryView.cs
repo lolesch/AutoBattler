@@ -67,10 +67,15 @@ namespace Code.Runtime.UI.Inventory
             if (_container != container)
             {
                 if (_container != null)
+                {
                     _container.OnContentsChanged -= OnContentsChanged;
+                    _dragController?.Unregister(_container);
+                }
 
                 _container = container;
+                
                 _container.OnContentsChanged += OnContentsChanged;
+                _chainOverlay?.Bind(_container);
 
                 if (_slots != null)
                     foreach (var slot in _slots)
@@ -78,10 +83,7 @@ namespace Code.Runtime.UI.Inventory
             }
 
             RebuildSlotsIfNeeded(_container.GridSize);
-
             _dragController?.Register(_container, Slots);
-            _chainOverlay?.Bind(_container);
-
             Refresh();
         }
 
@@ -103,7 +105,6 @@ namespace Code.Runtime.UI.Inventory
             {
                 var gridPos = new Vector2Int(i % gridSize.x, i / gridSize.x);
                 var slot    = Instantiate(_slotPrefab, _grid.transform);
-                Debug.Log($"[InventoryView] tooltip controller: {_tooltipController}", this);
                 slot.Initialize(gridPos, _dragController, _container, _tooltipController);
                 _slots[i] = slot;
             }

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Linq;
 using System.Text;
+using Code.Data.Enums;
+using Code.Data.Items.Activator;
 using Code.Runtime.Inventory;
 using TMPro;
 using UnityEngine;
@@ -171,26 +173,61 @@ namespace Code.Runtime.UI.Inventory
                 case IWeaponItem w:
                     sb.AppendLine($"  dmg  {(float)w.Damage:F1}   spd  {(float)w.AttackSpeed:F1}");
                     sb.AppendLine($"  cost {(float)w.ResourceCost:F1}   gen  {(float)w.ResourceGenOnHit:F1}");
+                    if (w.PayloadCondition != PayloadConditionType.None)
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine($"  payload: {w.PayloadCondition}  ×{w.PayloadDamageMultiplier:F2}");
+                        sb.AppendLine($"  threshold: {w.PayloadConditionThreshold:F2}");
+                    }
                     break;
+
                 case IAmplifierItem amp:
-                    var mod = amp.WeaponModifier;
-                    sb.AppendLine($"  {mod.AttackStat}: {mod.Modifier}");
+                    var weaponMod = amp.WeaponModifier;
+                    sb.AppendLine($"  chain:    {weaponMod.AttackStat} {weaponMod.Modifier}");
+                    if (amp is IStatModifier statMod)
+                        foreach (var affix in statMod.Affixes)
+                            sb.AppendLine($"  passive:  {affix.stat} {affix.modifier}");
                     break;
-                default:
-                    sb.AppendLine("  (stats not yet exposed)");
+
+                case IActivatorItem act:
+                    sb.AppendLine($"  modifies: {act.WeaponStat} {FormatModifier(act.Value, act.ModifierType)}");
+                    sb.AppendLine($"  when:     {act.ConditionType}");
+                    if (act.ConditionType != ActivatorConditionType.Always)
+                        sb.AppendLine($"  threshold:{act.ConditionThreshold:F2}");
+                    break;
+
+                case IReactorItem reactor:
+                    sb.AppendLine($"  trigger:  {reactor.ReactorType}");
+                    break;
+
+                case IConverterItem:
+                    sb.AppendLine("  (converter — not yet implemented)");
                     break;
             }
         }
+
+        private static string FormatModifier(float value, ModifierType type) => type switch
+        {
+            ModifierType.Overwrite   => $"= {value:0.###}",
+            ModifierType.FlatAdd     => $"{value:+0.###;0.###;-0.###}",
+            ModifierType.PercentAdd  => $"{value:+0.###;0.###;-0.###} %",
+            ModifierType.PercentMult => $"* {value:0.###} %",
+            _                        => $"{value:0.###}",
+        };
 
         private static void AppendChainOutput(StringBuilder sb, IItemChain chain)
         {
             var weapon = chain.Weapon;
             if (weapon == null) return;
 
+            chain.ApplyChainModifiers();
+
             sb.AppendLine();
             sb.AppendLine("<b>Chain output:</b>");
             sb.AppendLine($"  dmg  {(float)weapon.Damage:F1}   spd  {(float)weapon.AttackSpeed:F1}");
             sb.AppendLine($"  cost {(float)weapon.ResourceCost:F1}");
+
+            chain.RemoveChainModifiers();
         }
 
         private static string BuildChainSentence(IItemChain chain, ITetrisItem hovered)

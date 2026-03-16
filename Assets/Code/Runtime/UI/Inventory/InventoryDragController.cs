@@ -99,6 +99,15 @@ namespace Code.Runtime.UI.Inventory
 
         public void OnSlotPointerClick(ISlotView slot, Vector2 screenPos)
         {
+            
+            if (_gesture == GestureMode.Idle &&
+                (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) ||
+                 Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+            {
+                TryTransferToOtherContainer(slot, screenPos);
+                return;
+            }
+
             switch (_gesture)
             {
                 case GestureMode.Idle:
@@ -167,6 +176,37 @@ namespace Code.Runtime.UI.Inventory
                 EndDrag();
             else
                 ContinueHolding(returning);
+        }
+        
+        // ── Quick Move ────────────────────────────────────────────────────────
+
+        private void TryTransferToOtherContainer(ISlotView slot, Vector2 screenPos)
+        {
+            if (!_slotToContainer.TryGetValue(slot, out var source)) return;
+            if (!source.ContentPointer.TryGetValue(slot.GridPosition, out var anchor)) return;
+            if (!source.Contents.TryGetValue(anchor, out var item)) return;
+
+            var target = FindOtherContainer(source);
+            if (target != null)
+            {
+                ITetrisItem transfer = item;
+                if (target.TryAdd(transfer))
+                {
+                    source.TryRemove(anchor, out _);
+                    return;
+                }
+            }
+
+            // Transfer failed or no target — pick up the item instead.
+            if (TryPickUp(slot, screenPos))
+                _gesture = GestureMode.Click;
+        }
+
+        private ITetrisContainer FindOtherContainer(ITetrisContainer source)
+        {
+            foreach (var container in _bindings.Keys)
+                if (container != source) return container;
+            return null;
         }
 
         // ── Pickup ────────────────────────────────────────────────────────

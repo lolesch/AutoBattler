@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 480c7b2ab5684304e8100cb43c7d03d4, type: 3}
+  m_Name: Crossblades
+  m_EditorClassIdentifier: Data::Code.Data.Items.Weapon.WeaponConfig
+  <Icon>k__BackingField: {fileID: 0}
+  <Shape>k__BackingField:
+    gridSize: {x: 3, y: 3}
+    cellSize: {x: 16, y: 16}
+    rows:
+    - row: 000100
+    - row: 010101
+    - row: 000100
+  connectors:
+  - <LocalPosition>k__BackingField: {x: 2, y: 1}
+    <Direction>k__BackingField: 1
+  - <LocalPosition>k__BackingField: {x: 2, y: 1}
+    <Direction>k__BackingField: 3
+  <BaseDamage>k__BackingField: 5
+  <AttackSpeed>k__BackingField: 1
+  <ResourceCost>k__BackingField: 5
+  <ResourceGenOnHit>k__BackingField: 0
+  <PayloadCondition>k__BackingField: 0
+  <PayloadDamageMultiplier>k__BackingField: 0.5
+  <PayloadConditionThreshold>k__BackingField: 0.5
