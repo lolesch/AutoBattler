@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Code.Data.Enums;
@@ -64,8 +65,14 @@ namespace Code.Runtime.Inventory
             foreach (var item in Modifiers)
             {
                 if (item is not IAmplifierItem amp) continue;
-                weapon.Damage.TryRemoveAllModifiersBySource(amp.Guid);
-                weapon.ResourceGenOnHit.TryRemoveAllModifiersBySource(amp.Guid);
+                var mod = amp.WeaponModifier;
+                switch (mod.AttackStat)
+                {
+                    case AttackStatType.Damage:           weapon.Damage.TryRemoveAllModifiersBySource(amp.Guid);           break;
+                    case AttackStatType.ResourceGenOnHit: weapon.ResourceGenOnHit.TryRemoveAllModifiersBySource(amp.Guid); break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
 
             _modifiersApplied = false;

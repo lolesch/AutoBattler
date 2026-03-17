@@ -29,6 +29,6 @@ MonoBehaviour:
   <AttackSpeed>k__BackingField: 1
   <ResourceCost>k__BackingField: 5
   <ResourceGenOnHit>k__BackingField: 0
-  <PayloadCondition>k__BackingField: 0
+  <PayloadCondition>k__BackingField: 3
   <PayloadDamageMultiplier>k__BackingField: 0.5
   <PayloadConditionThreshold>k__BackingField: 0.5
