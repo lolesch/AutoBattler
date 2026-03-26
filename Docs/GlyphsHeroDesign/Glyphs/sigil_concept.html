@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Item Chain — Sigil Language</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --bg: #0d0d0f;
+    --panel: #111115;
+    --border: #2a2a35;
+    --gold: #c8a96e;
+    --gold-dim: #7a6340;
+    --reactor: #7b9ec8;
+    --activator: #9ec87b;
+    --weapon: #c87b7b;
+    --amplifier: #c8b87b;
+    --converter: #b07bc8;
+    --payload: #7bc8c0;
+    --condition: #c89a7b;
+    --text: #d4cfc4;
+    --text-dim: #6a6560;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh;
+    padding: 40px 24px;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 48px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 56px;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 28px;
+  }
+
+  /* ── SIGIL GRID ── */
+  .sigil-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .sigil-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 90px;
+  }
+
+  .sigil-card .label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .sigil-card .desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  /* ── SVG SIGILS ── */
+  svg.sigil {
+    width: 72px;
+    height: 72px;
+  }
+
+  /* ── CHAIN EXAMPLE ── */
+  .chain-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .chain-connector {
+    width: 20px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  .chain-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+
+  /* ── STACKING DEMO ── */
+  .stack-demo {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .stack-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-style: italic;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .plus {
+    font-size: 28px;
+    color: var(--gold-dim);
+    font-family: 'Cinzel', serif;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+
+  .equals {
+    font-size: 28px;
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+
+  .stack-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .note {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 4px;
+    line-height: 1.6;
+    max-width: 560px;
+  }
+
+  .note strong {
+    color: var(--gold);
+    font-style: normal;
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+
+<h1>Item Chain System</h1>
+<p class="subtitle">A visual sigil language — each component type carries a distinct shape grammar</p>
+
+<!-- SHAPE LANGUAGE -->
+<div class="section">
+  <div class="section-label">Component Shape Language</div>
+  <div class="sigil-row">
+
+    <!-- REACTOR -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72">
+        <defs>
+          <filter id="glow-r"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Outer: pointed inward arc (listening) -->
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--reactor)" stroke-width="1" opacity="0.3"/>
+        <!-- Inner arcs — ear-like, receiving -->
+        <path d="M26 28 Q20 36 26 44" fill="none" stroke="var(--reactor)" stroke-width="1.5" filter="url(#glow-r)"/>
+        <path d="M22 24 Q12 36 22 48" fill="none" stroke="var(--reactor)" stroke-width="1" opacity="0.5"/>
+        <!-- Dot — event trigger point -->
+        <circle cx="36" cy="36" r="3" fill="var(--reactor)" filter="url(#glow-r)"/>
+        <!-- Signal lines in -->
+        <line x1="36" y1="36" x2="48" y2="28" stroke="var(--reactor)" stroke-width="1" opacity="0.6" stroke-dasharray="2 3"/>
+        <line x1="36" y1="36" x2="50" y2="36" stroke="var(--reactor)" stroke-width="1" opacity="0.4" stroke-dasharray="2 3"/>
+        <line x1="36" y1="36" x2="48" y2="44" stroke="var(--reactor)" stroke-width="1" opacity="0.6" stroke-dasharray="2 3"/>
+      </svg>
+      <span class="label" style="color:var(--reactor)">Reactor</span>
+      <span class="desc">Listens for external event</span>
+    </div>
+
+    <!-- ACTIVATOR -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72">
+        <defs>
+          <filter id="glow-a"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Outer hex -->
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--activator)" stroke-width="1" opacity="0.3"/>
+        <!-- Hourglass / self-timer -->
+        <path d="M24 20 L48 20 L36 36 L48 52 L24 52 L36 36 Z" fill="none" stroke="var(--activator)" stroke-width="1.5" filter="url(#glow-a)"/>
+        <!-- Fill bottom half — charged -->
+        <path d="M36 36 L44 48 L28 48 Z" fill="var(--activator)" opacity="0.25"/>
+        <circle cx="36" cy="36" r="2.5" fill="var(--activator)" filter="url(#glow-a)"/>
+      </svg>
+      <span class="label" style="color:var(--activator)">Activator</span>
+      <span class="desc">Self-contained trigger</span>
+    </div>
+
+    <!-- WEAPON -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72">
+        <defs>
+          <filter id="glow-w"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Outer: bold octagon — root, authority -->
+        <path d="M36 6 L58 18 L62 42 L48 62 L24 62 L10 42 L14 18 Z" fill="none" stroke="var(--weapon)" stroke-width="1.5" opacity="0.4"/>
+        <!-- Crosshair — targeting -->
+        <line x1="36" y1="16" x2="36" y2="56" stroke="var(--weapon)" stroke-width="1" opacity="0.4"/>
+        <line x1="16" y1="36" x2="56" y2="36" stroke="var(--weapon)" stroke-width="1" opacity="0.4"/>
+        <!-- Diamond center — power core -->
+        <path d="M36 22 L50 36 L36 50 L22 36 Z" fill="none" stroke="var(--weapon)" stroke-width="1.5" filter="url(#glow-w)"/>
+        <circle cx="36" cy="36" r="4" fill="var(--weapon)" filter="url(#glow-w)"/>
+      </svg>
+      <span class="label" style="color:var(--weapon)">Weapon</span>
+      <span class="desc">Chain root — defines the attack</span>
+    </div>
+
+    <!-- AMPLIFIER -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72">
+        <defs>
+          <filter id="glow-amp"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--amplifier)" stroke-width="1" opacity="0.3"/>
+        <!-- Upward arrows — magnification -->
+        <path d="M28 48 L28 30 L36 18 L44 30 L44 48" fill="none" stroke="var(--amplifier)" stroke-width="1.5" filter="url(#glow-amp)"/>
+        <path d="M22 48 L22 36 L36 24 L50 36 L50 48" fill="none" stroke="var(--amplifier)" stroke-width="1" opacity="0.4"/>
+        <line x1="24" y1="48" x2="48" y2="48" stroke="var(--amplifier)" stroke-width="1.5" filter="url(#glow-amp)"/>
+      </svg>
+      <span class="label" style="color:var(--amplifier)">Amplifier</span>
+      <span class="desc">Scales weapon numbers</span>
+    </div>
+
+    <!-- CONVERTER -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72">
+        <defs>
+          <filter id="glow-c"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--converter)" stroke-width="1" opacity="0.3"/>
+        <!-- Two opposing spirals — transformation -->
+        <path d="M22 30 Q28 20 36 26 Q44 32 38 42 Q32 52 24 46" fill="none" stroke="var(--converter)" stroke-width="1.5" filter="url(#glow-c)"/>
+        <path d="M50 42 Q44 52 36 46 Q28 40 34 30 Q40 20 48 26" fill="none" stroke="var(--converter)" stroke-width="1" opacity="0.5"/>
+        <circle cx="36" cy="36" r="2" fill="var(--converter)" filter="url(#glow-c)"/>
+      </svg>
+      <span class="label" style="color:var(--converter)">Converter</span>
+      <span class="desc">Changes signal downstream</span>
+    </div>
+
+    <!-- PAYLOAD -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72">
+        <defs>
+          <filter id="glow-p"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--payload)" stroke-width="1" opacity="0.3"/>
+        <!-- Burst / explosion — secondary effect fires -->
+        <circle cx="36" cy="36" r="8" fill="none" stroke="var(--payload)" stroke-width="1.5" filter="url(#glow-p)"/>
+        <line x1="36" y1="20" x2="36" y2="26" stroke="var(--payload)" stroke-width="1.5" filter="url(#glow-p)"/>
+        <line x1="36" y1="46" x2="36" y2="52" stroke="var(--payload)" stroke-width="1.5" filter="url(#glow-p)"/>
+        <line x1="20" y1="36" x2="26" y2="36" stroke="var(--payload)" stroke-width="1.5" filter="url(#glow-p)"/>
+        <line x1="46" y1="36" x2="52" y2="36" stroke="var(--payload)" stroke-width="1.5" filter="url(#glow-p)"/>
+        <line x1="24" y1="24" x2="28" y2="28" stroke="var(--payload)" stroke-width="1" opacity="0.6"/>
+        <line x1="44" y1="44" x2="48" y2="48" stroke="var(--payload)" stroke-width="1" opacity="0.6"/>
+        <line x1="48" y1="24" x2="44" y2="28" stroke="var(--payload)" stroke-width="1" opacity="0.6"/>
+        <line x1="28" y1="44" x2="24" y2="48" stroke="var(--payload)" stroke-width="1" opacity="0.6"/>
+        <circle cx="36" cy="36" r="3" fill="var(--payload)" filter="url(#glow-p)"/>
+      </svg>
+      <span class="label" style="color:var(--payload)">Payload</span>
+      <span class="desc">Extra effect fires alongside</span>
+    </div>
+
+    <!-- CONDITION -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72">
+        <defs>
+          <filter id="glow-cond"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--condition)" stroke-width="1" opacity="0.3"/>
+        <!-- Gate symbol — barrier with opening -->
+        <line x1="22" y1="22" x2="22" y2="50" stroke="var(--condition)" stroke-width="1.5" filter="url(#glow-cond)"/>
+        <line x1="50" y1="22" x2="50" y2="50" stroke="var(--condition)" stroke-width="1.5" filter="url(#glow-cond)"/>
+        <!-- Gap in middle = conditional passage -->
+        <line x1="22" y1="22" x2="33" y2="30" stroke="var(--condition)" stroke-width="1.5" filter="url(#glow-cond)"/>
+        <line x1="50" y1="22" x2="39" y2="30" stroke="var(--condition)" stroke-width="1.5" filter="url(#glow-cond)"/>
+        <line x1="22" y1="50" x2="33" y2="42" stroke="var(--condition)" stroke-width="1.5" filter="url(#glow-cond)"/>
+        <line x1="50" y1="50" x2="39" y2="42" stroke="var(--condition)" stroke-width="1.5" filter="url(#glow-cond)"/>
+        <!-- Signal passes through gap -->
+        <line x1="33" y1="36" x2="39" y2="36" stroke="var(--condition)" stroke-width="2" filter="url(#glow-cond)" opacity="0.8"/>
+        <circle cx="36" cy="36" r="2.5" fill="var(--condition)" filter="url(#glow-cond)"/>
+      </svg>
+      <span class="label" style="color:var(--condition)">Condition</span>
+      <span class="desc">Gates everything downstream</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- STACKING DEMO -->
+<div class="section">
+  <div class="section-label">Sigil Stacking — Chain Reads as a Single Rune</div>
+  <p class="note" style="margin-bottom: 28px;">
+    When items connect in the inventory, their sigils <strong>layer on top of each other</strong> to form a composite rune on the unit card. Someone unfamiliar reads a unique shape. Someone familiar reads each layer independently.
+  </p>
+
+  <div class="stack-demo">
+
+    <!-- Weapon alone -->
+    <div class="stack-item">
+      <svg width="80" height="80" viewBox="0 0 72 72">
+        <defs><filter id="g1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M36 6 L58 18 L62 42 L48 62 L24 62 L10 42 L14 18 Z" fill="none" stroke="var(--weapon)" stroke-width="1.5" opacity="0.4"/>
+        <line x1="36" y1="16" x2="36" y2="56" stroke="var(--weapon)" stroke-width="1" opacity="0.4"/>
+        <line x1="16" y1="36" x2="56" y2="36" stroke="var(--weapon)" stroke-width="1" opacity="0.4"/>
+        <path d="M36 22 L50 36 L36 50 L22 36 Z" fill="none" stroke="var(--weapon)" stroke-width="1.5" filter="url(#g1)"/>
+        <circle cx="36" cy="36" r="4" fill="var(--weapon)" filter="url(#g1)"/>
+      </svg>
+      <div class="stack-label">Weapon</div>
+    </div>
+
+    <div class="plus">+</div>
+
+    <!-- Amplifier alone -->
+    <div class="stack-item">
+      <svg width="80" height="80" viewBox="0 0 72 72">
+        <defs><filter id="g2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--amplifier)" stroke-width="1" opacity="0.3"/>
+        <path d="M28 48 L28 30 L36 18 L44 30 L44 48" fill="none" stroke="var(--amplifier)" stroke-width="1.5" filter="url(#g2)"/>
+        <path d="M22 48 L22 36 L36 24 L50 36 L50 48" fill="none" stroke="var(--amplifier)" stroke-width="1" opacity="0.4"/>
+        <line x1="24" y1="48" x2="48" y2="48" stroke="var(--amplifier)" stroke-width="1.5" filter="url(#g2)"/>
+      </svg>
+      <div class="stack-label">Amplifier</div>
+    </div>
+
+    <div class="plus">+</div>
+
+    <!-- Payload alone -->
+    <div class="stack-item">
+      <svg width="80" height="80" viewBox="0 0 72 72">
+        <defs><filter id="g3"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--payload)" stroke-width="1" opacity="0.3"/>
+        <circle cx="36" cy="36" r="8" fill="none" stroke="var(--payload)" stroke-width="1.5" filter="url(#g3)"/>
+        <line x1="36" y1="20" x2="36" y2="26" stroke="var(--payload)" stroke-width="1.5" filter="url(#g3)"/>
+        <line x1="36" y1="46" x2="36" y2="52" stroke="var(--payload)" stroke-width="1.5" filter="url(#g3)"/>
+        <line x1="20" y1="36" x2="26" y2="36" stroke="var(--payload)" stroke-width="1.5" filter="url(#g3)"/>
+        <line x1="46" y1="36" x2="52" y2="36" stroke="var(--payload)" stroke-width="1.5" filter="url(#g3)"/>
+        <circle cx="36" cy="36" r="3" fill="var(--payload)" filter="url(#g3)"/>
+      </svg>
+      <div class="stack-label">Payload</div>
+    </div>
+
+    <div class="equals">=</div>
+
+    <!-- Composite rune (all layered) -->
+    <div class="stack-item">
+      <svg width="80" height="80" viewBox="0 0 72 72">
+        <defs>
+          <filter id="g4"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="g4s"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Weapon layer -->
+        <path d="M36 6 L58 18 L62 42 L48 62 L24 62 L10 42 L14 18 Z" fill="none" stroke="var(--weapon)" stroke-width="1" opacity="0.25"/>
+        <line x1="36" y1="16" x2="36" y2="56" stroke="var(--weapon)" stroke-width="0.8" opacity="0.25"/>
+        <line x1="16" y1="36" x2="56" y2="36" stroke="var(--weapon)" stroke-width="0.8" opacity="0.25"/>
+        <path d="M36 22 L50 36 L36 50 L22 36 Z" fill="none" stroke="var(--weapon)" stroke-width="1.2" opacity="0.7"/>
+        <!-- Amplifier layer -->
+        <path d="M28 48 L28 30 L36 18 L44 30 L44 48" fill="none" stroke="var(--amplifier)" stroke-width="1.2" opacity="0.7"/>
+        <line x1="24" y1="48" x2="48" y2="48" stroke="var(--amplifier)" stroke-width="1.2" opacity="0.7"/>
+        <!-- Payload layer -->
+        <circle cx="36" cy="36" r="8" fill="none" stroke="var(--payload)" stroke-width="1" opacity="0.6"/>
+        <line x1="36" y1="20" x2="36" y2="26" stroke="var(--payload)" stroke-width="1.2" opacity="0.7"/>
+        <line x1="36" y1="46" x2="36" y2="52" stroke="var(--payload)" stroke-width="1.2" opacity="0.7"/>
+        <line x1="20" y1="36" x2="26" y2="36" stroke="var(--payload)" stroke-width="1.2" opacity="0.7"/>
+        <line x1="46" y1="36" x2="52" y2="36" stroke="var(--payload)" stroke-width="1.2" opacity="0.7"/>
+        <!-- Shared core — white hot center -->
+        <circle cx="36" cy="36" r="3.5" fill="white" filter="url(#g4s)" opacity="0.9"/>
+        <circle cx="36" cy="36" r="2" fill="white"/>
+      </svg>
+      <div class="stack-label" style="color: var(--gold)">Composite Rune</div>
+    </div>
+
+  </div>
+
+  <p class="note" style="margin-top: 24px;">
+    The <strong>outer frame</strong> encodes component category. The <strong>inner symbol</strong> encodes its specific function. The <strong>color</strong> survives layering as a tint. A glowing center marks the chain root. Read the layers separately to understand it, or read the shape as a whole to recognize it at a glance.
+  </p>
+</div>
+
+<!-- CHAIN EXAMPLE -->
+<div class="section">
+  <div class="section-label">Example Chain — Reading the Sentence</div>
+
+  <div class="chain-row">
+
+    <!-- Reactor -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72" style="width:56px;height:56px">
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--reactor)" stroke-width="1" opacity="0.3"/>
+        <path d="M26 28 Q20 36 26 44" fill="none" stroke="var(--reactor)" stroke-width="1.5"/>
+        <path d="M22 24 Q12 36 22 48" fill="none" stroke="var(--reactor)" stroke-width="1" opacity="0.5"/>
+        <circle cx="36" cy="36" r="3" fill="var(--reactor)"/>
+        <line x1="36" y1="36" x2="48" y2="28" stroke="var(--reactor)" stroke-width="1" opacity="0.6" stroke-dasharray="2 3"/>
+        <line x1="36" y1="36" x2="50" y2="36" stroke="var(--reactor)" stroke-width="1" opacity="0.4" stroke-dasharray="2 3"/>
+        <line x1="36" y1="36" x2="48" y2="44" stroke="var(--reactor)" stroke-width="1" opacity="0.6" stroke-dasharray="2 3"/>
+      </svg>
+      <span class="label" style="color:var(--reactor); font-size:8px">When ally attacks</span>
+    </div>
+    <div class="chain-connector"></div>
+
+    <!-- Weapon -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72" style="width:56px;height:56px">
+        <defs><filter id="gw2"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M36 6 L58 18 L62 42 L48 62 L24 62 L10 42 L14 18 Z" fill="none" stroke="var(--weapon)" stroke-width="1.5" opacity="0.4"/>
+        <line x1="36" y1="16" x2="36" y2="56" stroke="var(--weapon)" stroke-width="1" opacity="0.4"/>
+        <line x1="16" y1="36" x2="56" y2="36" stroke="var(--weapon)" stroke-width="1" opacity="0.4"/>
+        <path d="M36 22 L50 36 L36 50 L22 36 Z" fill="none" stroke="var(--weapon)" stroke-width="1.5" filter="url(#gw2)"/>
+        <circle cx="36" cy="36" r="4" fill="var(--weapon)" filter="url(#gw2)"/>
+      </svg>
+      <span class="label" style="color:var(--weapon); font-size:8px">Strike (10 dmg)</span>
+    </div>
+    <div class="chain-connector"></div>
+
+    <!-- Amplifier -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72" style="width:56px;height:56px">
+        <defs><filter id="ga2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--amplifier)" stroke-width="1" opacity="0.3"/>
+        <path d="M28 48 L28 30 L36 18 L44 30 L44 48" fill="none" stroke="var(--amplifier)" stroke-width="1.5" filter="url(#ga2)"/>
+        <path d="M22 48 L22 36 L36 24 L50 36 L50 48" fill="none" stroke="var(--amplifier)" stroke-width="1" opacity="0.4"/>
+        <line x1="24" y1="48" x2="48" y2="48" stroke="var(--amplifier)" stroke-width="1.5" filter="url(#ga2)"/>
+      </svg>
+      <span class="label" style="color:var(--amplifier); font-size:8px">+50% damage</span>
+    </div>
+    <div class="chain-connector"></div>
+
+    <!-- Converter -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72" style="width:56px;height:56px">
+        <defs><filter id="gc2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--converter)" stroke-width="1" opacity="0.3"/>
+        <path d="M22 30 Q28 20 36 26 Q44 32 38 42 Q32 52 24 46" fill="none" stroke="var(--converter)" stroke-width="1.5" filter="url(#gc2)"/>
+        <path d="M50 42 Q44 52 36 46 Q28 40 34 30 Q40 20 48 26" fill="none" stroke="var(--converter)" stroke-width="1" opacity="0.5"/>
+        <circle cx="36" cy="36" r="2" fill="var(--converter)" filter="url(#gc2)"/>
+      </svg>
+      <span class="label" style="color:var(--converter); font-size:8px">→ Fire damage</span>
+    </div>
+    <div class="chain-connector"></div>
+
+    <!-- Payload -->
+    <div class="sigil-card">
+      <svg class="sigil" viewBox="0 0 72 72" style="width:56px;height:56px">
+        <defs><filter id="gp2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M36 8 L60 20 L60 52 L36 64 L12 52 L12 20 Z" fill="none" stroke="var(--payload)" stroke-width="1" opacity="0.3"/>
+        <circle cx="36" cy="36" r="8" fill="none" stroke="var(--payload)" stroke-width="1.5" filter="url(#gp2)"/>
+        <line x1="36" y1="20" x2="36" y2="26" stroke="var(--payload)" stroke-width="1.5" filter="url(#gp2)"/>
+        <line x1="36" y1="46" x2="36" y2="52" stroke="var(--payload)" stroke-width="1.5" filter="url(#gp2)"/>
+        <line x1="20" y1="36" x2="26" y2="36" stroke="var(--payload)" stroke-width="1.5" filter="url(#gp2)"/>
+        <line x1="46" y1="36" x2="52" y2="36" stroke="var(--payload)" stroke-width="1.5" filter="url(#gp2)"/>
+        <circle cx="36" cy="36" r="3" fill="var(--payload)" filter="url(#gp2)"/>
+      </svg>
+      <span class="label" style="color:var(--payload); font-size:8px">Apply Burn</span>
+    </div>
+
+  </div>
+
+  <p class="chain-label">
+    <em>"When an ally attacks → strike for 15 fire damage → and apply Burn"</em><br>
+    The chain reads as a sentence. The composite rune on the unit card is the compressed summary of that sentence.
+  </p>
+</div>
+
+</body>
+</html>
