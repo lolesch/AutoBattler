@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sigil Language v4</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --bg:      #09090b;
+    --border:  #1a1a22;
+    --gold:    #a08848;
+    --dim:     #404038;
+    --text:    #b8b4ac;
+
+    --weapon:  #c05050;   /* root mode — filled, red */
+    --payload: #c07830;   /* payload mode — hollow, orange */
+    --trigger: #5a9870;   /* activator / reactor */
+    --amp:     #7878b8;   /* amplifier */
+    --conv:    #888888;   /* converter — neutral, just shifts color */
+
+    /* damage types */
+    --fire:    #d06828;
+    --ice:     #4898c0;
+    --poison:  #68a840;
+    --aoe:     #9058b0;
+    --burst:   #b04870;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    padding: 40px 32px 80px;
+    max-width: 1000px;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: .35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .sub {
+    font-size: 12px;
+    color: var(--dim);
+    font-style: italic;
+    margin-bottom: 52px;
+  }
+
+  section { margin-bottom: 64px; }
+
+  .label {
+    font-family: 'Cinzel', serif;
+    font-size: 8.5px;
+    letter-spacing: .28em;
+    color: var(--gold);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+  .note {
+    font-size: 12px;
+    color: var(--dim);
+    font-style: italic;
+    margin-bottom: 28px;
+    line-height: 1.7;
+    max-width: 640px;
+  }
+  .note strong { color: var(--gold); font-style: normal; font-weight: 400; }
+
+  .row {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+  }
+  .card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .card-desc {
+    font-size: 10px;
+    color: var(--dim);
+    font-style: italic;
+    text-align: center;
+    max-width: 80px;
+    line-height: 1.35;
+  }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 4px 0 32px; }
+
+  .composite-row {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .composite-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .composite-title {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--gold);
+  }
+  .composite-read {
+    font-size: 11px;
+    color: var(--dim);
+    font-style: italic;
+    text-align: center;
+    max-width: 130px;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<h1>Item Chain — Sigil Language</h1>
+<p class="sub">v4 — outer shape = trigger · abstract weapon center · orbital amplifiers · lower zone = condition</p>
+
+<!-- ══ SYSTEM OVERVIEW ══ -->
+<section>
+  <div class="label">Zone Map — Four Layers, No Overlap</div>
+  <div class="note">
+    <strong>Outer shape</strong> — the trigger. Shape IS the identity. No inner symbol.<br>
+    <strong>Center mark</strong> — the weapon. Tight abstract rune. Filled red = root. Hollow orange = payload.<br>
+    <strong>Orbital ring</strong> — amplifiers. Surround the center. Each variant distinct enough to read at distance.<br>
+    <strong>Lower zone</strong> — condition. Default = cooldown rhythm. Replaced by trigger shape extension when Activator/Reactor present.
+  </div>
+
+  <svg width="200" height="210" viewBox="0 0 200 210">
+    <defs>
+      <filter id="zg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+
+    <!-- Outer shape zone annotation -->
+    <path d="M100 12 L168 52 L168 128 L100 168 L32 128 L32 52 Z"
+          fill="none" stroke="var(--trigger)" stroke-width="1" stroke-dasharray="4 5" opacity="0.3"/>
+    <text x="162" y="45" font-family="Cinzel,serif" font-size="6" fill="var(--trigger)" opacity="0.5" text-anchor="start">TRIGGER</text>
+    <text x="162" y="53" font-family="Cinzel,serif" font-size="6" fill="var(--trigger)" opacity="0.5" text-anchor="start">OUTER SHAPE</text>
+
+    <!-- Orbital zone -->
+    <circle cx="100" cy="90" r="36" fill="none" stroke="var(--amp)" stroke-width="0.8" stroke-dasharray="3 5" opacity="0.25"/>
+    <text x="138" y="70" font-family="Cinzel,serif" font-size="6" fill="var(--amp)" opacity="0.4">AMPLIFIER</text>
+    <text x="138" y="78" font-family="Cinzel,serif" font-size="6" fill="var(--amp)" opacity="0.4">ORBITAL</text>
+
+    <!-- Center zone -->
+    <circle cx="100" cy="90" r="14" fill="none" stroke="var(--weapon)" stroke-width="0.8" stroke-dasharray="2 4" opacity="0.3"/>
+    <text x="100" y="94" text-anchor="middle" font-family="Cinzel,serif" font-size="6" fill="var(--weapon)" opacity="0.5">WEAPON</text>
+
+    <!-- Lower zone -->
+    <rect x="72" y="140" width="56" height="22" rx="3" fill="none" stroke="var(--trigger)" stroke-width="0.8" stroke-dasharray="3 4" opacity="0.25"/>
+    <text x="100" y="154" text-anchor="middle" font-family="Cinzel,serif" font-size="6" fill="var(--trigger)" opacity="0.4">CONDITION ZONE</text>
+
+    <!-- Connection line: center to lower -->
+    <line x1="100" y1="104" x2="100" y2="140" stroke="var(--trigger)" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.2"/>
+  </svg>
+</section>
+
+<!-- ══ TRIGGERS — OUTER SHAPE ══ -->
+<section>
+  <div class="label">Triggers — Outer Shape is the Symbol</div>
+  <div class="note">
+    No inner detail. The silhouette alone carries meaning. Six distinct shapes — all recognizable at small size.
+  </div>
+
+  <div class="row">
+
+    <!-- Default timer: regular hexagon (baseline, no outer trigger needed — shown for reference) -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="t0"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Simple hex outline only — default, no trigger item -->
+        <path d="M42 8 L70 24 L70 56 L42 72 L14 56 L14 24 Z"
+              fill="none" stroke="var(--dim)" stroke-width="1.5" stroke-dasharray="3 4"/>
+        <!-- Rhythm marks in lower zone — default cooldown -->
+        <line x1="30" y1="78" x2="30" y2="86" stroke="var(--dim)" stroke-width="1.5"/>
+        <line x1="38" y1="78" x2="38" y2="86" stroke="var(--dim)" stroke-width="1.5"/>
+        <line x1="46" y1="78" x2="46" y2="86" stroke="var(--dim)" stroke-width="1.5"/>
+        <line x1="54" y1="78" x2="54" y2="86" stroke="var(--dim)" stroke-width="1.5"/>
+        <text x="42" y="40" text-anchor="middle" font-family="Cinzel,serif" font-size="7" fill="var(--dim)">(weapon here)</text>
+      </svg>
+      <div class="card-name" style="color:var(--dim)">No trigger</div>
+      <div class="card-desc">own timer · default</div>
+    </div>
+
+    <!-- Activator: Resource full — filled teardrop/droplet shape -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="t1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Droplet outer shape — resource/mana drop -->
+        <path d="M42 8 Q62 28 62 48 Q62 68 42 74 Q22 68 22 48 Q22 28 42 8 Z"
+              fill="var(--trigger)" opacity="0.12" filter="url(#t1)"/>
+        <path d="M42 8 Q62 28 62 48 Q62 68 42 74 Q22 68 22 48 Q22 28 42 8 Z"
+              fill="none" stroke="var(--trigger)" stroke-width="2" filter="url(#t1)"/>
+        <!-- Overflow sparks at top -->
+        <line x1="42" y1="6" x2="42" y2="1" stroke="var(--trigger)" stroke-width="1.5" filter="url(#t1)"/>
+        <line x1="36" y1="8" x2="33" y2="4" stroke="var(--trigger)" stroke-width="1" opacity="0.6"/>
+        <line x1="48" y1="8" x2="51" y2="4" stroke="var(--trigger)" stroke-width="1" opacity="0.6"/>
+        <!-- Lower zone: tap arrow -->
+        <path d="M34 80 L42 88 L50 80" fill="none" stroke="var(--trigger)" stroke-width="1.8" filter="url(#t1)"/>
+      </svg>
+      <div class="card-name" style="color:var(--trigger)">Activator</div>
+      <div class="card-desc">resource full</div>
+    </div>
+
+    <!-- Activator: HP low — heart with crack -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="t2"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Heart shape -->
+        <path d="M42 68 Q10 50 12 28 Q14 10 28 10 Q36 10 42 20 Q48 10 56 10 Q70 10 72 28 Q74 50 42 68 Z"
+              fill="var(--trigger)" opacity="0.1"/>
+        <path d="M42 68 Q10 50 12 28 Q14 10 28 10 Q36 10 42 20 Q48 10 56 10 Q70 10 72 28 Q74 50 42 68 Z"
+              fill="none" stroke="var(--trigger)" stroke-width="2" filter="url(#t2)"/>
+        <!-- Crack through heart = low HP -->
+        <path d="M42 20 L39 36 L44 40 L40 56" fill="none" stroke="var(--bg)" stroke-width="2.5"/>
+        <path d="M42 20 L39 36 L44 40 L40 56" fill="none" stroke="var(--trigger)" stroke-width="1" opacity="0.8" filter="url(#t2)"/>
+        <!-- Lower zone: threshold bar -->
+        <rect x="26" y="76" width="32" height="8" rx="2" fill="none" stroke="var(--trigger)" stroke-width="1.2"/>
+        <rect x="27" y="77" width="8" height="6" rx="1" fill="var(--trigger)" opacity="0.4"/>
+        <line x1="36" y1="74" x2="36" y2="86" stroke="var(--trigger)" stroke-width="1" stroke-dasharray="2 2" opacity="0.5"/>
+      </svg>
+      <div class="card-name" style="color:var(--trigger)">Activator</div>
+      <div class="card-desc">HP below X</div>
+    </div>
+
+    <!-- Reactor: Ally attacks — two-pointed star / burst -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="t3"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- 4-pointed star — event emanating outward -->
+        <path d="M42 8 L48 36 L76 40 L48 44 L42 72 L36 44 L8 40 L36 36 Z"
+              fill="var(--trigger)" opacity="0.1"/>
+        <path d="M42 8 L48 36 L76 40 L48 44 L42 72 L36 44 L8 40 L36 36 Z"
+              fill="none" stroke="var(--trigger)" stroke-width="2" filter="url(#t3)"/>
+        <!-- Dashed incoming lines -->
+        <line x1="62" y1="20" x2="50" y2="34" stroke="var(--trigger)" stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>
+        <line x1="70" y1="40" x2="56" y2="40" stroke="var(--trigger)" stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>
+        <!-- Lower zone: two unit dots with arrow -->
+        <circle cx="30" cy="82" r="3" fill="none" stroke="var(--trigger)" stroke-width="1.2"/>
+        <circle cx="54" cy="82" r="3" fill="none" stroke="var(--trigger)" stroke-width="1.2" opacity="0.5"/>
+        <line x1="33" y1="82" x2="48" y2="82" stroke="var(--trigger)" stroke-width="1.2"/>
+        <path d="M46 79 L50 82 L46 85" fill="none" stroke="var(--trigger)" stroke-width="1.2"/>
+      </svg>
+      <div class="card-name" style="color:var(--trigger)">Reactor</div>
+      <div class="card-desc">ally attacks</div>
+    </div>
+
+    <!-- Reactor: On hit — shield with crack/ripple -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="t4"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Shield shape -->
+        <path d="M42 8 L70 20 L70 46 Q70 64 42 74 Q14 64 14 46 L14 20 Z"
+              fill="var(--trigger)" opacity="0.1"/>
+        <path d="M42 8 L70 20 L70 46 Q70 64 42 74 Q14 64 14 46 L14 20 Z"
+              fill="none" stroke="var(--trigger)" stroke-width="2" filter="url(#t4)"/>
+        <!-- Impact point with ripples -->
+        <circle cx="42" cy="40" r="5" fill="var(--trigger)" filter="url(#t4)" opacity="0.7"/>
+        <circle cx="42" cy="40" r="10" fill="none" stroke="var(--trigger)" stroke-width="1" opacity="0.4"/>
+        <circle cx="42" cy="40" r="16" fill="none" stroke="var(--trigger)" stroke-width="0.7" opacity="0.2"/>
+        <!-- Lower zone: incoming bolt -->
+        <path d="M50 76 L38 84 L44 84 L32 92" fill="none" stroke="var(--trigger)" stroke-width="1.8" filter="url(#t4)"/>
+      </svg>
+      <div class="card-name" style="color:var(--trigger)">Reactor</div>
+      <div class="card-desc">this unit hit</div>
+    </div>
+
+    <!-- Reactor: Nearby kill — skull/flower radiating -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="t5"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- 6-petal flower/starburst — death event radiating -->
+        <path d="M42 8 L46 30 L64 18 L52 36 L76 40 L54 44 L66 62 L46 50 L42 72 L38 50 L18 62 L30 44 L8 40 L32 36 L20 18 L38 30 Z"
+              fill="var(--trigger)" opacity="0.08"/>
+        <path d="M42 8 L46 30 L64 18 L52 36 L76 40 L54 44 L66 62 L46 50 L42 72 L38 50 L18 62 L30 44 L8 40 L32 36 L20 18 L38 30 Z"
+              fill="none" stroke="var(--trigger)" stroke-width="1.5" filter="url(#t5)"/>
+        <!-- X at center = death -->
+        <line x1="36" y1="34" x2="48" y2="46" stroke="var(--trigger)" stroke-width="2" filter="url(#t5)"/>
+        <line x1="48" y1="34" x2="36" y2="46" stroke="var(--trigger)" stroke-width="2" filter="url(#t5)"/>
+        <!-- Lower zone: ripple rings -->
+        <circle cx="42" cy="84" r="4" fill="none" stroke="var(--trigger)" stroke-width="1.2"/>
+        <circle cx="42" cy="84" r="7" fill="none" stroke="var(--trigger)" stroke-width="0.8" opacity="0.5"/>
+      </svg>
+      <div class="card-name" style="color:var(--trigger)">Reactor</div>
+      <div class="card-desc">nearby kill</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ WEAPONS — CENTER MARK ══ -->
+<section>
+  <div class="label">Weapons — Abstract Center Mark</div>
+  <div class="note">
+    Tight geometric rune. <strong>Filled + red = root mode</strong> (fires freely). <strong>Hollow + orange = payload mode</strong> (conditional).<br>
+    No outer shape on its own. Condition notch below the center mark.
+  </div>
+
+  <div class="row">
+
+    <!-- Weapon A — root mode: bold filled diamond -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="w1"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Bold diamond = decisive, direct -->
+        <path d="M42 18 L62 38 L42 58 L22 38 Z" fill="var(--weapon)" opacity="0.25" filter="url(#w1)"/>
+        <path d="M42 18 L62 38 L42 58 L22 38 Z" fill="none" stroke="var(--weapon)" stroke-width="2.5" filter="url(#w1)"/>
+        <!-- Inner mark -->
+        <path d="M42 28 L52 38 L42 48 L32 38 Z" fill="var(--weapon)" filter="url(#w1)"/>
+        <!-- Lower zone: cooldown marks (default) -->
+        <line x1="28" y1="68" x2="28" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="36" y1="68" x2="36" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="44" y1="68" x2="44" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="52" y1="68" x2="52" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <!-- Connect center to lower zone -->
+        <line x1="42" y1="58" x2="42" y2="68" stroke="var(--weapon)" stroke-width="1" opacity="0.3" stroke-dasharray="2 2"/>
+      </svg>
+      <div class="card-name" style="color:var(--weapon)">Weapon A</div>
+      <div class="card-desc">root mode<br>own timer</div>
+    </div>
+
+    <!-- Weapon B — root: cross/plus mark -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="w2"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Cross = reach, radiate -->
+        <line x1="42" y1="20" x2="42" y2="58" stroke="var(--weapon)" stroke-width="4" filter="url(#w2)" stroke-linecap="round"/>
+        <line x1="22" y1="38" x2="62" y2="38" stroke="var(--weapon)" stroke-width="4" filter="url(#w2)" stroke-linecap="round"/>
+        <!-- Dot tips -->
+        <circle cx="42" cy="20" r="3" fill="var(--weapon)" filter="url(#w2)"/>
+        <circle cx="62" cy="38" r="3" fill="var(--weapon)" filter="url(#w2)"/>
+        <circle cx="42" cy="38" r="5" fill="var(--weapon)" filter="url(#w2)"/>
+        <!-- Lower zone -->
+        <line x1="28" y1="68" x2="28" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="36" y1="68" x2="36" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="44" y1="68" x2="44" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="52" y1="68" x2="52" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="42" y1="58" x2="42" y2="68" stroke="var(--weapon)" stroke-width="1" opacity="0.3" stroke-dasharray="2 2"/>
+      </svg>
+      <div class="card-name" style="color:var(--weapon)">Weapon B</div>
+      <div class="card-desc">root mode<br>own timer</div>
+    </div>
+
+    <!-- Weapon C — root: triangle pointing up -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="w3"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M42 16 L64 56 L20 56 Z" fill="var(--weapon)" opacity="0.2" filter="url(#w3)"/>
+        <path d="M42 16 L64 56 L20 56 Z" fill="none" stroke="var(--weapon)" stroke-width="2.5" filter="url(#w3)"/>
+        <circle cx="42" cy="16" r="4" fill="var(--weapon)" filter="url(#w3)"/>
+        <line x1="28" y1="68" x2="28" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="36" y1="68" x2="36" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="44" y1="68" x2="44" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="52" y1="68" x2="52" y2="76" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="42" y1="56" x2="42" y2="68" stroke="var(--weapon)" stroke-width="1" opacity="0.3" stroke-dasharray="2 2"/>
+      </svg>
+      <div class="card-name" style="color:var(--weapon)">Weapon C</div>
+      <div class="card-desc">root mode<br>own timer</div>
+    </div>
+
+    <div style="width:1px; height:80px; background:var(--border); align-self:center;"></div>
+
+    <!-- Payload mode (same weapons, hollow + orange) -->
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="p1"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Same diamond but HOLLOW + orange -->
+        <path d="M42 18 L62 38 L42 58 L22 38 Z" fill="none" stroke="var(--payload)" stroke-width="2" filter="url(#p1)"/>
+        <!-- Inner mark hollow -->
+        <path d="M42 28 L52 38 L42 48 L32 38 Z" fill="none" stroke="var(--payload)" stroke-width="1.5" filter="url(#p1)" opacity="0.7"/>
+        <!-- Lower zone: condition (on kill = X mark) -->
+        <line x1="35" y1="66" x2="49" y2="78" stroke="var(--payload)" stroke-width="1.8" filter="url(#p1)"/>
+        <line x1="49" y1="66" x2="35" y2="78" stroke="var(--payload)" stroke-width="1.8" filter="url(#p1)"/>
+        <line x1="42" y1="58" x2="42" y2="66" stroke="var(--payload)" stroke-width="1" opacity="0.3" stroke-dasharray="2 2"/>
+      </svg>
+      <div class="card-name" style="color:var(--payload)">Weapon A</div>
+      <div class="card-desc">payload mode<br>on kill</div>
+    </div>
+
+    <div class="card">
+      <svg width="84" height="90" viewBox="0 0 84 90">
+        <defs><filter id="p2"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Cross hollow + orange -->
+        <line x1="42" y1="20" x2="42" y2="58" stroke="var(--payload)" stroke-width="3" filter="url(#p2)" stroke-linecap="round"/>
+        <line x1="22" y1="38" x2="62" y2="38" stroke="var(--payload)" stroke-width="3" filter="url(#p2)" stroke-linecap="round"/>
+        <circle cx="42" cy="20" r="3" fill="none" stroke="var(--payload)" stroke-width="1.5" filter="url(#p2)"/>
+        <circle cx="62" cy="38" r="3" fill="none" stroke="var(--payload)" stroke-width="1.5" filter="url(#p2)"/>
+        <circle cx="42" cy="38" r="5" fill="none" stroke="var(--payload)" stroke-width="2" filter="url(#p2)"/>
+        <!-- Lower zone: on-hit condition (dot) -->
+        <circle cx="42" cy="74" r="4" fill="var(--payload)" filter="url(#p2)"/>
+        <circle cx="42" cy="74" r="7" fill="none" stroke="var(--payload)" stroke-width="0.8" opacity="0.4"/>
+        <line x1="42" y1="58" x2="42" y2="67" stroke="var(--payload)" stroke-width="1" opacity="0.3" stroke-dasharray="2 2"/>
+      </svg>
+      <div class="card-name" style="color:var(--payload)">Weapon B</div>
+      <div class="card-desc">payload mode<br>on hit</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ AMPLIFIERS — ORBITAL ══ -->
+<section>
+  <div class="label">Amplifiers — Orbital Around Weapon Center</div>
+  <div class="note">
+    Circular/surrounding geometry. Each variant holds a distinct silhouette readable at distance.<br>
+    No brackets. They orbit the center — shown here standalone, in composites they wrap the weapon mark.
+  </div>
+
+  <div class="row">
+
+    <!-- +damage: thick arc segment (weight, mass) -->
+    <div class="card">
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <defs><filter id="a1"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Heavy thick arc = weight/damage -->
+        <path d="M16 42 A26 26 0 0 1 68 42" fill="none" stroke="var(--amp)" stroke-width="8" stroke-linecap="round" filter="url(#a1)"/>
+        <path d="M16 42 A26 26 0 0 1 68 42" fill="none" stroke="var(--amp)" stroke-width="12" stroke-linecap="round" opacity="0.15"/>
+        <!-- Center placeholder -->
+        <circle cx="42" cy="42" r="8" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 3" opacity="0.4"/>
+      </svg>
+      <div class="card-name" style="color:var(--amp)">+ Damage</div>
+      <div class="card-desc">heavy arc = weight</div>
+    </div>
+
+    <!-- –cooldown: spinning partial ring with arrowhead -->
+    <div class="card">
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <defs><filter id="a2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Sweeping ring (270°) with arrowhead = speed -->
+        <path d="M42 16 A26 26 0 1 1 16 42" fill="none" stroke="var(--amp)" stroke-width="2.5" filter="url(#a2)" stroke-linecap="round"/>
+        <!-- Arrowhead at end -->
+        <path d="M16 42 L10 34 L20 36 Z" fill="var(--amp)" filter="url(#a2)"/>
+        <circle cx="42" cy="42" r="8" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 3" opacity="0.4"/>
+      </svg>
+      <div class="card-name" style="color:var(--amp)">– Cooldown</div>
+      <div class="card-desc">sweep = motion</div>
+    </div>
+
+    <!-- +range: dotted orbit ring (larger radius) -->
+    <div class="card">
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <defs><filter id="a3"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Outer dotted ring = extended reach -->
+        <circle cx="42" cy="42" r="32" fill="none" stroke="var(--amp)" stroke-width="1.8" stroke-dasharray="4 5" filter="url(#a3)"/>
+        <!-- Inner solid ring -->
+        <circle cx="42" cy="42" r="20" fill="none" stroke="var(--amp)" stroke-width="1.2" opacity="0.4"/>
+        <!-- Four reach lines outward -->
+        <line x1="42" y1="22" x2="42" y2="10" stroke="var(--amp)" stroke-width="1.5" filter="url(#a3)"/>
+        <line x1="62" y1="42" x2="74" y2="42" stroke="var(--amp)" stroke-width="1.5" filter="url(#a3)"/>
+        <line x1="42" y1="62" x2="42" y2="74" stroke="var(--amp)" stroke-width="1.5" filter="url(#a3)"/>
+        <line x1="22" y1="42" x2="10" y2="42" stroke="var(--amp)" stroke-width="1.5" filter="url(#a3)"/>
+        <circle cx="42" cy="42" r="8" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 3" opacity="0.4"/>
+      </svg>
+      <div class="card-name" style="color:var(--amp)">+ Range</div>
+      <div class="card-desc">dotted orbit = reach</div>
+    </div>
+
+    <!-- +proc chance: pie fill orbital -->
+    <div class="card">
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <defs><filter id="a4"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Ring outline -->
+        <circle cx="42" cy="42" r="26" fill="none" stroke="var(--amp)" stroke-width="1.5" opacity="0.35"/>
+        <!-- ~65% filled arc (proc chance) -->
+        <path d="M42 16 A26 26 0 1 1 17 56" fill="none" stroke="var(--amp)" stroke-width="6" filter="url(#a4)" stroke-linecap="butt"/>
+        <circle cx="42" cy="42" r="8" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 3" opacity="0.4"/>
+      </svg>
+      <div class="card-name" style="color:var(--amp)">+ Proc chance</div>
+      <div class="card-desc">partial fill = odds</div>
+    </div>
+
+    <!-- +resource gen: small ring with plus -->
+    <div class="card">
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <defs><filter id="a5"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <!-- Ring -->
+        <circle cx="42" cy="42" r="26" fill="none" stroke="var(--amp)" stroke-width="2" filter="url(#a5)" opacity="0.7"/>
+        <!-- Plus on ring (at top) -->
+        <line x1="42" y1="10" x2="42" y2="22" stroke="var(--amp)" stroke-width="3" filter="url(#a5)" stroke-linecap="round"/>
+        <line x1="36" y1="16" x2="48" y2="16" stroke="var(--amp)" stroke-width="3" filter="url(#a5)" stroke-linecap="round"/>
+        <circle cx="42" cy="42" r="8" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 3" opacity="0.4"/>
+      </svg>
+      <div class="card-name" style="color:var(--amp)">+ Resource</div>
+      <div class="card-desc">ring + plus<br>= generation</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ CONVERTER ══ -->
+<section>
+  <div class="label">Converter — Color Shift Only</div>
+  <div class="note">
+    No unique shape. A thin conversion arrow wrapping the outer edge, tinted to output color.<br>
+    In a composite, the weapon/payload center adopts the output color. The arrow is the only converter mark.
+  </div>
+
+  <div class="row">
+
+    <!-- Fire -->
+    <div class="card">
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <defs><filter id="cv1"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M42 16 A26 26 0 0 1 68 42 A26 26 0 0 1 42 68" fill="none" stroke="var(--fire)" stroke-width="2" filter="url(#cv1)" stroke-linecap="round"/>
+        <path d="M42 68 L36 62 L48 62 Z" fill="var(--fire)" filter="url(#cv1)"/>
+        <!-- Center tinted -->
+        <circle cx="42" cy="42" r="10" fill="var(--fire)" opacity="0.2" filter="url(#cv1)"/>
+        <circle cx="42" cy="42" r="10" fill="none" stroke="var(--fire)" stroke-width="1.5" opacity="0.6"/>
+      </svg>
+      <div class="card-name" style="color:var(--fire)">→ Fire</div>
+      <div class="card-desc">damage type</div>
+    </div>
+
+    <!-- Ice -->
+    <div class="card">
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <defs><filter id="cv2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M42 16 A26 26 0 0 1 68 42 A26 26 0 0 1 42 68" fill="none" stroke="var(--ice)" stroke-width="2" filter="url(#cv2)" stroke-linecap="round"/>
+        <path d="M42 68 L36 62 L48 62 Z" fill="var(--ice)" filter="url(#cv2)"/>
+        <circle cx="42" cy="42" r="10" fill="var(--ice)" opacity="0.2" filter="url(#cv2)"/>
+        <circle cx="42" cy="42" r="10" fill="none" stroke="var(--ice)" stroke-width="1.5" opacity="0.6"/>
+      </svg>
+      <div class="card-name" style="color:var(--ice)">→ Ice</div>
+      <div class="card-desc">damage type</div>
+    </div>
+
+    <!-- AoE target -->
+    <div class="card">
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <defs><filter id="cv3"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M42 16 A26 26 0 0 1 68 42 A26 26 0 0 1 42 68" fill="none" stroke="var(--aoe)" stroke-width="2" filter="url(#cv3)" stroke-linecap="round"/>
+        <path d="M42 68 L36 62 L48 62 Z" fill="var(--aoe)" filter="url(#cv3)"/>
+        <!-- Dot cluster center = AoE target -->
+        <circle cx="42" cy="42" r="3" fill="var(--aoe)" filter="url(#cv3)"/>
+        <circle cx="34" cy="36" r="2.5" fill="var(--aoe)" opacity="0.6"/>
+        <circle cx="50" cy="36" r="2.5" fill="var(--aoe)" opacity="0.6"/>
+        <circle cx="50" cy="48" r="2.5" fill="var(--aoe)" opacity="0.6"/>
+        <circle cx="34" cy="48" r="2.5" fill="var(--aoe)" opacity="0.6"/>
+      </svg>
+      <div class="card-name" style="color:var(--aoe)">→ AoE</div>
+      <div class="card-desc">target type</div>
+    </div>
+
+    <!-- Burst delivery -->
+    <div class="card">
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <defs><filter id="cv4"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M42 16 A26 26 0 0 1 68 42 A26 26 0 0 1 42 68" fill="none" stroke="var(--burst)" stroke-width="2" filter="url(#cv4)" stroke-linecap="round"/>
+        <path d="M42 68 L36 62 L48 62 Z" fill="var(--burst)" filter="url(#cv4)"/>
+        <!-- Three small marks → one big = accumulate -->
+        <line x1="34" y1="38" x2="34" y2="46" stroke="var(--dim)" stroke-width="1.2"/>
+        <line x1="39" y1="38" x2="39" y2="46" stroke="var(--dim)" stroke-width="1.2"/>
+        <line x1="50" y1="34" x2="50" y2="50" stroke="var(--burst)" stroke-width="4" filter="url(#cv4)" stroke-linecap="round"/>
+      </svg>
+      <div class="card-name" style="color:var(--burst)">→ Burst</div>
+      <div class="card-desc">delivery mode</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ COMPOSITE RUNES ══ -->
+<section>
+  <div class="label">Composite Runes — Max Four Readable Layers</div>
+  <div class="note">
+    Outer shape → center mark → orbital → lower zone. That's the read order. No more than four layers.
+  </div>
+
+  <div class="composite-row">
+
+    <!-- 1: No trigger + diamond weapon + damage amp -->
+    <div class="composite-card">
+      <svg width="110" height="120" viewBox="0 0 110 120">
+        <defs>
+          <filter id="comp1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="comp1s"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- No trigger outer shape -->
+        <!-- AMPLIFIER: heavy arc (damage) -->
+        <path d="M20 55 A35 35 0 0 1 90 55" fill="none" stroke="var(--amp)" stroke-width="9" stroke-linecap="round" filter="url(#comp1)" opacity="0.7"/>
+        <!-- WEAPON: diamond center -->
+        <path d="M55 30 L75 55 L55 80 L35 55 Z" fill="var(--weapon)" opacity="0.2" filter="url(#comp1)"/>
+        <path d="M55 30 L75 55 L55 80 L35 55 Z" fill="none" stroke="var(--weapon)" stroke-width="2.5" filter="url(#comp1)"/>
+        <path d="M55 40 L65 55 L55 70 L45 55 Z" fill="var(--weapon)" filter="url(#comp1)"/>
+        <!-- Lower zone: cooldown marks -->
+        <line x1="38" y1="90" x2="38" y2="98" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="47" y1="90" x2="47" y2="98" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="56" y1="90" x2="56" y2="98" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="65" y1="90" x2="65" y2="98" stroke="var(--weapon)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="55" y1="80" x2="55" y2="90" stroke="var(--weapon)" stroke-width="1" opacity="0.3" stroke-dasharray="2 2"/>
+        <!-- Core glow -->
+        <circle cx="55" cy="55" r="5" fill="white" filter="url(#comp1s)" opacity="0.3"/>
+      </svg>
+      <div class="composite-title">Weapon + Damage Amp</div>
+      <div class="composite-read">"Hits harder,<br>on own timer"</div>
+    </div>
+
+    <!-- 2: Reactor (4-point star) + fire-tinted diamond + cooldown amp -->
+    <div class="composite-card">
+      <svg width="120" height="130" viewBox="0 0 120 130">
+        <defs>
+          <filter id="comp2"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="comp2s"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- TRIGGER: 4-point star outer shape (ally attacks reactor) -->
+        <path d="M60 8 L68 44 L104 48 L68 52 L60 88 L52 52 L16 48 L52 44 Z"
+              fill="var(--trigger)" opacity="0.08"/>
+        <path d="M60 8 L68 44 L104 48 L68 52 L60 88 L52 52 L16 48 L52 44 Z"
+              fill="none" stroke="var(--trigger)" stroke-width="1.5" filter="url(#comp2)" opacity="0.6"/>
+        <!-- AMPLIFIER: cooldown sweep ring -->
+        <path d="M60 22 A26 26 0 1 1 34 48" fill="none" stroke="var(--amp)" stroke-width="3" filter="url(#comp2)" stroke-linecap="round" opacity="0.8"/>
+        <path d="M34 48 L28 40 L38 42 Z" fill="var(--amp)" filter="url(#comp2)"/>
+        <!-- WEAPON: diamond — fire tinted (converter applied) -->
+        <path d="M60 34 L76 48 L60 62 L44 48 Z" fill="var(--fire)" opacity="0.18" filter="url(#comp2)"/>
+        <path d="M60 34 L76 48 L60 62 L44 48 Z" fill="none" stroke="var(--fire)" stroke-width="2.5" filter="url(#comp2)"/>
+        <path d="M60 42 L68 48 L60 54 L52 48 Z" fill="var(--fire)" filter="url(#comp2)"/>
+        <!-- Lower zone: trigger condition (dashed lines from star point) -->
+        <line x1="60" y1="62" x2="60" y2="72" stroke="var(--trigger)" stroke-width="1" opacity="0.3" stroke-dasharray="2 2"/>
+        <!-- Two unit circles = ally trigger -->
+        <circle cx="48" cy="80" r="5" fill="none" stroke="var(--trigger)" stroke-width="1.5" filter="url(#comp2)"/>
+        <circle cx="72" cy="80" r="5" fill="none" stroke="var(--trigger)" stroke-width="1.5" opacity="0.4"/>
+        <line x1="53" y1="80" x2="65" y2="80" stroke="var(--trigger)" stroke-width="1.5" filter="url(#comp2)"/>
+        <path d="M63 76 L67 80 L63 84" fill="none" stroke="var(--trigger)" stroke-width="1.5" filter="url(#comp2)"/>
+        <!-- Core glow -->
+        <circle cx="60" cy="48" r="5" fill="white" filter="url(#comp2s)" opacity="0.25"/>
+      </svg>
+      <div class="composite-title">Reactor + Fire Sword<br>+ Speed Amp</div>
+      <div class="composite-read">"When ally attacks<br>→ fire strike, faster"</div>
+    </div>
+
+    <!-- 3: Activator (droplet) + ice cross weapon + range amp -->
+    <div class="composite-card">
+      <svg width="120" height="130" viewBox="0 0 120 130">
+        <defs>
+          <filter id="comp3"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="comp3s"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- TRIGGER: droplet outer shape (resource full activator) -->
+        <path d="M60 6 Q84 28 84 52 Q84 78 60 86 Q36 78 36 52 Q36 28 60 6 Z"
+              fill="var(--trigger)" opacity="0.07"/>
+        <path d="M60 6 Q84 28 84 52 Q84 78 60 86 Q36 78 36 52 Q36 28 60 6 Z"
+              fill="none" stroke="var(--trigger)" stroke-width="1.5" filter="url(#comp3)" opacity="0.55"/>
+        <!-- Overflow sparks on droplet -->
+        <line x1="60" y1="4" x2="60" y2="0" stroke="var(--trigger)" stroke-width="1.5" filter="url(#comp3)"/>
+        <line x1="54" y1="6" x2="51" y2="2" stroke="var(--trigger)" stroke-width="1" opacity="0.5"/>
+        <line x1="66" y1="6" x2="69" y2="2" stroke="var(--trigger)" stroke-width="1" opacity="0.5"/>
+        <!-- AMPLIFIER: range dotted orbit -->
+        <circle cx="60" cy="48" r="32" fill="none" stroke="var(--amp)" stroke-width="1.5" stroke-dasharray="4 5" filter="url(#comp3)" opacity="0.5"/>
+        <!-- WEAPON: cross — ice tinted -->
+        <line x1="60" y1="28" x2="60" y2="68" stroke="var(--ice)" stroke-width="4" filter="url(#comp3)" stroke-linecap="round"/>
+        <line x1="40" y1="48" x2="80" y2="48" stroke="var(--ice)" stroke-width="4" filter="url(#comp3)" stroke-linecap="round"/>
+        <circle cx="60" cy="28" r="4" fill="var(--ice)" filter="url(#comp3)"/>
+        <circle cx="80" cy="48" r="4" fill="var(--ice)" filter="url(#comp3)"/>
+        <circle cx="60" cy="48" r="6" fill="var(--ice)" filter="url(#comp3)"/>
+        <!-- Lower zone: resource bar full (activator condition) -->
+        <line x1="60" y1="68" x2="60" y2="76" stroke="var(--trigger)" stroke-width="1" opacity="0.3" stroke-dasharray="2 2"/>
+        <rect x="38" y="76" width="44" height="9" rx="2" fill="none" stroke="var(--trigger)" stroke-width="1.3"/>
+        <rect x="39" y="77" width="42" height="7" rx="1.5" fill="var(--trigger)" opacity="0.25"/>
+        <!-- Core glow -->
+        <circle cx="60" cy="48" r="5" fill="white" filter="url(#comp3s)" opacity="0.25"/>
+      </svg>
+      <div class="composite-title">Activator + Ice Wand<br>+ Range Amp</div>
+      <div class="composite-read">"When full →<br>ice blast, far reach"</div>
+    </div>
+
+    <!-- 4: Diamond (root) + hollow diamond (payload, on kill) — bidirectional pair -->
+    <div class="composite-card">
+      <svg width="130" height="130" viewBox="0 0 130 130">
+        <defs>
+          <filter id="comp4"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="comp4s"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Weapon A (root, left) — damage amp below -->
+        <path d="M38 18 A22 22 0 0 1 82 18" fill="none" stroke="var(--amp)" stroke-width="7" stroke-linecap="round" filter="url(#comp4)" opacity="0.5"/>
+        <path d="M35 40 L52 62 L35 84 L18 62 Z" fill="var(--weapon)" opacity="0.2"/>
+        <path d="M35 40 L52 62 L35 84 L18 62 Z" fill="none" stroke="var(--weapon)" stroke-width="2.5" filter="url(#comp4)"/>
+        <path d="M35 50 L44 62 L35 74 L26 62 Z" fill="var(--weapon)" filter="url(#comp4)"/>
+        <!-- Lower A: cooldown marks -->
+        <line x1="24" y1="92" x2="24" y2="100" stroke="var(--weapon)" stroke-width="1.3" opacity="0.4"/>
+        <line x1="32" y1="92" x2="32" y2="100" stroke="var(--weapon)" stroke-width="1.3" opacity="0.4"/>
+        <line x1="40" y1="92" x2="40" y2="100" stroke="var(--weapon)" stroke-width="1.3" opacity="0.4"/>
+        <line x1="35" y1="84" x2="35" y2="92" stroke="var(--weapon)" stroke-width="1" opacity="0.25" stroke-dasharray="2 2"/>
+
+        <!-- Bidirectional dashes between -->
+        <line x1="56" y1="62" x2="76" y2="62" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+        <!-- Weapon B (payload, right) — hollow orange, on-kill condition -->
+        <path d="M95 40 L112 62 L95 84 L78 62 Z" fill="none" stroke="var(--payload)" stroke-width="2" filter="url(#comp4)"/>
+        <path d="M95 50 L104 62 L95 74 L86 62 Z" fill="none" stroke="var(--payload)" stroke-width="1.5" filter="url(#comp4)" opacity="0.7"/>
+        <!-- Lower B: on-kill (X) -->
+        <line x1="95" y1="84" x2="95" y2="92" stroke="var(--payload)" stroke-width="1" opacity="0.25" stroke-dasharray="2 2"/>
+        <line x1="86" y1="94" x2="104" y2="108" stroke="var(--payload)" stroke-width="1.8" filter="url(#comp4)"/>
+        <line x1="104" y1="94" x2="86" y2="108" stroke="var(--payload)" stroke-width="1.8" filter="url(#comp4)"/>
+
+        <!-- Core glows -->
+        <circle cx="35" cy="62" r="4" fill="white" filter="url(#comp4s)" opacity="0.3"/>
+        <circle cx="95" cy="62" r="3" fill="white" filter="url(#comp4s)" opacity="0.12"/>
+      </svg>
+      <div class="composite-title">Weapon (root)<br>+ Weapon (payload, on kill)</div>
+      <div class="composite-read">"Strikes freely →<br>on kill, unleashes B"</div>
+    </div>
+
+  </div>
+</section>
+
+</body>
+</html>
