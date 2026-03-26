@@ -1,5 +1,4 @@
 using Code.Data.Enums;
-using Submodules.Utility.Extensions;
 using UnityEngine;
 
 namespace Code.Data.Items.Amplifier
@@ -7,8 +6,8 @@ namespace Code.Data.Items.Amplifier
     [CreateAssetMenu(fileName = "AmplifierConfig", menuName = "Configs/Items/Amplifier")]
     public sealed class AmplifierConfig : StatItemConfig
     {
-        [Header("Chain Effect")]
-        [Tooltip("Which weapon stat this amplifier modifies when connected in a chain.")]
+        [field: Header("Chain Effect")]
+        [field: Tooltip("Which weapon stat this amplifier modifies when connected in a chain.")]
         [field: SerializeField] public AttackStatType WeaponStat { get; private set; }
         [field: SerializeField] public float          WeaponValue         { get; private set; }
         [field: SerializeField] public ModifierType   WeaponModifierType  { get; private set; }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Code.Data.Enums;
-using Code.Runtime.Statistics;
 using UnityEngine;
 
 namespace Code.Runtime.Inventory

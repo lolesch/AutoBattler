@@ -96,12 +96,12 @@ namespace Code.Runtime.Combat
                 foreach (var act in activators)
                 {
                     var stat         = GetFiringStat(weapon, act.WeaponStat);
-                    var conditionMet = EvaluateActivatorCondition(act);
+                    var conditionMet = EvaluateCondition(act.ConditionType, act.ConditionThreshold);
                     var isApplied    = applied.Contains(act);
 
                     if (conditionMet && !isApplied)
                     {
-                        stat.AddModifier(new Modifier(act.Value, act.ModifierType, act.Guid));
+                        stat.AddModifier(new Modifier(act.WeaponValue, act.WeaponModifierType, act.Guid));
                         applied.Add(act);
                     }
                     else if (!conditionMet && isApplied)
@@ -136,21 +136,25 @@ namespace Code.Runtime.Combat
 
         private void BuildReactor(IReactorItem reactor, IItemChain chain)
         {
-            var weapon = chain.Weapon;
+            var weapon    = chain.Weapon;
+            var condType  = reactor.ConditionType;
+            var condThres = reactor.ConditionThreshold;
+
+            bool ConditionMet() => EvaluateCondition(condType, condThres);
 
             switch (reactor.ReactorType)
             {
                 case ReactorType.OnSelfHit:
                 {
                     void OnHealthChanged(float prev, float curr, float _)
-                    { if (curr < prev) Fire(chain, weapon); }
+                    { if (curr < prev && ConditionMet()) Fire(chain, weapon); }
                     _pawn.Stats.health.OnCurrentChanged += OnHealthChanged;
                     _cleanupActions.Add(() => _pawn.Stats.health.OnCurrentChanged -= OnHealthChanged);
                     break;
                 }
                 case ReactorType.OnManaDeplete:
                 {
-                    void OnManaDeplete() => Fire(chain, weapon);
+                    void OnManaDeplete() { if (ConditionMet()) Fire(chain, weapon); }
                     _pawn.Stats.mana.OnDepleted += OnManaDeplete;
                     _cleanupActions.Add(() => _pawn.Stats.mana.OnDepleted -= OnManaDeplete);
                     break;
@@ -158,7 +162,7 @@ namespace Code.Runtime.Combat
                 case ReactorType.OnEnemyDeath:
                 {
                     if (_target == null) break;
-                    void OnEnemyDefeated() => Fire(chain, weapon);
+                    void OnEnemyDefeated() { if (ConditionMet()) Fire(chain, weapon); }
                     _target.OnDefeated += OnEnemyDefeated;
                     _cleanupActions.Add(() => _target.OnDefeated -= OnEnemyDefeated);
                     break;
@@ -170,7 +174,7 @@ namespace Code.Runtime.Combat
                     break;
             }
         }
-
+        
         private void Fire(IItemChain chain, IWeaponItem weapon)
         {
             if (_target == null) return;
@@ -207,19 +211,18 @@ namespace Code.Runtime.Combat
                 _                                          => false,
             };
 
-        private bool EvaluateActivatorCondition(IActivatorItem activator)
+        private bool EvaluateCondition(ActivatorConditionType type, float threshold)
         {
-            var t = activator.ConditionThreshold;
-            return activator.ConditionType switch
+            return type switch
             {
                 ActivatorConditionType.Always          => true,
-                ActivatorConditionType.HpBelow         => _pawn.Stats.health.Percentage < t,
-                ActivatorConditionType.HpAbove         => _pawn.Stats.health.Percentage > t,
-                ActivatorConditionType.ResourceBelow   => _pawn.Stats.mana.Percentage < t,
-                ActivatorConditionType.ResourceAbove   => _pawn.Stats.mana.Percentage > t,
-                ActivatorConditionType.FirstXSeconds   => false, // TODO: needs combat start timestamp
-                ActivatorConditionType.EnemyCountBelow => false, // TODO: needs coordinator
-                ActivatorConditionType.AllyCountBelow  => false, // TODO: needs coordinator
+                ActivatorConditionType.HpBelow         => _pawn.Stats.health.Percentage < threshold,
+                ActivatorConditionType.HpAbove         => _pawn.Stats.health.Percentage > threshold,
+                ActivatorConditionType.ResourceBelow   => _pawn.Stats.mana.Percentage < threshold,
+                ActivatorConditionType.ResourceAbove   => _pawn.Stats.mana.Percentage > threshold,
+                ActivatorConditionType.FirstXSeconds   => false,
+                ActivatorConditionType.EnemyCountBelow => false,
+                ActivatorConditionType.AllyCountBelow  => false,
                 ActivatorConditionType.HasStatusEffect => false,
                 _                                      => false,
             };

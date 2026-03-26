@@ -16,8 +16,9 @@ namespace Code.Runtime.Pawns
         [field: SerializeField] public PawnTeam   Team   { get; private set; }
         [SerializeField, ReadOnly, PreviewIcon] private Sprite _icon;
         [SerializeField] private PawnEffect _pawnEffects;
-        [SerializeField] private PawnResourceView  _healthView;
-        [SerializeField] private PawnResourceView  _manaView;
+        [SerializeField] private PawnResourceView _healthView;
+        [SerializeField] private PawnResourceView _manaView;
+        [SerializeField] private ChainStateController _chainStateController;
 
         public IPawnStats            Stats            { get; private set; }
         public ITetrisContainer      Inventory        { get; private set; }
@@ -31,6 +32,7 @@ namespace Code.Runtime.Pawns
         {
             SpawnPawn();
             CombatController = new PawnCombatController(this);
+            _chainStateController = new ChainStateController(Inventory, Stats);
         }
 
         [ContextMenu("Spawn")]

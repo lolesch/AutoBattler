@@ -178,12 +178,20 @@ namespace Code.Runtime.UI.Inventory
                 .Where(c => c.Root == item || c.Modifiers.Contains(item))
                 .ToList();
             var isChained = chains.Count > 0;
-
-            AppendItemStats(sb, item, isChained);
+            
+            var primaryChainForPayload = topology.Chains.FirstOrDefault(c => c.Root == item || c.Modifiers.Contains(item));
+            var isPayload              = primaryChainForPayload != null && IsPayload(item, primaryChainForPayload);
+            AppendItemStats(sb, item, isChained, isPayload);
 
             if (!isChained)
             {
-                //sb.AppendLine("  (not connected)");
+                if (item is IWeaponItem w)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("<b>Attack:</b>");
+                    sb.AppendLine($"  dmg  {(float)w.Damage:F1}   every {(float)w.AttackSpeed:F1}s");
+                    sb.AppendLine($"  cost {(float)w.ResourceCost:F1}   gen  {(float)w.ResourceGenOnHit:F1}");
+                }
                 return sb.ToString().TrimEnd();
             }
 
@@ -270,9 +278,9 @@ namespace Code.Runtime.UI.Inventory
             float costFinal = weapon.ResourceCost;
             float genFinal  = weapon.ResourceGenOnHit;
 
-            sb.AppendLine("<b>Output:</b>");
-            sb.AppendLine($"  dmg  {Stat(dmgBase,  dmgFinal,  detailed)}   " +
-                          $"spd  {Stat(spdBase,  spdFinal,  detailed)}");
+            sb.AppendLine("<b>Attack:</b>");
+            sb.AppendLine($"  dmg  {Stat(dmgBase, dmgFinal, detailed)}   " +
+                          $"{FireRate(chain, spdBase, spdFinal, detailed)}");
             sb.AppendLine($"  cost {Stat(costBase, costFinal, detailed, invert: true)}   " +
                           $"gen  {Stat(genBase,  genFinal,  detailed)}");
 
@@ -306,7 +314,7 @@ namespace Code.Runtime.UI.Inventory
 
         private static void ApplyActivator(IActivatorItem act, IWeaponItem weapon)
         {
-            var mod = new Modifier(act.Value, act.ModifierType, act.Guid);
+            var mod = new Modifier(act.WeaponValue, act.WeaponModifierType, act.Guid);
             switch (act.WeaponStat)
             {
                 case FiringStatType.AttackSpeed:  weapon.AttackSpeed.AddModifier(mod);  break;
@@ -339,7 +347,7 @@ namespace Code.Runtime.UI.Inventory
 
         // ── Item stats display ────────────────────────────────────────────
 
-        private static void AppendItemStats(StringBuilder sb, ITetrisItem item, bool isChained)
+        private static void AppendItemStats(StringBuilder sb, ITetrisItem item, bool isChained, bool isPayload)
         {
             switch (item)
             {
@@ -349,52 +357,76 @@ namespace Code.Runtime.UI.Inventory
                     if (w.PayloadCondition != PayloadConditionType.None)
                     {
                         sb.AppendLine();
-                        sb.AppendLine($"  payload:   {w.PayloadCondition}  ×{w.PayloadDamageMultiplier:F2}");
-                        sb.AppendLine($"  threshold: {w.PayloadConditionThreshold:F2}");
+                        var payloadStr = $"  payload:   {w.PayloadCondition}  ×{w.PayloadDamageMultiplier:F2}\n" +
+                                         $"  threshold: {w.PayloadConditionThreshold:F2}";
+                        sb.AppendLine(isPayload ? $"<b>{payloadStr}</b>" : payloadStr.Colored(LightGray));
                     }
                     break;
 
-                case IAmplifierItem amp:
+                case IAmplifierItem or IActivatorItem or IReactorItem or IConverterItem:
                 {
-                    var weaponMod    = amp.WeaponModifier;
-                    var chainedStr   = $"chained:   {weaponMod.AttackStat} {weaponMod.Modifier}";
-                    var hasAffix     = amp is IStatModifier sm && sm.Affixes.Count > 0;
-                    var unchainedStr = hasAffix
-                        ? $"unchained: {((IStatModifier)amp).Affixes[0].stat} {((IStatModifier)amp).Affixes[0].modifier}"
+                    var chainedDesc  = ChainedDescription(item);
+                    var sm           = item as IStatModifier;
+                    var unchainedStr = sm?.Affixes.Count > 0
+                        ? $"unchained: {sm.Affixes[0].stat} {sm.Affixes[0].modifier}"
                         : null;
 
                     if (isChained)
                     {
-                        sb.AppendLine($"  <b>{chainedStr}</b>");
+                        sb.AppendLine($"  <b>{chainedDesc}</b>");
                         if (unchainedStr != null)
                             sb.AppendLine($"  {unchainedStr.Colored(LightGray)}");
                     }
                     else
                     {
-                        sb.AppendLine($"  {chainedStr.Colored(LightGray)}");
+                        sb.AppendLine($"  {chainedDesc.Colored(LightGray)}");
                         if (unchainedStr != null)
                             sb.AppendLine($"  <b>{unchainedStr}</b>");
                     }
                     break;
                 }
-
-                case IActivatorItem act:
-                    sb.AppendLine($"  <b>{act.WeaponStat} {FormatModifier(act.Value, act.ModifierType)}</b>");
-                    sb.AppendLine($"  when: {(act.ConditionType == ActivatorConditionType.Always ? "always" : $"{act.ConditionType} {act.ConditionThreshold:F2}")}");
-                    break;
-
-                case IReactorItem reactor:
-                    sb.AppendLine($"  <b>{reactor.ReactorType}</b>");
-                    break;
-
-                case IConverterItem:
-                    sb.AppendLine("  (converter — not yet implemented)");
-                    break;
             }
         }
 
         // ── Helpers ───────────────────────────────────────────────────────
 
+        private static string FireRate(IItemChain chain, float before, float after, bool detailed)
+        {
+            var reactor = chain.Root as IReactorItem
+                          ?? chain.Modifiers.OfType<IReactorItem>().FirstOrDefault();
+
+            var valueStr = Mathf.Approximately(before, after)
+                ? $"{after:F1}s"
+                : detailed
+                    ? $"{before:F1}s → {Stat(before, after, detailed)}s"
+                    : $"{Stat(before, after, detailed)}s";
+
+            return reactor != null
+                ? $"{reactor.ReactorType} ({valueStr})"
+                : $"every {valueStr}";
+        }
+        
+        private static string ChainedDescription(ITetrisItem item) => item switch
+        {
+            IAmplifierItem amp => 
+                $"chained:   {amp.WeaponModifier.AttackStat} {amp.WeaponModifier.Modifier}",
+
+            IActivatorItem act =>
+                $"chained:   {act.WeaponStat} {FormatModifier(act.WeaponValue, act.WeaponModifierType)}" +
+                $"  when: {ConditionString(act.ConditionType, act.ConditionThreshold)}",
+
+            IReactorItem reactor =>
+                $"chained:   {reactor.ReactorType}" +
+                $"  when: {ConditionString(reactor.ConditionType, reactor.ConditionThreshold)}",
+
+            IConverterItem => "chained:   (converter — not yet implemented)",
+
+            _ => string.Empty,
+        };
+
+        private static string ConditionString(ActivatorConditionType type, float threshold) =>
+            type == ActivatorConditionType.Always ? "always" : $"{type} {threshold:F2}";
+        
         private static List<ITetrisItem> OrderedItems(IItemChain chain)
         {
             var list = new List<ITetrisItem> { chain.Root };

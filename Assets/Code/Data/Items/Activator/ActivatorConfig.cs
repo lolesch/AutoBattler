@@ -4,37 +4,51 @@ using UnityEngine;
 namespace Code.Data.Items.Activator
 {
     /// <summary>
-    /// Activator applies a conditional stat modifier to the attached weapon's firing stats.
-    /// The weapon always fires on its default timer — the Activator modifies AttackSpeed or
-    /// ResourceCost while its condition is continuously true.
-    /// Does not extend StatItemConfig — no standalone pawn stat effect.
+    /// Unchained: applies a standalone pawn stat modifier (from StatItemConfig base).
+    /// Chained: applies a conditional FiringStatType modifier to the attached weapon.
     /// </summary>
     [CreateAssetMenu(fileName = "ActivatorConfig", menuName = "Configs/Items/Activator")]
-    public sealed class ActivatorConfig : ItemConfig
+    public sealed class ActivatorConfig : StatItemConfig
     {
-        [Header("Activator — Stat Modification")]
-        [Tooltip("Only AttackSpeed and ResourceCost are valid targets for Activators.")]
+        [field: Header("Chain — Firing Stat Modification")]
+        [field: Tooltip("Only AttackSpeed and ResourceCost are valid targets for Activators.")]
         [field: SerializeField] public FiringStatType          WeaponStat           { get; private set; }
-        [field: SerializeField] public float                   Value                { get; private set; }
-        [field: SerializeField] public ModifierType            ModifierType         { get; private set; }
+        [field: SerializeField] public float                   WeaponValue          { get; private set; }
+        [field: SerializeField] public ModifierType            WeaponModifierType   { get; private set; }
 
-        [Header("Activator — Condition")]
+        [field: Header("Chain — Condition")]
         [field: SerializeField] public ActivatorConditionType  ConditionType        { get; private set; }
         [field: SerializeField] public float                   ConditionThreshold   { get; private set; }
 
+        [SerializeField, HideInInspector] private string debugWeaponModifierString;
+
         protected override int MaxConnectors => 2;
+
+        protected override void OnValidate()
+        {
+            base.OnValidate();
+            var mod = WeaponModifierType switch
+            {
+                ModifierType.Overwrite   => $"= {WeaponValue:0.###;-0.###}",
+                ModifierType.FlatAdd     => $"{WeaponValue:+0.###;0.###;-0.###}",
+                ModifierType.PercentAdd  => $"{WeaponValue:+0.###;0.###;-0.###} %",
+                ModifierType.PercentMult => $"* {WeaponValue:0.###;-0.###} %",
+                var _                    => $"?? {WeaponValue:+0.###;-0.###;0.###}",
+            };
+            debugWeaponModifierString = $"{WeaponStat} {mod}";
+        }
     }
 
     public enum ActivatorConditionType
     {
-        Always,           // unconditional — modifier always applies
-        HpBelow,          // owning unit HP% < threshold
-        HpAbove,          // owning unit HP% > threshold
-        ResourceBelow,    // owning unit resource% < threshold
-        ResourceAbove,    // owning unit resource% > threshold
-        FirstXSeconds,    // active during first X seconds of combat (threshold = seconds)
-        EnemyCountBelow,  // fewer than X enemies alive (threshold = count)
-        AllyCountBelow,   // fewer than X allies alive (threshold = count)
+        Always,
+        HpBelow,
+        HpAbove,
+        ResourceBelow,
+        ResourceAbove,
+        FirstXSeconds,    // stub — needs combat start timestamp
+        EnemyCountBelow,  // stub — needs coordinator
+        AllyCountBelow,   // stub — needs coordinator
         HasStatusEffect,  // stub — always false until status system exists
     }
 }

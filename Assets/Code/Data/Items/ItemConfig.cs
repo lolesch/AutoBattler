@@ -17,8 +17,8 @@ namespace Code.Data.Items
         [field: SerializeField, PreviewIcon] public Sprite       Icon  { get; private set; }
         [field: SerializeField]              public RectGridBool Shape { get; private set; }
 
-        [Header("Chain Connectors")]
-        [Tooltip("Length is fixed to MaxConnectors. Add/remove via subclass override.")]
+        [field: Header("Chain Connectors")]
+        [field: Tooltip("Length is fixed to MaxConnectors. Add/remove via subclass override.")]
         [SerializeField] private List<ChainConnector> connectors = new();
 
         public IReadOnlyList<ChainConnector> Connectors   => connectors;
@@ -57,7 +57,7 @@ namespace Code.Data.Items
     /// </summary>
     public abstract class StatItemConfig : ItemConfig, IStatItemData
     {
-        [Header("Standalone Effect")]
+        [field: Header("Standalone Effect")]
         [field: SerializeField] public StatType     StatType     { get; private set; }
         [field: SerializeField] public float        Value        { get; private set; }
         [field: SerializeField] public ModifierType ModifierType { get; private set; }

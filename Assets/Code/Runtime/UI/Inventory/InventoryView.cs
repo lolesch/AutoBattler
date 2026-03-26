@@ -146,10 +146,12 @@ namespace Code.Runtime.UI.Inventory
                     foreach (var (slotPos, direction) in upstreamSet)
                         _slots[slotIndex].SetPipState(slotPos, direction, PipState.Dash);
 
-                if (topology.Roots.Contains(item) &&
-                    topology.UpstreamConnectors.TryGetValue(item, out var rootUpstream))
-                    foreach (var (slotPos, direction) in rootUpstream)
+                if (topology.Roots.Contains(item))
+                {
+                    var itemPos = _container.Contents.First(kvp => kvp.Value == item).Key;
+                    foreach (var (slotPos, direction) in item.GetGridConnectors(itemPos))
                         _slots[slotIndex].SetPipState(slotPos, direction, PipState.RootDash);
+                }
             }
         }
     }
