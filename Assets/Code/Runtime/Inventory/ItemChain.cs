@@ -43,11 +43,9 @@ namespace Code.Runtime.Inventory
             {
                 if (item is not IAmplifierItem amp) continue;
                 var mod = amp.WeaponModifier;
-                switch (mod.AttackStat)
-                {
-                    case AttackStatType.Damage:           weapon.Damage.AddModifier(mod.Modifier);           break;
-                    case AttackStatType.ResourceGenOnHit: weapon.ResourceGenOnHit.AddModifier(mod.Modifier); break;
-                }
+                
+                WeaponUtils.GetOutputStat(weapon, mod.AttackStat)
+                    .AddModifier(mod.Modifier);
             }
 
             _modifiersApplied = true;
@@ -64,14 +62,10 @@ namespace Code.Runtime.Inventory
             foreach (var item in Modifiers)
             {
                 if (item is not IAmplifierItem amp) continue;
+            
                 var mod = amp.WeaponModifier;
-                switch (mod.AttackStat)
-                {
-                    case AttackStatType.Damage:           weapon.Damage.TryRemoveAllModifiersBySource(amp.Guid);           break;
-                    case AttackStatType.ResourceGenOnHit: weapon.ResourceGenOnHit.TryRemoveAllModifiersBySource(amp.Guid); break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                WeaponUtils.GetOutputStat(weapon, mod.AttackStat)
+                    .TryRemoveModifier(mod.Modifier);
             }
 
             _modifiersApplied = false;

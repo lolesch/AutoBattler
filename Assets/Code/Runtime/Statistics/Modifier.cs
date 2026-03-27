@@ -9,7 +9,7 @@ namespace Code.Runtime.Statistics
     {
         [SerializeField] private float value;
         [SerializeField] private ModifierType type;
-        [field:SerializeField] public Guid source { get; }
+        [field: SerializeField] public Guid source { get; private set; }
 
         public Modifier( float value, ModifierType type, Guid source )
         {

@@ -4,6 +4,7 @@ using Code.Runtime.Grids.RectGridInspector;
 using Submodules.Utility.Attributes;
 using Submodules.Utility.Extensions;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Code.Data.Items
 {
@@ -59,7 +60,8 @@ namespace Code.Data.Items
     {
         [field: Header("Standalone Effect")]
         [field: SerializeField] public StatType     StatType     { get; private set; }
-        [field: SerializeField] public float        Value        { get; private set; }
+        [field: FormerlySerializedAs("<Value>k__BackingField")] 
+        [field: SerializeField] public float        StatValue    { get; private set; }
         [field: SerializeField] public ModifierType ModifierType { get; private set; }
 
         [SerializeField, HideInInspector] private string debugStatModifierString;
@@ -69,11 +71,11 @@ namespace Code.Data.Items
             base.OnValidate();
             var mod = ModifierType switch
             {
-                ModifierType.Overwrite   => $"= {Value:0.###;-0.###}",
-                ModifierType.FlatAdd     => $"{Value:+0.###;0.###;-0.###}",
-                ModifierType.PercentAdd  => $"{Value:+0.###;0.###;-0.###} %",
-                ModifierType.PercentMult => $"* {Value:0.###;-0.###} %",
-                var _                    => $"?? {Value:+ 0.###;- 0.###;0.###}",
+                ModifierType.Overwrite   => $"= {StatValue:0.###;-0.###}",
+                ModifierType.FlatAdd     => $"{StatValue:+0.###;0.###;-0.###}",
+                ModifierType.PercentAdd  => $"{StatValue:+0.###;0.###;-0.###} %",
+                ModifierType.PercentMult => $"* {StatValue:0.###;-0.###} %",
+                var _                    => $"?? {StatValue:+ 0.###;- 0.###;0.###}",
             };
             debugStatModifierString = $"{StatType.ToDescription()} {mod}";
         }
@@ -89,7 +91,7 @@ namespace Code.Data.Items
     public interface IStatItemData : IItemData
     {
         StatType     StatType     { get; }
-        float        Value        { get; }
+        float        StatValue        { get; }
         ModifierType ModifierType { get; }
     }
 }

@@ -289,46 +289,39 @@ namespace Code.Runtime.UI.Inventory
             if (hoveredAmp       != null) RemoveAmp(hoveredAmp, weapon);
             if (hoveredActivator != null) RemoveActivator(hoveredActivator, weapon);
         }
-
+        
         // ── Modifier apply/remove ─────────────────────────────────────────
 
         private static void ApplyAmp(IAmplifierItem amp, IWeaponItem weapon)
         {
             var mod = amp.WeaponModifier;
-            switch (mod.AttackStat)
-            {
-                case AttackStatType.Damage:           weapon.Damage.AddModifier(mod.Modifier);           break;
-                case AttackStatType.ResourceGenOnHit: weapon.ResourceGenOnHit.AddModifier(mod.Modifier); break;
-            }
+            WeaponUtils.GetOutputStat(weapon, mod.AttackStat)
+                .AddModifier(mod.Modifier);
         }
 
         private static void RemoveAmp(IAmplifierItem amp, IWeaponItem weapon)
         {
             var mod = amp.WeaponModifier;
-            switch (mod.AttackStat)
-            {
-                case AttackStatType.Damage:           weapon.Damage.TryRemoveAllModifiersBySource(amp.Guid);           break;
-                case AttackStatType.ResourceGenOnHit: weapon.ResourceGenOnHit.TryRemoveAllModifiersBySource(amp.Guid); break;
-            }
+            WeaponUtils.GetOutputStat(weapon, mod.AttackStat)
+                .TryRemoveModifier(mod.Modifier);
         }
 
         private static void ApplyActivator(IActivatorItem act, IWeaponItem weapon)
         {
-            var mod = new Modifier(act.WeaponValue, act.WeaponModifierType, act.Guid);
-            switch (act.WeaponStat)
-            {
-                case FiringStatType.AttackSpeed:  weapon.AttackSpeed.AddModifier(mod);  break;
-                case FiringStatType.ResourceCost: weapon.ResourceCost.AddModifier(mod); break;
-            }
+            WeaponUtils.GetFiringStat(weapon, act.FiringStat).AddModifier(
+                new Modifier(act.FiringValue, act.FiringModifierType, act.Guid));
+            if (act.OutputValue != 0)
+                WeaponUtils.GetOutputStat(weapon, act.OutputStat).AddModifier(
+                    new Modifier(act.OutputValue, act.OutputModifierType, act.Guid));
         }
 
         private static void RemoveActivator(IActivatorItem act, IWeaponItem weapon)
         {
-            switch (act.WeaponStat)
-            {
-                case FiringStatType.AttackSpeed:  weapon.AttackSpeed.TryRemoveAllModifiersBySource(act.Guid);  break;
-                case FiringStatType.ResourceCost: weapon.ResourceCost.TryRemoveAllModifiersBySource(act.Guid); break;
-            }
+            WeaponUtils.GetFiringStat(weapon, act.FiringStat).TryRemoveModifier(
+                new Modifier(act.FiringValue, act.FiringModifierType, act.Guid));
+            if (act.OutputValue != 0)
+                WeaponUtils.GetOutputStat(weapon, act.OutputStat).TryRemoveModifier(
+                    new Modifier(act.OutputValue, act.OutputModifierType, act.Guid));
         }
 
         // ── Stat formatting ───────────────────────────────────────────────
@@ -412,7 +405,8 @@ namespace Code.Runtime.UI.Inventory
                 $"chained:   {amp.WeaponModifier.AttackStat} {amp.WeaponModifier.Modifier}",
 
             IActivatorItem act =>
-                $"chained:   {act.WeaponStat} {FormatModifier(act.WeaponValue, act.WeaponModifierType)}" +
+                $"chained:   {act.FiringStat} {FormatModifier(act.FiringValue, act.FiringModifierType)}" +
+                (act.OutputValue != 0 ? $" ↔ {act.OutputStat} {FormatModifier(act.OutputValue, act.OutputModifierType)}" : "") +
                 $"  when: {ConditionString(act.ConditionType, act.ConditionThreshold)}",
 
             IReactorItem reactor =>

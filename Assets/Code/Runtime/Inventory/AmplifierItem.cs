@@ -19,7 +19,7 @@ namespace Code.Runtime.Inventory
 
             _affixes.Add(new PawnStatModifier(
                 config.StatType,
-                new Modifier(config.Value, config.ModifierType, Guid)));
+                new Modifier(config.StatValue, config.ModifierType, Guid)));
         }
 
         public override void Use() { }

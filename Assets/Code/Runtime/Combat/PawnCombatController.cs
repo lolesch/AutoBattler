@@ -89,28 +89,7 @@ namespace Code.Runtime.Combat
         {
             var weapon     = chain.Weapon;
             var activators = GetActivators(chain);
-            var applied    = new HashSet<IActivatorItem>();
-
-            void EvaluateActivators()
-            {
-                foreach (var act in activators)
-                {
-                    var stat         = GetFiringStat(weapon, act.WeaponStat);
-                    var conditionMet = EvaluateCondition(act.ConditionType, act.ConditionThreshold);
-                    var isApplied    = applied.Contains(act);
-
-                    if (conditionMet && !isApplied)
-                    {
-                        stat.AddModifier(new Modifier(act.WeaponValue, act.WeaponModifierType, act.Guid));
-                        applied.Add(act);
-                    }
-                    else if (!conditionMet && isApplied)
-                    {
-                        stat.TryRemoveAllModifiersBySource(act.Guid);
-                        applied.Remove(act);
-                    }
-                }
-            }
+            var applied    = new Dictionary<IActivatorItem, (Modifier firing, Modifier output)>();
 
             EvaluateActivators();
 
@@ -128,10 +107,44 @@ namespace Code.Runtime.Combat
             _cleanupActions.Add(() =>
             {
                 timer.Stop();
-                foreach (var act in applied)
-                    GetFiringStat(weapon, act.WeaponStat).TryRemoveAllModifiersBySource(act.Guid);
+                foreach (var (act, (firingMod, outputMod)) in applied)
+                {
+                    WeaponUtils.GetFiringStat(weapon, act.FiringStat).TryRemoveModifier(firingMod);
+                    if (act.OutputValue != 0)
+                        WeaponUtils.GetOutputStat(weapon, act.OutputStat).TryRemoveModifier(outputMod);
+                }
                 applied.Clear();
             });
+            return;
+
+            void EvaluateActivators()
+            {
+                foreach (var act in activators)
+                {
+                    var firingStat = WeaponUtils.GetFiringStat(weapon, act.FiringStat);
+                    var outputStat = WeaponUtils.GetOutputStat(weapon,  act.OutputStat);
+                    var conditionMet = EvaluateCondition(act.ConditionType, act.ConditionThreshold);
+                    var isApplied    = applied.ContainsKey(act);
+
+                    if (conditionMet && !isApplied)
+                    {
+                        var firingMod = new Modifier( act.FiringValue, act.FiringModifierType, act.Guid);
+                        var outputMod = new Modifier( act.OutputValue, act.OutputModifierType, act.Guid);
+                        firingStat.AddModifier(firingMod);
+                        if (act.OutputValue != 0)
+                            outputStat.AddModifier(outputMod);
+                        applied[act] = (firingMod, outputMod);
+                    }
+                    else if (!conditionMet && isApplied)
+                    {
+                        var (firingMod, outputMod) = applied[act];
+                        firingStat.TryRemoveModifier(firingMod);
+                        if (act.OutputValue != 0)
+                            outputStat.TryRemoveModifier(outputMod);
+                        applied.Remove(act);
+                    }
+                }
+            }
         }
 
         private void BuildReactor(IReactorItem reactor, IItemChain chain)
@@ -230,13 +243,6 @@ namespace Code.Runtime.Combat
 
         private bool CanFire(IWeaponItem weapon) =>
             weapon.ResourceCost <= 0 || _pawn.Stats.mana.CanSpend(weapon.ResourceCost);
-
-        private static MutableFloat GetFiringStat(IWeaponItem weapon, FiringStatType stat) => stat switch
-        {
-            FiringStatType.AttackSpeed  => weapon.AttackSpeed,
-            FiringStatType.ResourceCost => weapon.ResourceCost,
-            _                           => throw new ArgumentOutOfRangeException(nameof(stat), stat, null),
-        };
 
         private static List<IActivatorItem> GetActivators(IItemChain chain)
         {

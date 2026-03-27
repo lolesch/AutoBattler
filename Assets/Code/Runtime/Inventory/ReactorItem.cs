@@ -21,9 +21,9 @@ namespace Code.Runtime.Inventory
             ConditionType      = config.ConditionType;
             ConditionThreshold = config.ConditionThreshold;
 
-            if (config.Value != 0)
+            if (config.StatValue != 0)
                 _affixes.Add(new PawnStatModifier(config.StatType,
-                    new Modifier(config.Value, config.ModifierType, Guid)));
+                    new Modifier(config.StatValue, config.ModifierType, Guid)));
         }
 
         public override void Use() { }

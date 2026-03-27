@@ -24,12 +24,15 @@ MonoBehaviour:
   - <LocalPosition>k__BackingField: {x: 1, y: 0}
     <Direction>k__BackingField: 0
   <StatType>k__BackingField: 1
-  <Value>k__BackingField: -50
+  <StatValue>k__BackingField: -50
   <ModifierType>k__BackingField: 2
   debugStatModifierString: Damage 50 %
   <WeaponStat>k__BackingField: 0
   <WeaponValue>k__BackingField: 5
   <WeaponModifierType>k__BackingField: 0
-  <ConditionType>k__BackingField: 0
-  <ConditionThreshold>k__BackingField: 0
+  <OutputStat>k__BackingField: 0
+  <OutputValue>k__BackingField: 20
+  <OutputModifierType>k__BackingField: 2
+  <ConditionType>k__BackingField: 1
+  <ConditionThreshold>k__BackingField: 0.5
   debugWeaponModifierString: AttackSpeed = 5

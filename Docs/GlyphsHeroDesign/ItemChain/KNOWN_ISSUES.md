@@ -27,7 +27,7 @@
 ### Item Chain — Not Yet Implemented
 
 - [ ] Converters + typed signal propagation (damage type, target type, delivery mode, resource type)
-- [ ] Shifter cross-axis trading — `ActivatorItem` currently only modifies `FiringStatType`; needs a second stat field for the output side of the trade
+- [x] Shifter cross-axis trading — `ActivatorItem` currently only modifies `FiringStatType`; needs a second stat field for the output side of the trade
 - [ ] Reactor ally/nearby events — `OnAllyAttacks`, `OnAllyKills`, `OnNearbyEnemyDies` require coordinator access to other pawns
 - [ ] Shifter time/count conditions — `FirstXSeconds` needs combat start timestamp; `EnemyCountBelow`/`AllyCountBelow` need coordinator access
 - [ ] Connection type validation — Reactors connect only to weapons; Shifters connect to Reactors/Shifters/weapons. Not yet enforced beyond max-connection limit in ItemConfig.

@@ -7,26 +7,32 @@ namespace Code.Runtime.Inventory
 {
     public sealed class ActivatorItem : TetrisItem, IActivatorItem, IStatModifier
     {
-        public FiringStatType          WeaponStat          { get; }
-        public float                   WeaponValue         { get; }
-        public ModifierType            WeaponModifierType  { get; }
+        public FiringStatType          FiringStat          { get; }
+        public float                   FiringValue         { get; }
+        public ModifierType            FiringModifierType  { get; }
         public ActivatorConditionType  ConditionType       { get; }
         public float                   ConditionThreshold  { get; }
+        public AttackStatType          OutputStat          { get; }
+        public float                   OutputValue         { get; }
+        public ModifierType            OutputModifierType  { get; }
 
         public IReadOnlyList<PawnStatModifier> Affixes => _affixes;
         private readonly List<PawnStatModifier> _affixes = new();
 
         public ActivatorItem(ActivatorConfig config, RotationType rotation = RotationType.None) : base(config, rotation)
         {
-            WeaponStat         = config.WeaponStat;
-            WeaponValue        = config.WeaponValue;
-            WeaponModifierType = config.WeaponModifierType;
+            FiringStat         = config.WeaponStat;
+            FiringValue        = config.WeaponValue;
+            FiringModifierType = config.WeaponModifierType;
             ConditionType      = config.ConditionType;
             ConditionThreshold = config.ConditionThreshold;
+            OutputStat         = config.OutputStat;
+            OutputValue        = config.OutputValue;
+            OutputModifierType = config.OutputModifierType;
 
-            if (config.Value != 0)
+            if (config.StatValue != 0)
                 _affixes.Add(new PawnStatModifier(config.StatType,
-                    new Modifier(config.Value, config.ModifierType, Guid)));
+                    new Modifier(config.StatValue, config.ModifierType, Guid)));
         }
 
         public override void Use() { }
@@ -48,10 +54,15 @@ namespace Code.Runtime.Inventory
 
     public interface IActivatorItem : ITetrisItem
     {
-        FiringStatType         WeaponStat         { get; }
-        float                  WeaponValue        { get; }
-        ModifierType           WeaponModifierType { get; }
         ActivatorConditionType ConditionType      { get; }
         float                  ConditionThreshold { get; }
+        
+        FiringStatType         FiringStat         { get; }
+        float                  FiringValue        { get; }
+        ModifierType           FiringModifierType { get; }
+        
+        AttackStatType         OutputStat         { get; }
+        float                  OutputValue        { get; }
+        ModifierType           OutputModifierType { get; }
     }
 }

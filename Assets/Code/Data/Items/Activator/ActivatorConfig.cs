@@ -15,7 +15,13 @@ namespace Code.Data.Items.Activator
         [field: SerializeField] public FiringStatType          WeaponStat           { get; private set; }
         [field: SerializeField] public float                   WeaponValue          { get; private set; }
         [field: SerializeField] public ModifierType            WeaponModifierType   { get; private set; }
-
+        
+        [field: Header("Chain — Output Stat Trade")]
+        [field: Tooltip("The output stat traded against the firing stat modification.")]
+        [field: SerializeField] public AttackStatType OutputStat          { get; private set; }
+        [field: SerializeField] public float          OutputValue         { get; private set; }
+        [field: SerializeField] public ModifierType   OutputModifierType  { get; private set; }
+        
         [field: Header("Chain — Condition")]
         [field: SerializeField] public ActivatorConditionType  ConditionType        { get; private set; }
         [field: SerializeField] public float                   ConditionThreshold   { get; private set; }
@@ -36,6 +42,9 @@ namespace Code.Data.Items.Activator
                 var _                    => $"?? {WeaponValue:+0.###;-0.###;0.###}",
             };
             debugWeaponModifierString = $"{WeaponStat} {mod}";
+            
+            if (OutputValue == 0)
+                Debug.LogWarning($"[{name}] Shifter OutputValue is 0 — no output trade configured. Every firing stat change must cost something on the other axis.", this);
         }
     }
 
