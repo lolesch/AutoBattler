@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Code.Data.Enums;
-using Code.Data.Items.Activator;
+using Code.Data.Items.Shifter;
 using Code.Runtime.Inventory;
 using Code.Runtime.Statistics;
 using Submodules.Utility.Extensions;
@@ -228,7 +228,7 @@ namespace Code.Runtime.UI.Inventory
                 isFirst = false;
             }
 
-            var isTrigger = hovered is IActivatorItem or IReactorItem;
+            var isTrigger = hovered is IShifterItem or IReactorItem;
             if (isTrigger)
             {
                 AppendEntry(hovered);
@@ -258,9 +258,9 @@ namespace Code.Runtime.UI.Inventory
             var hovIndex = ordered.IndexOf(hovered);
 
             var ampsBefore       = ordered.Take(hovIndex).OfType<IAmplifierItem>().ToList();
-            var activatorsBefore = ordered.Take(hovIndex).OfType<IActivatorItem>().ToList();
+            var activatorsBefore = ordered.Take(hovIndex).OfType<IShifterItem>().ToList();
             var hoveredAmp       = hovered as IAmplifierItem;
-            var hoveredActivator = hovered as IActivatorItem;
+            var hoveredActivator = hovered as IShifterItem;
 
             foreach (var amp in ampsBefore)       ApplyAmp(amp, weapon);
             foreach (var act in activatorsBefore) ApplyActivator(act, weapon);
@@ -294,34 +294,28 @@ namespace Code.Runtime.UI.Inventory
 
         private static void ApplyAmp(IAmplifierItem amp, IWeaponItem weapon)
         {
-            var mod = amp.WeaponModifier;
-            WeaponUtils.GetOutputStat(weapon, mod.AttackStat)
-                .AddModifier(mod.Modifier);
+            var mod = amp.weaponAttackModifier;
+            weapon.GetAttackStat(mod.stat)
+                .AddModifier(mod.modifier);
         }
 
         private static void RemoveAmp(IAmplifierItem amp, IWeaponItem weapon)
         {
-            var mod = amp.WeaponModifier;
-            WeaponUtils.GetOutputStat(weapon, mod.AttackStat)
-                .TryRemoveModifier(mod.Modifier);
+            var mod = amp.weaponAttackModifier;
+            weapon.GetAttackStat(mod.stat)
+                .TryRemoveModifier(mod.modifier);
         }
 
-        private static void ApplyActivator(IActivatorItem act, IWeaponItem weapon)
+        private static void ApplyActivator(IShifterItem act, IWeaponItem weapon)
         {
-            WeaponUtils.GetFiringStat(weapon, act.FiringStat).AddModifier(
-                new Modifier(act.FiringValue, act.FiringModifierType, act.Guid));
-            if (act.OutputValue != 0)
-                WeaponUtils.GetOutputStat(weapon, act.OutputStat).AddModifier(
-                    new Modifier(act.OutputValue, act.OutputModifierType, act.Guid));
+            weapon.GetUsageStat(act.usageMod.stat).AddModifier(act.usageMod.modifier);
+            weapon.GetAttackStat(act.attackMod.stat).AddModifier(act.attackMod.modifier);
         }
 
-        private static void RemoveActivator(IActivatorItem act, IWeaponItem weapon)
+        private static void RemoveActivator(IShifterItem act, IWeaponItem weapon)
         {
-            WeaponUtils.GetFiringStat(weapon, act.FiringStat).TryRemoveModifier(
-                new Modifier(act.FiringValue, act.FiringModifierType, act.Guid));
-            if (act.OutputValue != 0)
-                WeaponUtils.GetOutputStat(weapon, act.OutputStat).TryRemoveModifier(
-                    new Modifier(act.OutputValue, act.OutputModifierType, act.Guid));
+            weapon.GetUsageStat(act.usageMod.stat).TryRemoveModifier(act.usageMod.modifier);
+            weapon.GetAttackStat(act.attackMod.stat).TryRemoveModifier(act.attackMod.modifier);
         }
 
         // ── Stat formatting ───────────────────────────────────────────────
@@ -347,21 +341,21 @@ namespace Code.Runtime.UI.Inventory
                 case IWeaponItem w:
                     sb.AppendLine($"  dmg  {(float)w.Damage:F1}   spd  {(float)w.AttackSpeed:F1}");
                     sb.AppendLine($"  cost {(float)w.ResourceCost:F1}   gen  {(float)w.ResourceGenOnHit:F1}");
-                    if (w.PayloadCondition != PayloadConditionType.None)
+                    if (w.PayloadCondition != ConditionType.None)
                     {
                         sb.AppendLine();
-                        var payloadStr = $"  payload:   {w.PayloadCondition}  ×{w.PayloadDamageMultiplier:F2}\n" +
+                        var payloadStr = $"  payload:   {w.PayloadCondition} \n" +
                                          $"  threshold: {w.PayloadConditionThreshold:F2}";
                         sb.AppendLine(isPayload ? $"<b>{payloadStr}</b>" : payloadStr.Colored(LightGray));
                     }
                     break;
 
-                case IAmplifierItem or IActivatorItem or IReactorItem or IConverterItem:
+                case IAmplifierItem or IShifterItem or IReactorItem or IConverterItem:
                 {
                     var chainedDesc  = ChainedDescription(item);
                     var sm           = item as IStatModifier;
                     var unchainedStr = sm?.Affixes.Count > 0
-                        ? $"unchained: {sm.Affixes[0].stat} {sm.Affixes[0].modifier}"
+                        ? $"unchained: {sm.Affixes[0].PawnStat} {sm.Affixes[0].Modifier}"
                         : null;
 
                     if (isChained)
@@ -402,24 +396,20 @@ namespace Code.Runtime.UI.Inventory
         private static string ChainedDescription(ITetrisItem item) => item switch
         {
             IAmplifierItem amp => 
-                $"chained:   {amp.WeaponModifier.AttackStat} {amp.WeaponModifier.Modifier}",
+                $"chained:   {amp.weaponAttackModifier.stat} {amp.weaponAttackModifier.modifier}",
 
-            IActivatorItem act =>
-                $"chained:   {act.FiringStat} {FormatModifier(act.FiringValue, act.FiringModifierType)}" +
-                (act.OutputValue != 0 ? $" ↔ {act.OutputStat} {FormatModifier(act.OutputValue, act.OutputModifierType)}" : "") +
-                $"  when: {ConditionString(act.ConditionType, act.ConditionThreshold)}",
+            IShifterItem act =>
+                $"chained:   {act.usageMod.stat} {act.usageMod.modifier}" +
+                $" ↔ {act.attackMod.stat} {act.attackMod.modifier}",
 
             IReactorItem reactor =>
                 $"chained:   {reactor.ReactorType}" +
-                $"  when: {ConditionString(reactor.ConditionType, reactor.ConditionThreshold)}",
+                "  when: ",
 
             IConverterItem => "chained:   (converter — not yet implemented)",
 
             _ => string.Empty,
         };
-
-        private static string ConditionString(ActivatorConditionType type, float threshold) =>
-            type == ActivatorConditionType.Always ? "always" : $"{type} {threshold:F2}";
         
         private static List<ITetrisItem> OrderedItems(IItemChain chain)
         {
@@ -449,18 +439,9 @@ namespace Code.Runtime.UI.Inventory
             IWeaponItem    => "Weapon",
             IAmplifierItem => "Amplifier",
             IConverterItem => "Converter",
-            IActivatorItem => "Activator",
+            IShifterItem => "Activator",
             IReactorItem   => "Reactor",
             _              => item.GetType().Name,
-        };
-
-        private static string FormatModifier(float value, ModifierType type) => type switch
-        {
-            ModifierType.Overwrite   => $"= {value:0.###}",
-            ModifierType.FlatAdd     => $"{value:+0.###;0.###;-0.###}",
-            ModifierType.PercentAdd  => $"{value:+0.###;0.###;-0.###} %",
-            ModifierType.PercentMult => $"* {value:0.###} %",
-            _                        => $"{value:0.###}",
         };
     }
 

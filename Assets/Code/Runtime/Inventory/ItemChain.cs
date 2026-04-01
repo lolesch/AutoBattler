@@ -42,10 +42,10 @@ namespace Code.Runtime.Inventory
             foreach (var item in Modifiers)
             {
                 if (item is not IAmplifierItem amp) continue;
-                var mod = amp.WeaponModifier;
+                var mod = amp.weaponAttackModifier;
                 
-                WeaponUtils.GetOutputStat(weapon, mod.AttackStat)
-                    .AddModifier(mod.Modifier);
+                WeaponUtils.GetAttackStat(weapon, mod.stat)
+                    .AddModifier(mod.modifier);
             }
 
             _modifiersApplied = true;
@@ -63,9 +63,9 @@ namespace Code.Runtime.Inventory
             {
                 if (item is not IAmplifierItem amp) continue;
             
-                var mod = amp.WeaponModifier;
-                WeaponUtils.GetOutputStat(weapon, mod.AttackStat)
-                    .TryRemoveModifier(mod.Modifier);
+                var mod = amp.weaponAttackModifier;
+                WeaponUtils.GetAttackStat(weapon, mod.stat)
+                    .TryRemoveModifier(mod.modifier);
             }
 
             _modifiersApplied = false;

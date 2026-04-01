@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Code.Data.Enums;
-using Code.Data.Items.Activator;
 using Code.Data.Items.Reactor;
+using Code.Data.Items.Shifter;
 using Code.Runtime.Statistics;
 
 namespace Code.Runtime.Inventory
@@ -9,7 +9,7 @@ namespace Code.Runtime.Inventory
     public sealed class ReactorItem : TetrisItem, IReactorItem, IStatModifier
     {
         public ReactorType             ReactorType        { get; }
-        public ActivatorConditionType  ConditionType      { get; }
+        public ConditionType  ConditionType      { get; }
         public float                   ConditionThreshold { get; }
 
         public IReadOnlyList<PawnStatModifier> Affixes => _affixes;
@@ -21,12 +21,9 @@ namespace Code.Runtime.Inventory
             ConditionType      = config.ConditionType;
             ConditionThreshold = config.ConditionThreshold;
 
-            if (config.StatValue != 0)
-                _affixes.Add(new PawnStatModifier(config.StatType,
-                    new Modifier(config.StatValue, config.ModifierType, Guid)));
+                _affixes.Add(new PawnStatModifier(config.pawnStatMod.stat,
+                    new Modifier(config.pawnStatMod.value, config.pawnStatMod.type, Guid)));
         }
-
-        public override void Use() { }
 
         void IEquippable.OnEquipped(IPawnStats stats)
         {
@@ -46,7 +43,7 @@ namespace Code.Runtime.Inventory
     public interface IReactorItem : ITetrisItem
     {
         ReactorType            ReactorType        { get; }
-        ActivatorConditionType ConditionType      { get; }
+        ConditionType ConditionType      { get; }
         float                  ConditionThreshold { get; }
     }
 }

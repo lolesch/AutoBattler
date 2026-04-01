@@ -12,7 +12,7 @@ namespace Code.Runtime.UI.Inventory
             IWeaponItem                => Const.PayloadColor,
             IAmplifierItem             => Const.AmplifierColor,
             IConverterItem             => Const.ConverterColor,
-            IActivatorItem             => Const.ActivatorColor,
+            IShifterItem             => Const.ActivatorColor,
             IReactorItem               => Const.ReactorColor,
             _                          => Color.white,
         };

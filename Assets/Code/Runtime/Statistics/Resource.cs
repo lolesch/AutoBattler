@@ -8,7 +8,7 @@ namespace Code.Runtime.Statistics
     [Serializable]
     public sealed class Resource : Stat, IResource
     {
-        public Resource( StatType resource, /*Stat regen,*/ float baseValue ) : base( resource, baseValue )
+        public Resource( PawnStatType resource, /*Stat regen,*/ float baseValue ) : base( resource, baseValue )
         {
             CurrentValue = baseValue;
             MaxValue.OnTotalChanged += _ => SetCurrentTo( CurrentValue );
@@ -26,7 +26,7 @@ namespace Code.Runtime.Statistics
         public event Action OnDepleted;
         public event Action OnRecharged;
 
-        public bool CanSpend( float amount ) => StatType == StatType.MaxLife
+        public bool CanSpend( float amount ) => pawnStatType == PawnStatType.MaxLife
             ? amount < CurrentValue // prevent deplete health when using health as a resource
             : amount <= CurrentValue;
 
@@ -35,9 +35,10 @@ namespace Code.Runtime.Statistics
         public float IncreaseCurrent( float amountToAdd )
         {
             if( amountToAdd < 0 )
-                throw new ArgumentOutOfRangeException( nameof( amountToAdd ), "Amount to add must be positive" );
+                Debug.LogWarning( $"Amount to add ({amountToAdd}) must be positive" );
 
             var added = Math.Min( MissingValue, amountToAdd );
+            //var overshoot = amountToAdd - added;
 
             if( added != 0 )
                 SetCurrentTo( CurrentValue + added );
@@ -52,7 +53,7 @@ namespace Code.Runtime.Statistics
         public float ReduceCurrent( float amountToRemove )
         {
             if( amountToRemove < 0 )
-                throw new ArgumentOutOfRangeException( nameof( amountToRemove ), "Amount to remove must be positive" );
+                Debug.LogWarning( $"Amount to remove ({amountToRemove}) must be positive" );
 
             var removed = Math.Min( CurrentValue, amountToRemove );
 
@@ -69,7 +70,7 @@ namespace Code.Runtime.Statistics
         {
             var other = (Resource) MemberwiseClone();
             other.name = string.Copy( name );
-            other.StatType = StatType;
+            other.pawnStatType = pawnStatType;
             other.MaxValue = MaxValue;
             other.CurrentValue = CurrentValue;
             other.OnCurrentChanged = null; //have no listeners to these deep copies
@@ -96,7 +97,7 @@ namespace Code.Runtime.Statistics
         {
             var other = (Resource) MemberwiseClone();
             other.name = string.Copy( name );
-            other.StatType = StatType;
+            other.pawnStatType = pawnStatType;
             other.MaxValue = MaxValue;
             other.OnCurrentChanged = null; //have no listeners to these deep copies
 

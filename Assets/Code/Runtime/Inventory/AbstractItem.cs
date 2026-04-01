@@ -16,9 +16,6 @@ namespace Code.Runtime.Inventory
             Guid = Guid.NewGuid();
             Icon = itemData.Icon;
         }
-        
-        public abstract void Use();
-        //public abstract void Revert();
     
         public abstract List<Vector2Int> GetPointers( Vector2Int position );
     }
@@ -27,6 +24,5 @@ namespace Code.Runtime.Inventory
     {
         Guid Guid { get; }
         Sprite Icon { get; }
-        void Use();
     }
 }

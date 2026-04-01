@@ -635,7 +635,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Runtime::Code.Runtime.GUI.PawnResourceView
   resource:
     name: 
-    <StatType>k__BackingField: 0
+    <pawnStatType>k__BackingField: 0
     MaxValue:
       totalValue: 0
       baseValue: 0
@@ -3125,7 +3125,7 @@ MonoBehaviour:
   continueAfterLootButton: {fileID: 1233224307}
   itemPool:
   - {fileID: 11400000, guid: f3bd027fce4558b40b6e3c663a5defcd, type: 2}
-  - {fileID: 11400000, guid: 72c650d1112ec8441baed1fe60494154, type: 2}
+  - {fileID: 11400000, guid: 3aafe504aba36954f9fe01fa03622533, type: 2}
   - {fileID: 11400000, guid: fd4a579c748d3414f88c941336c65ec9, type: 2}
   - {fileID: 11400000, guid: 62b0a140624198a4d909ae17f3a25027, type: 2}
   - {fileID: 11400000, guid: d287988fc72bebe49a9a88107b6d4e2f, type: 2}
@@ -3696,7 +3696,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Runtime::Code.Runtime.GUI.PawnResourceView
   resource:
     name: 
-    <StatType>k__BackingField: 0
+    <pawnStatType>k__BackingField: 0
     MaxValue:
       totalValue: 0
       baseValue: 0
@@ -3918,7 +3918,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Runtime::Code.Runtime.GUI.PawnResourceView
   resource:
     name: 
-    <StatType>k__BackingField: 0
+    <pawnStatType>k__BackingField: 0
     MaxValue:
       totalValue: 0
       baseValue: 0
@@ -4285,7 +4285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Runtime::Code.Runtime.GUI.PawnResourceView
   resource:
     name: 
-    <StatType>k__BackingField: 0
+    <pawnStatType>k__BackingField: 0
     MaxValue:
       totalValue: 0
       baseValue: 0
@@ -4639,16 +4639,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8141589213139099117, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 433ca0a2a6a675841bf2a9d46847573b, type: 3}
+    - target: {fileID: 8141589213139099117, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: m_Color.b
-      value: 0.3991634
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8141589213139099117, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: m_Color.g
-      value: 0.3991634
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8141589213139099117, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: m_Color.r
-      value: 0.735849
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8809631631018634548, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -4997,6 +5001,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5931159786323204307, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
       propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8141589213139099117, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8141589213139099117, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8141589213139099117, guid: a2467cd2f46bfe248935b17b807cc7de, type: 3}
+      propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []

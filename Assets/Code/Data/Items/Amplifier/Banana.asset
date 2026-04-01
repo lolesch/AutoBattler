@@ -20,15 +20,15 @@ MonoBehaviour:
     - row: 0100
     - row: 0101
   connectors:
-  - <LocalPosition>k__BackingField: {x: 0, y: 0}
+  - <Position>k__BackingField: {x: 0, y: 0}
     <Direction>k__BackingField: 1
-  - <LocalPosition>k__BackingField: {x: 1, y: 1}
+  - <Position>k__BackingField: {x: 1, y: 1}
     <Direction>k__BackingField: 0
-  <StatType>k__BackingField: 1
-  <Value>k__BackingField: 5
+  <pawnStatType>k__BackingField: 1
+  <StatValue>k__BackingField: 50
   <ModifierType>k__BackingField: 2
-  debugStatModifierString: Damage +5 %
-  <WeaponStat>k__BackingField: 0
-  <WeaponValue>k__BackingField: 5
+  debugStatModifierString: Max Life +50 %
+  <weaponResult>k__BackingField: 0
+  <WeaponValue>k__BackingField: 1
   <WeaponModifierType>k__BackingField: 1
-  debugWeaponModifierString: Damage +5
+  debugWeaponModifierString: Damage +1

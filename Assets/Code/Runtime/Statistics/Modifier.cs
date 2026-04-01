@@ -4,8 +4,14 @@ using UnityEngine;
 
 namespace Code.Runtime.Statistics
 {
+    public interface IModifier
+    {
+        ModifierType Type { get; }
+        Guid source { get; }
+    }
+
     [Serializable]
-    public struct Modifier : IComparable<Modifier>, IEquatable<Modifier>
+    public struct Modifier : IComparable<Modifier>, IEquatable<Modifier>, IModifier
     {
         [SerializeField] private float value;
         [SerializeField] private ModifierType type;
@@ -35,19 +41,14 @@ namespace Code.Runtime.Statistics
 
         public readonly override string ToString() => Type switch
         {
-            ModifierType.Overwrite => $"= {value:0.###;-0.###}",           //  = 123   | = -123   |  = 0
-            ModifierType.FlatAdd => $"{value:+0.###;0.###;-0.###}",        //   +123   |   -123   |    0
-            ModifierType.PercentAdd => $"{value:+0.###;0.###;-0.###} %",   //   +123 % |   -123 % |    0 %
-            ModifierType.PercentMult => $"* {value:0.###;-0.###} %",       //  * 123 % | * -123 % |  * 0 %
-
-            var _ => $"?? {value:+ 0.###;- 0.###;0.###}",
+            ModifierType.Overwrite => $"= {value:0.###;}",               //  = 123   | = -123   |  = 0
+            ModifierType.FlatAdd => $"{value:+0.###;0.###;-0.###}",      //   +123   |   -123   |    0
+            ModifierType.PercentAdd => $"{value:+0.###;0.###;-0.###} %", //   +123 % |   -123 % |    0 %
+            ModifierType.PercentMult => $"* {value:0.###;} %",           //  * 123 % | * -123 % |  * 0 %
+            _ => $"?? {value:+0.###;0.###;-0.###}",
         };
 
         public readonly bool Equals( Modifier other ) =>
             source == other.source && Type == other.Type && Mathf.Approximately( value, other.value );
-    }
-    
-    public interface IModifierSource {
-        Guid guid { get; }
     }
 }

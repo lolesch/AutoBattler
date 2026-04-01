@@ -1,12 +1,17 @@
 ## Bugs
 
 - [ ] Enemies should not be draggable
+	- [ ] enemies inventory should not be interactable ( inspect, but no add/remove/drag )
+cross container drag swaps items
+the returning item is placed at the outgoing item with its origin cell, not relative to the cell the outgoing item was placed on top of the returning. make it relative to the dropped cell might feel better. -> or just highlight the required slots in the origin inventory, to show the collisions.
+- [ ] implement required slots highlights again -> use backpack battles as reference.
 - [ ] Same-container drag should attempt swap first; fall back to force-pickup only if displaced item does not fit in source
-- [ ] Weapons with no chained items should still show as root, as they fire on their own
+- [x] Weapons with no chained items should still show as root, as they fire on their own
+- [ ] adding and removing max resource mods changes the current value. change implementation or reset on battle start?
 
 ## Game Loop
 
-- [ ] Pawns should start with a default weapon
+- [x] Pawns should start with a default weapon
 - [ ] On player death → trigger Game Over
 - [ ] Hex placement phase — not yet wired in scene
 

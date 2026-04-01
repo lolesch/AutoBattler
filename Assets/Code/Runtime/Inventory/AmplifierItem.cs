@@ -6,23 +6,21 @@ namespace Code.Runtime.Inventory
 {
     public sealed class AmplifierItem : TetrisItem, IAmplifierItem, IStatModifier
     {
-        public WeaponStatModifier              WeaponModifier { get; }
+        public WeaponAttackModifier              weaponAttackModifier { get; }
         public IReadOnlyList<PawnStatModifier> Affixes        => _affixes;
 
         private readonly List<PawnStatModifier> _affixes = new();
 
         public AmplifierItem(AmplifierConfig config, RotationType rotation = RotationType.None) : base(config, rotation)
         {
-            WeaponModifier = new WeaponStatModifier(
-                config.WeaponStat,
-                new Modifier(config.WeaponValue, config.WeaponModifierType, Guid));
+            weaponAttackModifier = new WeaponAttackModifier(
+                config.attackStatMod.stat,
+                new Modifier(config.attackStatMod.value, config.attackStatMod.type, Guid));
 
             _affixes.Add(new PawnStatModifier(
-                config.StatType,
-                new Modifier(config.StatValue, config.ModifierType, Guid)));
+                config.pawnStatMod.stat,
+                new Modifier(config.pawnStatMod.value, config.pawnStatMod.type, Guid)));
         }
-
-        public override void Use() { }
 
         void IEquippable.OnEquipped(IPawnStats stats)
         {
@@ -39,11 +37,6 @@ namespace Code.Runtime.Inventory
 
     public interface IAmplifierItem : ITetrisItem
     {
-        WeaponStatModifier WeaponModifier { get; }
-    }
-
-    public interface IStatModifier : IEquippable
-    {
-        IReadOnlyList<PawnStatModifier> Affixes { get; }
+        WeaponAttackModifier weaponAttackModifier { get; }
     }
 }

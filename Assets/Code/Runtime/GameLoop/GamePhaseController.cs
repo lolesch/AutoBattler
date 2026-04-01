@@ -1,6 +1,5 @@
 using System;
 using Code.Data.Items;
-using Code.Data.Items.Activator;
 using Code.Data.Items.Amplifier;
 using Code.Data.Items.Reactor;
 using Code.Data.Items.Weapon;

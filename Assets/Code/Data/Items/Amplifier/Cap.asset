@@ -20,15 +20,15 @@ MonoBehaviour:
     - row: 01
     - row: 01
   connectors:
-  - <LocalPosition>k__BackingField: {x: 0, y: 0}
+  - <Position>k__BackingField: {x: 0, y: 0}
     <Direction>k__BackingField: 2
-  - <LocalPosition>k__BackingField: {x: 0, y: 0}
+  - <Position>k__BackingField: {x: 0, y: 1}
     <Direction>k__BackingField: 0
-  <StatType>k__BackingField: 2
-  <Value>k__BackingField: 10
+  <pawnStatType>k__BackingField: 0
+  <StatValue>k__BackingField: 0
   <ModifierType>k__BackingField: 3
-  debugStatModifierString: Max Life * 10 %
-  <WeaponStat>k__BackingField: 1
+  debugStatModifierString: None * 0 %
+  <weaponResult>k__BackingField: 1
   <WeaponValue>k__BackingField: 1
   <WeaponModifierType>k__BackingField: 1
   debugWeaponModifierString: ResourceGenOnHit +1

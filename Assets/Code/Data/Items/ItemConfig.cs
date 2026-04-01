@@ -4,30 +4,22 @@ using Code.Runtime.Grids.RectGridInspector;
 using Submodules.Utility.Attributes;
 using Submodules.Utility.Extensions;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Code.Data.Items
 {
-    /// <summary>
-    /// Base config for all grid-placed items.
-    /// Holds shape and chain connectors only — no stat modifier data.
-    /// Subclass StatItemConfig for items that also apply standalone stat effects.
-    /// </summary>
     public abstract class ItemConfig : ScriptableObject, IItemData
     {
         [field: SerializeField, PreviewIcon] public Sprite       Icon  { get; private set; }
         [field: SerializeField]              public RectGridBool Shape { get; private set; }
 
-        [field: Header("Chain Connectors")]
-        [field: Tooltip("Length is fixed to MaxConnectors. Add/remove via subclass override.")]
+        public abstract int MaxConnectors { get; }
+        
         [SerializeField] private List<ChainConnector> connectors = new();
-
-        public IReadOnlyList<ChainConnector> Connectors   => connectors;
-        protected abstract int               MaxConnectors { get; }
+        public IReadOnlyList<ChainConnector> Connectors => connectors;
 
         protected virtual void OnValidate()
         {
-            connectors ??= new List<ChainConnector>();
+            connectors ??= new List<ChainConnector>(MaxConnectors);
 
             while (connectors.Count < MaxConnectors)
                 connectors.Add(new ChainConnector());
@@ -39,45 +31,14 @@ namespace Code.Data.Items
             for (var i = 0; i < connectors.Count; i++)
             {
                 var c = connectors[i];
-                if (shapeCells != null && !shapeCells.Contains(c.LocalPosition))
-                    Debug.LogWarning($"[{name}] Connector {i}: LocalPosition {c.LocalPosition} is not part of the item shape.", this);
-                if (c.Direction.ToVector2Int() == Vector2Int.zero)
-                    Debug.LogWarning($"[{name}] Connector {i}: Direction is (0,0) — set a valid unit vector.", this);
-                if (shapeCells != null && shapeCells.Contains(c.LocalPosition + c.Direction.ToVector2Int()))
-                    Debug.LogWarning($"[{name}] Connector {i}: Direction points inward — target cell {c.LocalPosition + c.Direction.ToVector2Int()} is part of the item shape.", this);
+                if (shapeCells != null && !shapeCells.Contains(c.position))
+                    Debug.LogWarning($"[{name}] Connector {i}: LocalPosition {c.position} is not part of the item shape.", this);
+                if (shapeCells != null && shapeCells.Contains(c.position + c.direction.ToVector2Int()))
+                    Debug.LogWarning($"[{name}] Connector {i}: Direction points inward — target cell {c.position + c.direction.ToVector2Int()} is part of the item shape.", this);
                 for (var j = i + 1; j < connectors.Count; j++)
-                    if (c.LocalPosition == connectors[j].LocalPosition && c.Direction.ToVector2Int() == connectors[j].Direction.ToVector2Int())
-                        Debug.LogWarning($"[{name}] Connectors {i} and {j} are identical (position {c.LocalPosition}, direction {c.Direction}) — remove the duplicate.", this);
+                    if (c.position == connectors[j].position && c.direction.ToVector2Int() == connectors[j].direction.ToVector2Int())
+                        Debug.LogWarning($"[{name}] Connectors {i} and {j} are identical (position {c.position}, direction {c.direction}) — remove the duplicate.", this);
             }
-        }
-    }
-
-    /// <summary>
-    /// Config for items that apply a standalone stat effect when placed in the inventory.
-    /// Amplifiers and plain stat items extend this. Weapons do not.
-    /// </summary>
-    public abstract class StatItemConfig : ItemConfig, IStatItemData
-    {
-        [field: Header("Standalone Effect")]
-        [field: SerializeField] public StatType     StatType     { get; private set; }
-        [field: FormerlySerializedAs("<Value>k__BackingField")] 
-        [field: SerializeField] public float        StatValue    { get; private set; }
-        [field: SerializeField] public ModifierType ModifierType { get; private set; }
-
-        [SerializeField, HideInInspector] private string debugStatModifierString;
-
-        protected override  void OnValidate()
-        {
-            base.OnValidate();
-            var mod = ModifierType switch
-            {
-                ModifierType.Overwrite   => $"= {StatValue:0.###;-0.###}",
-                ModifierType.FlatAdd     => $"{StatValue:+0.###;0.###;-0.###}",
-                ModifierType.PercentAdd  => $"{StatValue:+0.###;0.###;-0.###} %",
-                ModifierType.PercentMult => $"* {StatValue:0.###;-0.###} %",
-                var _                    => $"?? {StatValue:+ 0.###;- 0.###;0.###}",
-            };
-            debugStatModifierString = $"{StatType.ToDescription()} {mod}";
         }
     }
 
@@ -86,12 +47,5 @@ namespace Code.Data.Items
         Sprite                        Icon       { get; }
         RectGridBool                  Shape      { get; }
         IReadOnlyList<ChainConnector> Connectors { get; }
-    }
-
-    public interface IStatItemData : IItemData
-    {
-        StatType     StatType     { get; }
-        float        StatValue        { get; }
-        ModifierType ModifierType { get; }
     }
 }

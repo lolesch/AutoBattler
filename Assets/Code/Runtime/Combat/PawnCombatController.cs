@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Code.Data.Enums;
-using Code.Data.Items.Activator;
+using Code.Data.Items.Shifter;
 using Code.Runtime.Inventory;
 using Code.Runtime.Pawns;
 using Code.Runtime.Statistics;
@@ -64,12 +64,12 @@ namespace Code.Runtime.Combat
             {
                 chain.ApplyChainModifiers();
                 _cleanupActions.Add(chain.RemoveChainModifiers);
-                ChainResolver.LogChain(chain);
+                //ChainResolver.LogChain(chain);
 
                 switch (chain.Root)
                 {
                     case IWeaponItem:
-                    case IActivatorItem:
+                    case IShifterItem:
                         BuildTimedChain(chain);
                         break;
                     case IReactorItem reactor:
@@ -89,7 +89,8 @@ namespace Code.Runtime.Combat
         {
             var weapon     = chain.Weapon;
             var activators = GetActivators(chain);
-            var applied    = new Dictionary<IActivatorItem, (Modifier firing, Modifier output)>();
+            var (costResource, genResource) = ResolveChainResources(chain);
+            var applied    = new Dictionary<IShifterItem, (Modifier firing, Modifier output)>();
 
             EvaluateActivators();
 
@@ -99,8 +100,8 @@ namespace Code.Runtime.Combat
                 EvaluateActivators();
                 timer.Duration = weapon.AttackSpeed;
 
-                if (CanFire(weapon))
-                    Fire(chain, weapon);
+                if (CanFire(weapon, costResource))
+                    Fire(chain, weapon, costResource, genResource);
             };
             timer.Start();
 
@@ -109,9 +110,8 @@ namespace Code.Runtime.Combat
                 timer.Stop();
                 foreach (var (act, (firingMod, outputMod)) in applied)
                 {
-                    WeaponUtils.GetFiringStat(weapon, act.FiringStat).TryRemoveModifier(firingMod);
-                    if (act.OutputValue != 0)
-                        WeaponUtils.GetOutputStat(weapon, act.OutputStat).TryRemoveModifier(outputMod);
+                    weapon.GetUsageStat(act.usageMod.stat).TryRemoveModifier(firingMod);
+                    weapon.GetAttackStat(act.attackMod.stat).TryRemoveModifier(outputMod);
                 }
                 applied.Clear();
             });
@@ -121,27 +121,20 @@ namespace Code.Runtime.Combat
             {
                 foreach (var act in activators)
                 {
-                    var firingStat = WeaponUtils.GetFiringStat(weapon, act.FiringStat);
-                    var outputStat = WeaponUtils.GetOutputStat(weapon,  act.OutputStat);
-                    var conditionMet = EvaluateCondition(act.ConditionType, act.ConditionThreshold);
-                    var isApplied    = applied.ContainsKey(act);
-
-                    if (conditionMet && !isApplied)
-                    {
-                        var firingMod = new Modifier( act.FiringValue, act.FiringModifierType, act.Guid);
-                        var outputMod = new Modifier( act.OutputValue, act.OutputModifierType, act.Guid);
-                        firingStat.AddModifier(firingMod);
-                        if (act.OutputValue != 0)
-                            outputStat.AddModifier(outputMod);
-                        applied[act] = (firingMod, outputMod);
-                    }
-                    else if (!conditionMet && isApplied)
+                    if (applied.ContainsKey(act))
                     {
                         var (firingMod, outputMod) = applied[act];
-                        firingStat.TryRemoveModifier(firingMod);
-                        if (act.OutputValue != 0)
-                            outputStat.TryRemoveModifier(outputMod);
+                        weapon.GetUsageStat(act.usageMod.stat).TryRemoveModifier(firingMod);
+                        weapon.GetAttackStat(act.attackMod.stat).TryRemoveModifier(outputMod);
                         applied.Remove(act);
+                    }
+                    else
+                    {
+                        var firingMod = act.usageMod.modifier;
+                        var outputMod = act.attackMod.modifier;
+                        weapon.GetUsageStat(act.usageMod.stat).AddModifier(firingMod);
+                        weapon.GetAttackStat(act.attackMod.stat).AddModifier(outputMod);
+                        applied[act] = (firingMod, outputMod);
                     }
                 }
             }
@@ -152,7 +145,9 @@ namespace Code.Runtime.Combat
             var weapon    = chain.Weapon;
             var condType  = reactor.ConditionType;
             var condThres = reactor.ConditionThreshold;
+            var (costResource, genResource) = ResolveChainResources(chain);
 
+            // TODO: merge ConditionMet() and CanFire()
             bool ConditionMet() => EvaluateCondition(condType, condThres);
 
             switch (reactor.ReactorType)
@@ -160,14 +155,14 @@ namespace Code.Runtime.Combat
                 case ReactorType.OnSelfHit:
                 {
                     void OnHealthChanged(float prev, float curr, float _)
-                    { if (curr < prev && ConditionMet()) Fire(chain, weapon); }
+                    { if (curr < prev && ConditionMet() && CanFire(weapon, costResource)) Fire(chain, weapon, costResource, genResource); }
                     _pawn.Stats.health.OnCurrentChanged += OnHealthChanged;
                     _cleanupActions.Add(() => _pawn.Stats.health.OnCurrentChanged -= OnHealthChanged);
                     break;
                 }
                 case ReactorType.OnManaDeplete:
                 {
-                    void OnManaDeplete() { if (ConditionMet()) Fire(chain, weapon); }
+                    void OnManaDeplete() { if (ConditionMet()&& CanFire(weapon, costResource)) Fire(chain, weapon, costResource, genResource); }
                     _pawn.Stats.mana.OnDepleted += OnManaDeplete;
                     _cleanupActions.Add(() => _pawn.Stats.mana.OnDepleted -= OnManaDeplete);
                     break;
@@ -175,7 +170,7 @@ namespace Code.Runtime.Combat
                 case ReactorType.OnEnemyDeath:
                 {
                     if (_target == null) break;
-                    void OnEnemyDefeated() { if (ConditionMet()) Fire(chain, weapon); }
+                    void OnEnemyDefeated() { if (ConditionMet()&& CanFire(weapon, costResource)) Fire(chain, weapon, costResource, genResource); }
                     _target.OnDefeated += OnEnemyDefeated;
                     _cleanupActions.Add(() => _target.OnDefeated -= OnEnemyDefeated);
                     break;
@@ -188,12 +183,12 @@ namespace Code.Runtime.Combat
             }
         }
         
-        private void Fire(IItemChain chain, IWeaponItem weapon)
+        private void Fire(IItemChain chain, IWeaponItem weapon, Resource costResource, Resource genResource)
         {
             if (_target == null) return;
+            costResource.ReduceCurrent(weapon.ResourceCost);
             _target.TakeDamage(weapon.Damage);
-            // TODO: spend ResourceCost from _pawn.Stats.mana
-            // TODO: apply ResourceGenOnHit to _pawn.Stats.mana
+            genResource.IncreaseCurrent(weapon.ResourceGenOnHit);
             FirePayloads(chain, weapon.Damage);
         }
 
@@ -203,56 +198,52 @@ namespace Code.Runtime.Combat
             {
                 if (item is not IWeaponItem payload) continue;
                 if (EvaluatePayloadCondition(payload, rootDamage))
-                    _target?.TakeDamage(rootDamage * payload.PayloadDamageMultiplier);
+                {
+                    //_target?.TakeDamage(rootDamage * payload.PayloadDamageMultiplier);
+                }
             }
         }
 
         private bool EvaluatePayloadCondition(IWeaponItem payload, float rootDamage) =>
             payload.PayloadCondition switch
             {
-                PayloadConditionType.None                  => true,
-                PayloadConditionType.HealthBelow           => _pawn.Stats.health.Percentage < payload.PayloadConditionThreshold,
-                PayloadConditionType.HealthAbove           => _pawn.Stats.health.Percentage > payload.PayloadConditionThreshold,
-                PayloadConditionType.ResourceFull          => _pawn.Stats.mana.IsFull,
-                PayloadConditionType.ResourceBelow         => _pawn.Stats.mana.Percentage < payload.PayloadConditionThreshold,
-                PayloadConditionType.ResourceAbove         => _pawn.Stats.mana.Percentage > payload.PayloadConditionThreshold,
-                PayloadConditionType.RootDamageAbove       => rootDamage >= payload.PayloadConditionThreshold,
-                PayloadConditionType.RootKilledTarget      => _target.Stats.health.IsDepleted,
-                PayloadConditionType.TargetHealthBelow     => _target.Stats.health.Percentage < payload.PayloadConditionThreshold,
-                PayloadConditionType.TargetHealthAbove     => _target.Stats.health.Percentage > payload.PayloadConditionThreshold,
-                PayloadConditionType.TargetHasStatusEffect => false,
+                ConditionType.None                  => true,
+                ConditionType.ResourceFull          => _pawn.Stats.mana.IsFull,
+                ConditionType.ResourceBelow         => _pawn.Stats.mana.Percentage < payload.PayloadConditionThreshold,
+                ConditionType.ResourceAbove         => _pawn.Stats.mana.Percentage > payload.PayloadConditionThreshold,
+                ConditionType.DamageAbove           => rootDamage >= payload.PayloadConditionThreshold,
                 _                                          => false,
             };
 
-        private bool EvaluateCondition(ActivatorConditionType type, float threshold)
+        private bool EvaluateCondition(ConditionType type, float threshold)
         {
             return type switch
             {
-                ActivatorConditionType.Always          => true,
-                ActivatorConditionType.HpBelow         => _pawn.Stats.health.Percentage < threshold,
-                ActivatorConditionType.HpAbove         => _pawn.Stats.health.Percentage > threshold,
-                ActivatorConditionType.ResourceBelow   => _pawn.Stats.mana.Percentage < threshold,
-                ActivatorConditionType.ResourceAbove   => _pawn.Stats.mana.Percentage > threshold,
-                ActivatorConditionType.FirstXSeconds   => false,
-                ActivatorConditionType.EnemyCountBelow => false,
-                ActivatorConditionType.AllyCountBelow  => false,
-                ActivatorConditionType.HasStatusEffect => false,
+                ConditionType.Always          => true,
+                ConditionType.ResourceBelow   => _pawn.Stats.mana.Percentage < threshold,
+                ConditionType.ResourceAbove   => _pawn.Stats.mana.Percentage > threshold,
+                ConditionType.HasStatusEffect => false,
                 _                                      => false,
             };
         }
 
-        private bool CanFire(IWeaponItem weapon) =>
-            weapon.ResourceCost <= 0 || _pawn.Stats.mana.CanSpend(weapon.ResourceCost);
+        private bool CanFire(IWeaponItem weapon, Resource costResource) => costResource.CanSpend(weapon.ResourceCost);
 
-        private static List<IActivatorItem> GetActivators(IItemChain chain)
+        private static List<IShifterItem> GetActivators(IItemChain chain)
         {
-            var list = new List<IActivatorItem>();
-            if (chain.Root is IActivatorItem root) list.Add(root);
+            var list = new List<IShifterItem>();
+            if (chain.Root is IShifterItem root) list.Add(root);
             foreach (var item in chain.Modifiers)
-                if (item is IActivatorItem act) list.Add(act);
+                if (item is IShifterItem act) list.Add(act);
             return list;
         }
 
+        private (Resource costResource, Resource genResource) ResolveChainResources(IItemChain chain)
+        {
+            // Converter will override resource targets here when implemented.
+            return (_pawn.Stats.mana, _pawn.Stats.mana);
+        }
+        
         private void Cleanup()
         {
             foreach (var action in _cleanupActions) action();

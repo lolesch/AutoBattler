@@ -21,8 +21,8 @@ MonoBehaviour:
   connectors:
   - <LocalPosition>k__BackingField: {x: 0, y: 0}
     <Direction>k__BackingField: 0
-  <StatType>k__BackingField: 3
-  <Value>k__BackingField: 20
+  <pawnStatType>k__BackingField: 2
+  <StatValue>k__BackingField: 20
   <ModifierType>k__BackingField: 1
   debugStatModifierString: Max Mana +20
   <ReactorType>k__BackingField: 0

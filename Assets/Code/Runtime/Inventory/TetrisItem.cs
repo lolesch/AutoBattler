@@ -18,7 +18,6 @@ namespace Code.Runtime.Inventory
 
         public string       Name       { get; private set; }
         public RotationType rotation   { get; set; }
-        public RarityType   RarityType { get; private set; }
 
         protected TetrisItem(ItemConfig config, RotationType rotation) : base(config)
         {
@@ -26,7 +25,6 @@ namespace Code.Runtime.Inventory
             _config       = config;
             Name          = config.name;
             this.rotation = rotation;
-            RarityType    = (RarityType)Random.Range(0, Enum.GetValues(typeof(RarityType)).Length);
         }
 
         // ── Grid placement ────────────────────────────────────────────────
@@ -94,8 +92,8 @@ namespace Code.Runtime.Inventory
 
             foreach (var connector in _config.Connectors)
             {
-                var rotatedPos = ApplyRotation(connector.LocalPosition - pivot, rotation) - normOffset;
-                var rotatedDir = ApplyRotation(connector.Direction.ToVector2Int(),         rotation);
+                var rotatedPos = ApplyRotation(connector.position - pivot, rotation) - normOffset;
+                var rotatedDir = ApplyRotation(connector.direction.ToVector2Int(), rotation);
                 var gridPos    = placement + rotatedPos - origin;
                 result.Add((gridPos, rotatedDir));
             }
@@ -118,7 +116,6 @@ namespace Code.Runtime.Inventory
     {
         string       Name       { get; }
         RotationType rotation   { get; set; }
-        RarityType   RarityType { get; }
 
         List<Vector2Int> GetPointers(Vector2Int position);
         Vector2Int       GetShapeOrigin(List<Vector2Int> normalized = null);
@@ -127,7 +124,12 @@ namespace Code.Runtime.Inventory
 
         List<(Vector2Int slotPos, Vector2Int direction)> GetGridConnectors(Vector2Int placement);
     }
-
+    
+    public interface IStatModifier : IEquippable
+    {
+        IReadOnlyList<PawnStatModifier> Affixes { get; }
+    }
+    
     public interface IEquippable
     {
         void OnEquipped(IPawnStats stats);

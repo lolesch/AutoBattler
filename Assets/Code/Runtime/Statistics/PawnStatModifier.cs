@@ -1,29 +1,26 @@
 using System;
 using UnityEngine;
 using Code.Data.Enums;
+using UnityEngine.Serialization;
 
 namespace Code.Runtime.Statistics
 {
     [Serializable]
     public struct PawnStatModifier : IPawnStatModifier
     {
-        /// where to put this?
-        //[field: SerializeField] protected float randomRoll { get; } = Random.value;
-        //[SerializeField] protected Vector2 _range;
-        
-        [field: SerializeField] public StatType stat { get; private set; }
-        [field: SerializeField] public Modifier modifier { get; private set; }
+        [field: SerializeField] public PawnStatType PawnStat { get; private set; }
+        [field: SerializeField] public Modifier Modifier { get; private set; }
 
-        public PawnStatModifier( StatType stat, Modifier modifier )
+        public PawnStatModifier( PawnStatType pawnStat, Modifier modifier )
         {
-            this.stat = stat;
-            this.modifier = modifier;
+            this.PawnStat = pawnStat;
+            this.Modifier = modifier;
         }
     }
 
     internal interface IPawnStatModifier
     {
-        StatType stat { get; }
-        Modifier modifier { get; }
+        PawnStatType PawnStat { get; }
+        Modifier Modifier { get; }
     }
 }

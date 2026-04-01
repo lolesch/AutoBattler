@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Code.Data.Items;
-using Code.Data.Items.Activator;
 using Code.Data.Items.Amplifier;
 using Code.Data.Items.Reactor;
+using Code.Data.Items.Shifter;
 using Code.Data.Items.Weapon;
 using Code.Runtime.Inventory;
 using UnityEngine;
@@ -35,7 +35,7 @@ namespace Code.Runtime.GameLoop
         {
             WeaponConfig    c => new WeaponItem(c),
             AmplifierConfig c => new AmplifierItem(c),
-            ActivatorConfig c => new ActivatorItem(c),
+            ShifterConfig c => new ShifterItem(c),
             ReactorConfig   c => new ReactorItem(c),
             _                 => throw new ArgumentOutOfRangeException(nameof(config), config.GetType().Name, "No factory mapping found.")
         };

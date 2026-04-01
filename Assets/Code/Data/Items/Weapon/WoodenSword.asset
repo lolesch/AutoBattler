@@ -20,14 +20,25 @@ MonoBehaviour:
     - row: 01
     - row: 01
   connectors:
-  - <LocalPosition>k__BackingField: {x: 0, y: 0}
-    <Direction>k__BackingField: 1
-  - <LocalPosition>k__BackingField: {x: 0, y: 1}
-    <Direction>k__BackingField: 3
+  - <position>k__BackingField: {x: 0, y: 0}
+    <direction>k__BackingField: 0
+  - <position>k__BackingField: {x: 0, y: 0}
+    <direction>k__BackingField: 0
   <BaseDamage>k__BackingField: 1
   <AttackSpeed>k__BackingField: 1.4
   <ResourceCost>k__BackingField: 1
   <ResourceGenOnHit>k__BackingField: 0
   <PayloadCondition>k__BackingField: 6
-  <PayloadDamageMultiplier>k__BackingField: 1.2
   <PayloadConditionThreshold>k__BackingField: 2
+  tags: 0
+  delivery:
+    range: 0
+    radius: 0
+    chainCount: 0
+    tickRate: 0
+    duration: 0
+    requiresLOS: 0
+  payload:
+    powerMultiplier: 1
+    effects: []
+  status: {fileID: 0}

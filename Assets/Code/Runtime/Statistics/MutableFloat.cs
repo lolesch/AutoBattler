@@ -47,7 +47,7 @@ namespace Code.Runtime.Statistics
             return false;
         }
 
-        public bool TryRemoveAllModifiersBySource( Guid source )
+        /*public bool TryRemoveAllModifiersBySource( Guid source )
         {
             var removed = false;
             for( var i = modifiers.Count; i-- > 0; )
@@ -65,7 +65,7 @@ namespace Code.Runtime.Statistics
             
             Debug.LogWarning( $"No modifiers of source {source} were found" );
             return false;
-        }
+        }*/
 
         public string ToString(string format) => totalValue.ToString( format );
         public string ToString(string format, IFormatProvider provider) => totalValue.ToString( format, provider );

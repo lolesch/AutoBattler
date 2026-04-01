@@ -1,6 +1,7 @@
 using System;
 using Code.Data.Pawns;
 using Code.Runtime.Combat;
+using Code.Runtime.GameLoop;
 using Code.Runtime.Inventory;
 using Code.Runtime.Statistics;
 using Code.Runtime.UI;
@@ -48,6 +49,11 @@ namespace Code.Runtime.Pawns
             Stats       = new PawnStats(Config);
             Inventory   = new TetrisContainer(new Vector2Int(6, 3), Stats);
             PawnEffects = _pawnEffects;
+            
+            if (Config.StarterWeapon != null)
+                Inventory.TryAdd(ItemFactory.Create(Config.StarterWeapon));
+            else
+                Debug.LogWarning($"{gameObject.name} has no StarterWeapon assigned in PawnConfig.", this);
 
             Stats.health.OnDepleted += DespawnPawn;
             _healthView.SetPawn(Stats.health);

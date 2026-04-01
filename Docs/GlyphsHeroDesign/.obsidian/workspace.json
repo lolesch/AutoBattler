@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "ItemChain/KNOWN_ISSUES.md",
+                "file": "ItemChain/Payload refined.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "KNOWN_ISSUES"
+              "title": "Payload refined"
             }
           }
         ]
@@ -185,14 +185,18 @@
   },
   "active": "67f58c1cfce64830",
   "lastOpenFiles": [
-    "ItemChain/PawnDesign.md",
-    "Templates/New Feature.md",
-    "Ported/Technical Information.md",
+    "ItemChain/Ideation.md",
+    "ItemChain/Payload refined.md",
     "ItemChain/Weapon.md",
+    "ItemChain/ItemChain_Design.md",
+    "ItemChain/Chain Deep Dive.md",
+    "ItemChain/PawnDesign.md",
+    "ItemChain/KNOWN_ISSUES.md",
+    "Ported/Technical Information.md",
     "ItemChain/Triggers.md",
+    "Templates/New Feature.md",
     "README.md",
     "Templates",
-    "ItemChain/KNOWN_ISSUES.md",
     "Ported"
   ]
 }

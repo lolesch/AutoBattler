@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b9fac261344d4e8da39abc2ae0a9c7ee, type: 3}
-  m_Name: ActivatorConfig
+  m_Name: ShifterConfig
   m_EditorClassIdentifier: Data::Code.Data.Items.Activator.ActivatorConfig
   <Icon>k__BackingField: {fileID: 21300000, guid: d8afbd1d0479c4e4db98d97b945b11c5, type: 3}
   <Shape>k__BackingField:

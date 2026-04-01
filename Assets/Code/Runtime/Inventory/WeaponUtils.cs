@@ -6,17 +6,17 @@ namespace Code.Runtime.Inventory
 {
     public static class WeaponUtils
     {
-        public static MutableFloat GetFiringStat(IWeaponItem weapon, FiringStatType stat) => stat switch
+        public static MutableFloat GetUsageStat(this IWeaponItem weapon, UsageStatType stat) => stat switch
         {
-            FiringStatType.AttackSpeed  => weapon.AttackSpeed,
-            FiringStatType.ResourceCost => weapon.ResourceCost,
+            UsageStatType.AttackSpeed  => weapon.AttackSpeed,
+            UsageStatType.ResourceCost => weapon.ResourceCost,
             _                           => throw new ArgumentOutOfRangeException(nameof(stat), stat, null),
         };
-        public static MutableFloat GetOutputStat(IWeaponItem weapon, AttackStatType stat) => stat switch
+        public static MutableFloat GetAttackStat(this IWeaponItem weapon, AttackStatType result) => result switch
         {
             AttackStatType.Damage           => weapon.Damage,
             AttackStatType.ResourceGenOnHit => weapon.ResourceGenOnHit,
-            _ => throw new ArgumentOutOfRangeException(nameof(stat), stat, null),
+            _ => throw new ArgumentOutOfRangeException(nameof(result), result, null),
         };
     }
 }

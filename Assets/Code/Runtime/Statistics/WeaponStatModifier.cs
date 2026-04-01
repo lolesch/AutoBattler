@@ -9,21 +9,27 @@ namespace Code.Runtime.Statistics
     /// Used by AmplifierItem to modify weapon properties during chain resolution.
     /// </summary>
     [Serializable]
-    public struct WeaponStatModifier : IWeaponStatModifier
+    public class WeaponModifier<T> where T : Enum
     {
-        [field: SerializeField] public AttackStatType AttackStat { get; private set; }
-        [field: SerializeField] public Modifier       Modifier   { get; private set; }
+        [field: SerializeField] public T stat { get; private set; }
+        [field: SerializeField] public Modifier modifier { get; private set; }
 
-        public WeaponStatModifier(AttackStatType attackStat, Modifier modifier)
+        public WeaponModifier(T stat, Modifier modifier)
         {
-            AttackStat = attackStat;
-            Modifier   = modifier;
+            this.stat = stat;
+            this.modifier   = modifier;
         }
     }
-
-    public interface IWeaponStatModifier
+    
+    [Serializable]
+    public class WeaponUsageModifier : WeaponModifier<UsageStatType>
     {
-        AttackStatType AttackStat { get; }
-        Modifier       Modifier   { get; }
+        public WeaponUsageModifier(UsageStatType stat, Modifier modifier) : base(stat, modifier) { }
+    }
+    
+    [Serializable]
+    public class WeaponAttackModifier : WeaponModifier<AttackStatType>
+    {
+        public WeaponAttackModifier(AttackStatType stat, Modifier modifier) : base(stat, modifier) { }
     }
 }

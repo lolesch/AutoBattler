@@ -10,8 +10,7 @@ namespace Code.Runtime.Inventory
         public MutableFloat          AttackSpeed               { get; }
         public MutableFloat          ResourceCost              { get; }
         public MutableFloat          ResourceGenOnHit          { get; }
-        public PayloadConditionType  PayloadCondition          { get; }
-        public float                 PayloadDamageMultiplier   { get; }
+        public ConditionType         PayloadCondition          { get; }
         public float                 PayloadConditionThreshold { get; }
 
         public WeaponItem(WeaponConfig config, RotationType rotation = RotationType.None) : base(config, rotation)
@@ -21,11 +20,8 @@ namespace Code.Runtime.Inventory
             ResourceCost              = new MutableFloat(config.ResourceCost);
             ResourceGenOnHit          = new MutableFloat(config.ResourceGenOnHit);
             PayloadCondition          = config.PayloadCondition;
-            PayloadDamageMultiplier   = config.PayloadDamageMultiplier;
             PayloadConditionThreshold = config.PayloadConditionThreshold;
         }
-
-        public override void Use() { }
     }
 
     public interface IWeaponItem : ITetrisItem
@@ -34,8 +30,7 @@ namespace Code.Runtime.Inventory
         MutableFloat         AttackSpeed               { get; }
         MutableFloat         ResourceCost              { get; }
         MutableFloat         ResourceGenOnHit          { get; }
-        PayloadConditionType PayloadCondition          { get; }
-        float                PayloadDamageMultiplier   { get; }
+        ConditionType        PayloadCondition          { get; }
         float                PayloadConditionThreshold { get; }
     }
 }

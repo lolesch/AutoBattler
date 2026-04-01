@@ -7,6 +7,8 @@ _Part of [[ItemChain_Design|Item Chain Design]] — Item Chain System_
 ## Dual Mode
 
 Every Weapon item has two built-in modes. The same item, two roles depending on its position in the chain.
+- Weapon → “verb” (shoot, swing, beam)
+- Payload → “meaning” (burn, pull, mark, explode, echo)
 
 ---
 
@@ -31,7 +33,7 @@ Steps on arrival: Check own condition (`PayloadCondition`).
 
 **The payload package is its own definition** — not derived from the weapon's root stats. It has its own effect, its own damage expression, its own output type. `AttackSpeed` is irrelevant in payload mode — the weapon is not firing on a timer.
 
-The payload effect and condition are fixed properties of the weapon item itself, scaled by Amplifiers and Converters positioned around it.
+The payload effect and condition are fixed properties of the weapon item itself, scaled by Amplifiers and Converters positioned downstream.
 
 ---
 

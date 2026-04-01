@@ -101,8 +101,11 @@ namespace Code.Runtime.Inventory
                     
                     var chain = new ItemChain(root, modifiers);
                     chains.Add(chain);
-                    LogChain(chain);
+                    //LogChain(chain);
                 }
+                
+                if (root is IWeaponItem && !chains.Any(c => c.Root == root))
+                    chains.Add(new ItemChain(root, new List<ITetrisItem>()));
             }
 
             return new ChainTopology(chains, connectedEdges, downstreamConnectors, upstreamConnectors, rootSet);
@@ -273,14 +276,14 @@ namespace Code.Runtime.Inventory
             (IReactorItem,   IConverterItem) => false,
             (IAmplifierItem, IReactorItem)   => false,
             (IConverterItem, IReactorItem)   => false,
-            (IActivatorItem, IAmplifierItem) => false,
-            (IActivatorItem, IConverterItem) => false,
-            (IAmplifierItem, IActivatorItem) => false,
-            (IConverterItem, IActivatorItem) => false,
+            (IShifterItem, IAmplifierItem) => false,
+            (IShifterItem, IConverterItem) => false,
+            (IAmplifierItem, IShifterItem) => false,
+            (IConverterItem, IShifterItem) => false,
             _                                => true,
         };
 
-        private static bool IsTrigger(ITetrisItem item) => item is IActivatorItem or IReactorItem;
+        private static bool IsTrigger(ITetrisItem item) => item is IShifterItem or IReactorItem;
 
         private static bool HasMatchingConnector(
             ITetrisItem item, Vector2Int placement,

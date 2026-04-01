@@ -3,6 +3,7 @@ using NaughtyAttributes;
 using UnityEngine;
 using Code.Data.Enums;
 using Submodules.Utility.Extensions;
+using UnityEngine.Serialization;
 
 namespace Code.Runtime.Statistics
 {
@@ -11,13 +12,13 @@ namespace Code.Runtime.Statistics
     {
         [SerializeField, HideInInspector] protected string name;
 
-        [field: SerializeField, ReadOnly] public StatType StatType { get; protected set; }
+        [field: FormerlySerializedAs("<StatType>k__BackingField")] [field: SerializeField, ReadOnly] public PawnStatType pawnStatType { get; protected set; }
 
         [SerializeField, ReadOnly] protected MutableFloat MaxValue;
 
-        public Stat( StatType stat, float baseValue )
+        public Stat( PawnStatType pawnStat, float baseValue )
         {
-            StatType = stat;
+            pawnStatType = pawnStat;
             MaxValue = new MutableFloat( baseValue );
         }
 
@@ -26,13 +27,13 @@ namespace Code.Runtime.Statistics
         public void AddModifier( Modifier modifier ) => MaxValue.AddModifier( modifier );
         public bool TryRemoveModifier( Modifier modifier ) => MaxValue.TryRemoveModifier( modifier );
         
-        public bool TryRemoveAllModifiersBySource( IModifierSource source ) => MaxValue.TryRemoveAllModifiersBySource( source.guid );
+        //public bool TryRemoveAllModifiersBySource( IModifierSource source ) => MaxValue.TryRemoveAllModifiersBySource( source.guid );
 
         public virtual Stat GetDeepCopy()
         {
             var other = (Stat) MemberwiseClone();
             other.name = string.Copy( name );
-            other.StatType = StatType;
+            other.pawnStatType = pawnStatType;
             other.MaxValue = MaxValue;
 
             return other;
@@ -40,7 +41,7 @@ namespace Code.Runtime.Statistics
 
         public sealed override string ToString()
         {
-            var statName = StatType.ToDescription();
+            var statName = pawnStatType.ToDescription();
 
             if( statName.Contains( "Percent" ) )
                 statName = statName.Replace( " Percent", "%" );
@@ -51,9 +52,13 @@ namespace Code.Runtime.Statistics
 
     internal interface IStat
     {
-        StatType StatType { get; }
+        PawnStatType pawnStatType { get; }
         void AddModifier( Modifier modifier );
         bool TryRemoveModifier( Modifier modifier );
         Stat GetDeepCopy();
+    }
+    
+    public interface IModifierSource {
+        Guid guid { get; }
     }
 }

@@ -62,9 +62,9 @@ Two rules cover the whole grammar:
 1. **Triggers precede** the action node they fire
 2. **Modifiers follow** the component they modify
 
-Reading a chain as a sentence: `[Reactor] → Weapon → Amplifier → Converter → [Shifter] → Weapon`
+Reading a chain as a sentence: `Reactor → Shifter → Weapon → Amplifier → Converter → Payload`
 
-_"When hit → strike → harder → as fire → and when resource full → burst"_
+_"When hit → trade speed for damage → strike → harder → as fire → when resource full, add burst"_
 
 ---
 
@@ -127,12 +127,6 @@ All deepen once **encounter information is visible during deployment** — plann
 5. **Weapon (payload mode, conditional) + Converters** — needs encounter visibility
 6. **Bidirectional chains** — validate legibility first
 7. **Splitter/Merger** — last, highest complexity debt
-
----
-
-## Synergy Idea
-
-Items can highlight scripted interactions, like Backpack Battles' merge function. Example: Sling and Stone — the Stone has a weak standalone payload, but when chained as payload downstream of a Sling, that payload is replaced with a much stronger one. A scripted build identity, not general mechanics.
 
 ---
 

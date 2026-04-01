@@ -1,5 +1,5 @@
 using Code.Data.Enums;
-using Code.Data.Items.Activator;
+using Code.Data.Items.Shifter;
 using UnityEngine;
 
 namespace Code.Data.Items.Reactor
@@ -15,10 +15,11 @@ namespace Code.Data.Items.Reactor
         [field: Header("Chain — Event")]
         [field: SerializeField] public ReactorType             ReactorType        { get; private set; }
 
+        //TODO: rework conditions!
         [field: Header("Chain — Condition")]
-        [field: SerializeField] public ActivatorConditionType  ConditionType      { get; private set; }
+        [field: SerializeField] public ConditionType  ConditionType      { get; private set; }
         [field: SerializeField] public float                   ConditionThreshold { get; private set; }
 
-        protected override int MaxConnectors => 1;
+        public override int MaxConnectors => 1;
     }
 }
