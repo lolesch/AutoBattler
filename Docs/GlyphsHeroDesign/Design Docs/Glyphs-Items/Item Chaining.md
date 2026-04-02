@@ -1,10 +1,5 @@
-# Item Chain System — Design Document
 
-_Tactical Puzzle RPG — Design Session Handoff_
-
----
-
-## Context
+## Contextual Summary
 
 This game is a tactical puzzle RPG on a hex grid. Units occupy hexes and have positional interactive effects with neighbors. Each unit has a 2D grid inventory where item placement matters.
 
@@ -29,7 +24,7 @@ These two levels synergize but do not conflict. Unit abilities handle inter-unit
 
 There is no standalone Condition or Payload component. These concepts are absorbed into Weapon's dual-mode design.
 
-Full detail: [[Triggers|Trigger Components]] · [[Weapon|Weapon Design]]
+Full detail: [[Triggers|Trigger Components]] · [[Weapons|Weapon Design]]
 
 ---
 
@@ -37,12 +32,12 @@ Full detail: [[Triggers|Trigger Components]] · [[Weapon|Weapon Design]]
 
 All weapon stats belong to one of two economies:
 
-**Firing economy** — governs when and at what cost the weapon activates:
+**Usage economy** — governs when and at what cost the weapon activates:
 
 - `AttackSpeed` / internal cooldown
 - `ResourceCost` (resource type → Converter)
 
-**Output economy** — governs what the attack produces:
+**Attack economy** — governs what the attack produces:
 
 - `Damage`
 - `ResourceGenOnHit` (resource type → Converter)
@@ -51,7 +46,7 @@ All weapon stats belong to one of two economies:
 
 **Shifters** operate across both economies — trading a firing stat for an output stat or vice versa. **Amplifiers** operate within the output economy only — pure addition, no tradeoff. **Converters** reclassify types within either economy.
 
-See [[Weapon|Weapon Design]] for full stat tables and conversion types.
+See [[Weapons|Weapon Design]] for full stat tables and conversion types.
 
 ---
 
@@ -86,11 +81,11 @@ _"When hit → trade speed for damage → strike → harder → as fire → when
 
 ---
 
-## Signal Types
+## Signal Types and Conversion
 
-- Most connectors are **untyped structural links** — adjacency + matching slots = connection
 - **Typed signals** exist for: damage type, target type, delivery mode, resource type
 - Converters change typed signals locally — nearest upstream action node only
+- weapons can have types/Tags that could be converted, converting a 'heavy' hammer to a 'swift' one
 
 ---
 
@@ -108,7 +103,7 @@ In a weapon triangle (A→B→C→A), Weapon A firing propagates through B and C
 
 ## Risk/Reward Depth
 
-- **Payload conditions** — chain space before a weapon builds toward its condition; space after scales its effect. See [[Weapon#Payload Mode|Payload Mode]].
+- **Payload conditions** — chain space before a weapon builds toward its condition; space after scales its effect. See [[Weapons#Payload Mode|Payload Mode]].
 - **Shifter tradeoffs** — a slow+hard weapon overridden by a Reactor that fires often exploits the Shifter's sacrifice. The timing penalty stays irrelevant but the damage bonus remains.
 - **Converter commitment** — damage/target type choice may be strong or weak against the encounter
 - **Bidirectional builds** — Amplifiers doing double duty in cycles
@@ -120,13 +115,9 @@ All deepen once **encounter information is visible during deployment** — plann
 
 ## Implementation Priority
 
-1. **Weapon (root mode) + Amplifiers** — immediately testable
-2. **Weapon (payload mode, unconditional)** — second weapon always contributes
-3. **Shifters** — conditional cross-axis stat trading. See [[Triggers#Shifter|Shifter]].
-4. **Reactors** — external event listeners. See [[Triggers#Reactor|Reactor]].
-5. **Weapon (payload mode, conditional) + Converters** — needs encounter visibility
-6. **Bidirectional chains** — validate legibility first
-7. **Splitter/Merger** — last, highest complexity debt
+1. **Weapon (payload mode, conditional) + Converters** — needs encounter visibility
+2. **Bidirectional chains** — validate legibility first
+3. **Splitter/Merger** — last, highest complexity debt
 
 ---
 
@@ -161,6 +152,6 @@ Current baseline (v7): trigger = connection line character · weapon = abstract 
 - **Splitter/Merger** — out of scope. Cycles via splitter need explicit visited-node detection.
 - **Crafting/currency** — not yet designed
 - **Loadouts/build switching** — not yet designed
-- **Positional Shifter conditions** (flanked, adjacent to ally, terrain type) — deferred to hex layer. See [[PawnDesign|Pawn Design]].
+- **Positional conditions** (flanked, adjacent to ally, terrain type) — deferred to hex layer. See [[PawnDesign|Pawn Design]].
 
 See [[KNOWN_ISSUES|Known Issues]] for active bugs and pending items.

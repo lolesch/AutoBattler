@@ -26,7 +26,7 @@ namespace Code.Runtime.Statistics
         public event Action OnDepleted;
         public event Action OnRecharged;
 
-        public bool CanSpend( float amount ) => pawnStatType == PawnStatType.MaxLife
+        public bool CanSpend( float amount ) => pawnStatType == PawnStatType.LifeMax
             ? amount < CurrentValue // prevent deplete health when using health as a resource
             : amount <= CurrentValue;
 

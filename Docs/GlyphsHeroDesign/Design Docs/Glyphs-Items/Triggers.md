@@ -1,8 +1,3 @@
-# Triggers — Shifter & Reactor
-
-_Part of [[ItemChain_Design|Item Chain Design]] — Item Chain System_
-
----
 
 ## Shifter
 

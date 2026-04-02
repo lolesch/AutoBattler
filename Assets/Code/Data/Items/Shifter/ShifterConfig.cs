@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace Code.Data.Items.Shifter
 {
-    [CreateAssetMenu(fileName = "ShifterConfig", menuName = Const.ConfigRoot + "Items/Shifter")]
-    public sealed class ShifterConfig : StatItemConfig, IShifterConfig
+    [CreateAssetMenu(fileName = "ShifterConfig", menuName = Const.ItemConfig + "Shifter")]
+    public sealed class ShifterConfig : AttachmentItemConfig, IShifterConfig
     {
         [field: Header("Chained")]
         [field: SerializeField] public WeaponUsageStatModConfig usageStatMod { get; private set; }

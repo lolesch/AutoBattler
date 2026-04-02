@@ -3,47 +3,90 @@ using Code.Runtime.Statistics;
 
 namespace Code.Runtime.Inventory
 {
-    /// <summary>
-    /// Tracks which items transition between unchained (applying pawn stat mods)
-    /// and chained (pawn mods removed, chain effect active).
-    /// Subscribes to OnContentsChanged and diffs topology each time the inventory changes.
-    /// </summary>
     public sealed class ChainStateController
     {
         private readonly ITetrisContainer _inventory;
         private readonly IPawnStats       _stats;
-        private HashSet<ITetrisItem>      _chained = new();
+
+        private HashSet<ITetrisItem> _chained    = new();
+        private HashSet<ITetrisItem> _allTracked = new();
 
         public ChainStateController(ITetrisContainer inventory, IPawnStats stats)
         {
             _inventory = inventory;
             _stats     = stats;
+
+            Bootstrap();
+
             _inventory.OnContentsChanged += _ => Refresh();
+        }
+        
+        // Bootstrap from whatever is already in the inventory (e.g. starter weapon).
+        private void Bootstrap()
+        {
+            var topology   = ChainResolver.ResolveTopology(_inventory);
+            var nowChained = CollectChained(topology);
+
+            foreach (var item in _inventory.Contents.Values)
+            {
+                _allTracked.Add(item);
+                if (!nowChained.Contains(item) && item is IAttachmentItem att)
+                    att.OnUnchained(_stats);
+            }
+
+            _chained = nowChained;
         }
 
         private void Refresh()
         {
-            var topology  = ChainResolver.ResolveTopology(_inventory);
-            var nowChained = new HashSet<ITetrisItem>();
+            var topology   = ChainResolver.ResolveTopology(_inventory);
+            var nowChained = CollectChained(topology);
+            var nowAll     = new HashSet<ITetrisItem>(_inventory.Contents.Values);
 
-            foreach (var chain in topology.Chains)
+            foreach (var item in _allTracked)
             {
-                nowChained.Add(chain.Root);
-                foreach (var mod in chain.Modifiers)
-                    nowChained.Add(mod);
+                if (nowAll.Contains(item)) continue;
+                if (!_chained.Contains(item) && item is IAttachmentItem att)
+                    att.OnChained(_stats);
+            }
+            
+            foreach (var item in nowAll)
+            {
+                if (_allTracked.Contains(item)) continue;
+                if (!nowChained.Contains(item) && item is IAttachmentItem att)
+                    att.OnUnchained(_stats);
+            }
+            
+            foreach (var item in nowAll)
+            {
+                if (!_allTracked.Contains(item)) continue; // already handled above
+                if (item is not IAttachmentItem att) continue;
+
+                var wasChained = _chained.Contains(item);
+                var isChained  = nowChained.Contains(item);
+                
+                if (!wasChained && isChained)
+                    att.OnChained(_stats);
+                else if (wasChained && !isChained )
+                    att.OnUnchained(_stats);
             }
 
-            // Newly chained — remove pawn mods
-            foreach (var item in nowChained)
-                if (!_chained.Contains(item) && item is IEquippable eq)
-                    eq.OnUnequipped(_stats);
+            _allTracked = nowAll;
+            _chained    = nowChained;
+        }
 
-            // Newly unchained — re-apply pawn mods
-            foreach (var item in _chained)
-                if (!nowChained.Contains(item) && item is IEquippable eq)
-                    eq.OnEquipped(_stats);
+        // ── Helpers ───────────────────────────────────────────────────────
 
-            _chained = nowChained;
+        private static HashSet<ITetrisItem> CollectChained(ChainTopology topology)
+        {
+            var set = new HashSet<ITetrisItem>();
+            foreach (var chain in topology.Chains)
+            {
+                set.Add(chain.Root);
+                foreach (var mod in chain.Modifiers)
+                    set.Add(mod);
+            }
+            return set;
         }
     }
 }

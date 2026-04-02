@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Code.Data.Items.Weapon
 {
-    [CreateAssetMenu(fileName = "WeaponConfig", menuName = "Configs/Items/Weapon")]
+    [CreateAssetMenu(fileName = "WeaponConfig", menuName = Const.ItemConfig + "Weapon")]
     public sealed class WeaponConfig : ItemConfig
     {
         [field: Header("Weapon Properties")]
@@ -23,11 +23,9 @@ namespace Code.Data.Items.Weapon
         // CONTINUE HERE
         public WeaponTags tags;
 
-        public DeliveryProfile delivery;
-
-        public PayloadModifier payload;
-
-        public StatusEffect status;
+        //public DeliveryProfile delivery;
+        //public PayloadModifier payload;
+        //public StatusEffect status;
     }
     
     [System.Serializable]
@@ -67,7 +65,8 @@ namespace Code.Data.Items.Weapon
         CreateTerrain,
         ApplyForce
     }
-    [CreateAssetMenu]
+    
+    [CreateAssetMenu(fileName = "StatusEffect", menuName = Const.ConfigRoot + "StatusEffect")]
     public class StatusEffect : ScriptableObject
     {
         public string statusName;
@@ -79,6 +78,7 @@ namespace Code.Data.Items.Weapon
 
         public List<StatusBehavior> behaviors;
     }
+    
     [System.Serializable]
     public class StatusBehavior
     {

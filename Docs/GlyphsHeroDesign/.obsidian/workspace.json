@@ -13,15 +13,30 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "ItemChain/Payload refined.md",
+                "file": "Design Docs/Glyphs-Items/Item Chaining.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Payload refined"
+              "title": "Item Chaining"
+            }
+          },
+          {
+            "id": "43e17adba94f2406",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Design Docs/Glyphs-Items/Weapons.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Weapons"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -183,17 +198,18 @@
       "bases:Create new base": false
     }
   },
-  "active": "67f58c1cfce64830",
+  "active": "43e17adba94f2406",
   "lastOpenFiles": [
-    "ItemChain/Ideation.md",
-    "ItemChain/Payload refined.md",
-    "ItemChain/Weapon.md",
-    "ItemChain/ItemChain_Design.md",
-    "ItemChain/Chain Deep Dive.md",
-    "ItemChain/PawnDesign.md",
-    "ItemChain/KNOWN_ISSUES.md",
+    "Design Docs/Glyphs-Items/Triggers.md",
+    "Design Docs/Glyphs-Items/Payload refined.md",
+    "Design Docs/Glyphs-Items/Item Chaining.md",
+    "Design Docs/Glyphs-Items/Chain Deep Dive.md",
+    "Design Docs/Ideation.md",
+    "Design Docs/Glyphs-Items/Weapons.md",
+    "Design Docs/Glyphs-Items",
+    "Design Docs/PawnDesign.md",
+    "Design Docs/KNOWN_ISSUES.md",
     "Ported/Technical Information.md",
-    "ItemChain/Triggers.md",
     "Templates/New Feature.md",
     "README.md",
     "Templates",

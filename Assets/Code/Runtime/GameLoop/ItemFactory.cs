@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Code.Data.Items;
 using Code.Data.Items.Amplifier;
+using Code.Data.Items.Converter;
 using Code.Data.Items.Reactor;
 using Code.Data.Items.Shifter;
 using Code.Data.Items.Weapon;
@@ -37,6 +38,7 @@ namespace Code.Runtime.GameLoop
             AmplifierConfig c => new AmplifierItem(c),
             ShifterConfig c => new ShifterItem(c),
             ReactorConfig   c => new ReactorItem(c),
+            ConverterConfig c => new ConverterItem(c),
             _                 => throw new ArgumentOutOfRangeException(nameof(config), config.GetType().Name, "No factory mapping found.")
         };
     }

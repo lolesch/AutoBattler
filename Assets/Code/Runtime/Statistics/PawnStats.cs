@@ -11,19 +11,26 @@ namespace Code.Runtime.Statistics
     public sealed class PawnStats : IPawnStats
     {
         [field: SerializeField, ReadOnly, AllowNesting] public Resource health      { get; private set; }
-        [field: FormerlySerializedAs("<Mana>k__BackingField")] [field: SerializeField, ReadOnly, AllowNesting] public Resource mana        { get; private set; }
+        [field: SerializeField, ReadOnly, AllowNesting] public Resource mana        { get; private set; }
+        
+        [field: SerializeField, ReadOnly, AllowNesting] public Stat healthRegen        { get; private set; }
+        [field: SerializeField, ReadOnly, AllowNesting] public Stat manaRegen        { get; private set; }
 
         public PawnStats(PawnConfig config)
         {
-            health      = new Resource(PawnStatType.MaxLife,      config.baseHealth);
-            mana        = new Resource(PawnStatType.MaxMana,      config.baseMana);
+            health      = new Resource(PawnStatType.LifeMax, config.baseHealth);
+            healthRegen = new Stat(PawnStatType.LifeRegen,   config.baseHealthRegen);
+            mana        = new Resource(PawnStatType.ManaMax, config.baseMana);
+            manaRegen   = new Stat(PawnStatType.ManaRegen,   config.baseManaRegen);
         }
 
         private Stat GetStat(PawnStatType type) => type switch
         {
-            PawnStatType.MaxLife     => health,
-            PawnStatType.MaxMana     => mana,
-            _                    => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            PawnStatType.LifeMax   => health,
+            PawnStatType.ManaMax   => mana,
+            PawnStatType.LifeRegen => healthRegen,
+            PawnStatType.ManaRegen => manaRegen,
+            PawnStatType.None or _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
         public void ApplyMod(PawnStatModifier mod)  => GetStat(mod.PawnStat)?.AddModifier(mod.Modifier);

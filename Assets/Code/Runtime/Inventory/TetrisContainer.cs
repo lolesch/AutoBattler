@@ -94,10 +94,6 @@ namespace Code.Runtime.Inventory
                 return false;
             }
 
-            // _stats is null when this container is a stash — items in the stash are inert.
-            if (_stats != null && arrival is IEquippable equippable)
-                equippable.OnEquipped(_stats);
-
             OnContentsChanged?.Invoke(Contents);
             return true;
         }
@@ -127,10 +123,6 @@ namespace Code.Runtime.Inventory
             var pointers = removed.GetPointers(position);
             foreach (var pointer in pointers)
                 _contentPointer.Remove(pointer);
-
-            // _stats is null when this container is a stash — skip unequip.
-            if (_stats != null && removed is IEquippable equippable)
-                equippable.OnUnequipped(_stats);
 
             OnContentsChanged?.Invoke(Contents);
             return true;

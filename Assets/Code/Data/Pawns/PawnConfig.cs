@@ -9,7 +9,10 @@ namespace Code.Data.Pawns
     {
         [PreviewIcon] public Sprite icon;
         [Min(1)] public uint baseHealth = 100;
+        [Min(1)] public uint baseHealthRegen = 2;
         [Min(1)] public uint baseMana = 60;
+        [Min(1)] public uint baseManaRegen = 5;
+        
         public WeaponConfig StarterWeapon;
     }
 }

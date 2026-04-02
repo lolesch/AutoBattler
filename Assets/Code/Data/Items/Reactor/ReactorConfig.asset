@@ -19,12 +19,12 @@ MonoBehaviour:
     rows:
     - row: 01
   connectors:
-  - <LocalPosition>k__BackingField: {x: 0, y: 0}
-    <Direction>k__BackingField: 0
-  <pawnStatType>k__BackingField: 2
-  <StatValue>k__BackingField: 20
-  <ModifierType>k__BackingField: 1
-  debugStatModifierString: Max Mana +20
+  - <position>k__BackingField: {x: 0, y: 0}
+    <direction>k__BackingField: 0
+  pawnStatMod:
+    stat: 3
+    value: 20
+    type: 1
   <ReactorType>k__BackingField: 0
-  <ConditionType>k__BackingField: 0
+  <ConditionType>k__BackingField: 1
   <ConditionThreshold>k__BackingField: 0

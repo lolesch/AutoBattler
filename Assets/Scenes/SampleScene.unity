@@ -875,8 +875,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 6ffcd358715dca54b941bcad3ccef2d4, type: 3}
+  m_Type: 2
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -3131,6 +3131,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d287988fc72bebe49a9a88107b6d4e2f, type: 2}
   - {fileID: 11400000, guid: 57ebd3624db0aa6469b794b430703496, type: 2}
   - {fileID: 11400000, guid: d27bd8a659792f741917243aa66dcfcb, type: 2}
+  - {fileID: 11400000, guid: a572866fea819a94d87021b0702dd708, type: 2}
   lootCount: 3
   <Current>k__BackingField: 0
 --- !u!4 &1346236139

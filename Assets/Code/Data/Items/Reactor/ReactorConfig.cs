@@ -10,7 +10,7 @@ namespace Code.Data.Items.Reactor
     /// Condition is checked each time the event fires — if not met, the chain does not fire.
     /// </summary>
     [CreateAssetMenu(fileName = "ReactorConfig", menuName = "Configs/Items/Reactor")]
-    public sealed class ReactorConfig : StatItemConfig
+    public sealed class ReactorConfig : AttachmentItemConfig
     {
         [field: Header("Chain — Event")]
         [field: SerializeField] public ReactorType             ReactorType        { get; private set; }

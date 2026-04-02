@@ -21,13 +21,13 @@ MonoBehaviour:
     - row: 01
   connectors:
   - <position>k__BackingField: {x: 0, y: 0}
+    <direction>k__BackingField: 1
+  - <position>k__BackingField: {x: 0, y: 1}
     <direction>k__BackingField: 0
-  - <position>k__BackingField: {x: 0, y: 0}
-    <direction>k__BackingField: 0
-  <BaseDamage>k__BackingField: 1
+  <BaseDamage>k__BackingField: 3
   <AttackSpeed>k__BackingField: 1.4
-  <ResourceCost>k__BackingField: 1
-  <ResourceGenOnHit>k__BackingField: 0
+  <ResourceCost>k__BackingField: 0
+  <ResourceGenOnHit>k__BackingField: 3
   <PayloadCondition>k__BackingField: 6
   <PayloadConditionThreshold>k__BackingField: 2
   tags: 0

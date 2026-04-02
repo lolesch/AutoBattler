@@ -1,13 +1,11 @@
-﻿using Code.Data.Items;
-using Code.Data.Enums;
+﻿using Code.Data.Items.Converter;
 
 namespace Code.Runtime.Inventory
 {
-    public sealed class ConverterItem : TetrisItem, IConverterItem
+    public sealed class ConverterItem : AttachmentItem, IConverterItem
     {
-        public ConverterItem(ItemConfig config, RotationType rotation) : base(config, rotation)
-        {
-        }
+        public ConverterItem(ConverterConfig config, RotationType rotation = RotationType.None) : base(config, rotation)
+        {}
     }
 
     public interface IConverterItem : ITetrisItem

@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Code.Data.Enums;
 using Code.Data.Items;
 using Code.Runtime.Grids.RectGridInspector;
 using Code.Runtime.Statistics;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Code.Runtime.Inventory
 {
@@ -124,16 +122,40 @@ namespace Code.Runtime.Inventory
 
         List<(Vector2Int slotPos, Vector2Int direction)> GetGridConnectors(Vector2Int placement);
     }
-    
-    public interface IStatModifier : IEquippable
+
+    // Base class for components, not for weapons. Weapons do not apply statMods but attack
+    public abstract class AttachmentItem : TetrisItem, IAttachmentItem
     {
-        IReadOnlyList<PawnStatModifier> Affixes { get; }
+        protected AttachmentItem(AttachmentItemConfig config, RotationType rotation) : base(config, rotation)
+        {
+            _affixes.Add(new PawnStatModifier(config.pawnStatMod.stat,
+                new Modifier(config.pawnStatMod.value, config.pawnStatMod.type, Guid)));
+        }
+
+        public IReadOnlyList<PawnStatModifier> affixes => _affixes;
+        private readonly List<PawnStatModifier> _affixes = new();
+        
+        public void OnUnchained(IPawnStats stats)
+        {
+            if (_affixes.Count == 0) return;
+            foreach (var affix in _affixes)
+                stats.ApplyMod(affix);
+        }
+
+        public void OnChained(IPawnStats stats)
+        {
+            if (_affixes.Count == 0) return;
+            foreach (var affix in _affixes)
+                stats.RemoveMod(affix);
+        }
     }
     
-    public interface IEquippable
+    public interface IAttachmentItem
     {
-        void OnEquipped(IPawnStats stats);
-        void OnUnequipped(IPawnStats stats);
+        IReadOnlyList<PawnStatModifier> affixes { get; }
+   
+        void OnUnchained(IPawnStats stats);
+        void OnChained(IPawnStats stats);
     }
 
     [Serializable]

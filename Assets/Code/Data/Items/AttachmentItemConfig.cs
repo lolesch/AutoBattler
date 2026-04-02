@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Code.Data.Items
 {
     [Serializable]
-    public abstract class StatItemConfig : ItemConfig
+    public abstract class AttachmentItemConfig : ItemConfig
     {
         [field: Header("Unchained")] 
         public PawnStatModConfig pawnStatMod;

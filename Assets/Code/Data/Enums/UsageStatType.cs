@@ -3,6 +3,8 @@ namespace Code.Data.Enums
     public enum UsageStatType : byte
     {
         AttackSpeed,
-        ResourceCost,
+        LifeCost,
+        ManaCost,
+        ProcChance, // is it usage or attack stat?
     }
 }

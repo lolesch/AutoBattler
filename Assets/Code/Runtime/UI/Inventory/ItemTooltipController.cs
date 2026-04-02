@@ -353,9 +353,9 @@ namespace Code.Runtime.UI.Inventory
                 case IAmplifierItem or IShifterItem or IReactorItem or IConverterItem:
                 {
                     var chainedDesc  = ChainedDescription(item);
-                    var sm           = item as IStatModifier;
-                    var unchainedStr = sm?.Affixes.Count > 0
-                        ? $"unchained: {sm.Affixes[0].PawnStat} {sm.Affixes[0].Modifier}"
+                    var sm           = item as IAttachmentItem;
+                    var unchainedStr = sm?.affixes.Count > 0
+                        ? $"unchained: {sm.affixes[0].PawnStat} {sm.affixes[0].Modifier}"
                         : null;
 
                     if (isChained)

@@ -28,7 +28,7 @@ namespace Code.Runtime.Inventory
     {
         MutableFloat         Damage                    { get; }
         MutableFloat         AttackSpeed               { get; }
-        MutableFloat         ResourceCost              { get; }
+        MutableFloat         ResourceCost              { get; } // probably needs healthCost and manaCost separately
         MutableFloat         ResourceGenOnHit          { get; }
         ConditionType        PayloadCondition          { get; }
         float                PayloadConditionThreshold { get; }

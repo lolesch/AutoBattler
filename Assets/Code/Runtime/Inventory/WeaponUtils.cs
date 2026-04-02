@@ -9,7 +9,7 @@ namespace Code.Runtime.Inventory
         public static MutableFloat GetUsageStat(this IWeaponItem weapon, UsageStatType stat) => stat switch
         {
             UsageStatType.AttackSpeed  => weapon.AttackSpeed,
-            UsageStatType.ResourceCost => weapon.ResourceCost,
+            UsageStatType.ManaCost => weapon.ResourceCost,
             _                           => throw new ArgumentOutOfRangeException(nameof(stat), stat, null),
         };
         public static MutableFloat GetAttackStat(this IWeaponItem weapon, AttackStatType result) => result switch

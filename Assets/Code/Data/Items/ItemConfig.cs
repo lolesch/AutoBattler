@@ -27,13 +27,13 @@ namespace Code.Data.Items
             while (connectors.Count > MaxConnectors)
                 connectors.RemoveAt(connectors.Count - 1);
 
-            var shapeCells = Shape != null ? Shape.GetVec2Ints() : null;
+            var shapeCells = Shape.GetVec2Ints();
             for (var i = 0; i < connectors.Count; i++)
             {
                 var c = connectors[i];
-                if (shapeCells != null && !shapeCells.Contains(c.position))
+                if (!shapeCells.Contains(c.position))
                     Debug.LogWarning($"[{name}] Connector {i}: LocalPosition {c.position} is not part of the item shape.", this);
-                if (shapeCells != null && shapeCells.Contains(c.position + c.direction.ToVector2Int()))
+                if (shapeCells.Contains(c.position + c.direction.ToVector2Int()))
                     Debug.LogWarning($"[{name}] Connector {i}: Direction points inward — target cell {c.position + c.direction.ToVector2Int()} is part of the item shape.", this);
                 for (var j = i + 1; j < connectors.Count; j++)
                     if (c.position == connectors[j].position && c.direction.ToVector2Int() == connectors[j].direction.ToVector2Int())
