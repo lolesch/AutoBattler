@@ -20,9 +20,9 @@ namespace Code.Data.Items
     }
     
     [Serializable]
-    public class PawnStatModConfig : StatModConfig<PawnStatType> {}
+    public class PawnStatModConfig : StatModConfig<PawnStat> {}
     [Serializable]
-    public class WeaponUsageStatModConfig : StatModConfig<UsageStatType> {}
+    public class WeaponInputStatModConfig : StatModConfig<WeaponInputStat> {}
     [Serializable]
-    public class WeaponAttackStatModConfig : StatModConfig<AttackStatType> {}
+    public class WeaponOutputStatModConfig : StatModConfig<WeaponOutputStat> {}
 }

@@ -47,7 +47,7 @@ namespace Code.Runtime.Pawns
 
             _icon       = Config.icon;
             Stats       = new PawnStats(Config);
-            Inventory   = new TetrisContainer(new Vector2Int(6, 3), Stats);
+            Inventory   = new TetrisContainer(new Vector2Int(6, 3));
             PawnEffects = _pawnEffects;
             
             if (Config.StarterWeapon != null)

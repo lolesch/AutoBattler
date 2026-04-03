@@ -12,13 +12,13 @@ namespace Code.Runtime.Statistics
     {
         [SerializeField, HideInInspector] protected string name;
 
-        [field: FormerlySerializedAs("<StatType>k__BackingField")] [field: SerializeField, ReadOnly] public PawnStatType pawnStatType { get; protected set; }
+        [field: FormerlySerializedAs("<StatType>k__BackingField")] [field: SerializeField, ReadOnly] public PawnStat pawnStat { get; protected set; }
 
         [SerializeField, ReadOnly] protected MutableFloat MaxValue;
 
-        public Stat( PawnStatType pawnStat, float baseValue )
+        public Stat( PawnStat pawnStat, float baseValue )
         {
-            pawnStatType = pawnStat;
+            this.pawnStat = pawnStat;
             MaxValue = new MutableFloat( baseValue );
         }
 
@@ -33,7 +33,7 @@ namespace Code.Runtime.Statistics
         {
             var other = (Stat) MemberwiseClone();
             other.name = string.Copy( name );
-            other.pawnStatType = pawnStatType;
+            other.pawnStat = pawnStat;
             other.MaxValue = MaxValue;
 
             return other;
@@ -41,7 +41,7 @@ namespace Code.Runtime.Statistics
 
         public sealed override string ToString()
         {
-            var statName = pawnStatType.ToDescription();
+            var statName = pawnStat.ToDescription();
 
             if( statName.Contains( "Percent" ) )
                 statName = statName.Replace( " Percent", "%" );
@@ -52,7 +52,7 @@ namespace Code.Runtime.Statistics
 
     internal interface IStat
     {
-        PawnStatType pawnStatType { get; }
+        PawnStat pawnStat { get; }
         void AddModifier( Modifier modifier );
         bool TryRemoveModifier( Modifier modifier );
         Stat GetDeepCopy();

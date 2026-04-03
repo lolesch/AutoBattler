@@ -64,7 +64,6 @@ namespace Code.Runtime.Combat
             {
                 chain.ApplyChainModifiers();
                 _cleanupActions.Add(chain.RemoveChainModifiers);
-                //ChainResolver.LogChain(chain);
 
                 switch (chain.Root)
                 {
@@ -90,15 +89,17 @@ namespace Code.Runtime.Combat
             var weapon     = chain.Weapon;
             var activators = GetActivators(chain);
             var (costResource, genResource) = ResolveChainResources(chain);
-            var applied    = new Dictionary<IShifterItem, (Modifier firing, Modifier output)>();
 
-            EvaluateActivators();
+            foreach (var act in activators)
+            {
+                weapon.GetInputStat(act.inputMod.stat).AddModifier(act.inputMod.modifier);
+                weapon.GetOutputStat(act.outputMod.stat).AddModifier(act.inputMod.modifier);
+            }
 
             var timer = new Timer(weapon.AttackSpeed, true);
             timer.OnRewind += () =>
             {
-                EvaluateActivators();
-                timer.Duration = weapon.AttackSpeed;
+                timer.Duration =  1 / weapon.AttackSpeed;
 
                 if (CanFire(weapon, costResource))
                     Fire(chain, weapon, costResource, genResource);
@@ -108,61 +109,35 @@ namespace Code.Runtime.Combat
             _cleanupActions.Add(() =>
             {
                 timer.Stop();
-                foreach (var (act, (firingMod, outputMod)) in applied)
-                {
-                    weapon.GetUsageStat(act.usageMod.stat).TryRemoveModifier(firingMod);
-                    weapon.GetAttackStat(act.attackMod.stat).TryRemoveModifier(outputMod);
-                }
-                applied.Clear();
-            });
-            return;
-
-            void EvaluateActivators()
-            {
                 foreach (var act in activators)
                 {
-                    if (applied.ContainsKey(act))
-                    {
-                        var (firingMod, outputMod) = applied[act];
-                        weapon.GetUsageStat(act.usageMod.stat).TryRemoveModifier(firingMod);
-                        weapon.GetAttackStat(act.attackMod.stat).TryRemoveModifier(outputMod);
-                        applied.Remove(act);
-                    }
-                    else
-                    {
-                        var firingMod = act.usageMod.modifier;
-                        var outputMod = act.attackMod.modifier;
-                        weapon.GetUsageStat(act.usageMod.stat).AddModifier(firingMod);
-                        weapon.GetAttackStat(act.attackMod.stat).AddModifier(outputMod);
-                        applied[act] = (firingMod, outputMod);
-                    }
+                    weapon.GetInputStat(act.inputMod.stat).TryRemoveModifier(act.inputMod.modifier);
+                    weapon.GetOutputStat(act.outputMod.stat).TryRemoveModifier(act.inputMod.modifier);
                 }
-            }
+            });
         }
 
         private void BuildReactor(IReactorItem reactor, IItemChain chain)
         {
             var weapon    = chain.Weapon;
-            var condType  = reactor.ConditionType;
-            var condThres = reactor.ConditionThreshold;
+            //var condType  = reactor.ConditionType;
+            //var condThres = reactor.ConditionThreshold;
             var (costResource, genResource) = ResolveChainResources(chain);
 
-            // TODO: merge ConditionMet() and CanFire()
-            bool ConditionMet() => EvaluateCondition(condType, condThres);
-
+            weapon.GetInputStat(reactor.inputMod.stat).AddModifier(reactor.inputMod.modifier);
+            
             switch (reactor.ReactorType)
             {
                 case ReactorType.OnSelfHit:
                 {
-                    void OnHealthChanged(float prev, float curr, float _)
-                    { if (curr < prev && ConditionMet() && CanFire(weapon, costResource)) Fire(chain, weapon, costResource, genResource); }
+                    void OnHealthChanged(float prev, float curr, float _) { if (curr < prev && CanFire(weapon, costResource)) Fire(chain, weapon, costResource, genResource); }
                     _pawn.Stats.health.OnCurrentChanged += OnHealthChanged;
                     _cleanupActions.Add(() => _pawn.Stats.health.OnCurrentChanged -= OnHealthChanged);
                     break;
                 }
                 case ReactorType.OnManaDeplete:
                 {
-                    void OnManaDeplete() { if (ConditionMet()&& CanFire(weapon, costResource)) Fire(chain, weapon, costResource, genResource); }
+                    void OnManaDeplete() { if (CanFire(weapon, costResource)) Fire(chain, weapon, costResource, genResource); }
                     _pawn.Stats.mana.OnDepleted += OnManaDeplete;
                     _cleanupActions.Add(() => _pawn.Stats.mana.OnDepleted -= OnManaDeplete);
                     break;
@@ -170,7 +145,7 @@ namespace Code.Runtime.Combat
                 case ReactorType.OnEnemyDeath:
                 {
                     if (_target == null) break;
-                    void OnEnemyDefeated() { if (ConditionMet()&& CanFire(weapon, costResource)) Fire(chain, weapon, costResource, genResource); }
+                    void OnEnemyDefeated() { if (CanFire(weapon, costResource)) Fire(chain, weapon, costResource, genResource); }
                     _target.OnDefeated += OnEnemyDefeated;
                     _cleanupActions.Add(() => _target.OnDefeated -= OnEnemyDefeated);
                     break;
@@ -181,6 +156,8 @@ namespace Code.Runtime.Combat
                     Debug.LogWarning($"[Combat] Reactor {reactor.ReactorType} requires coordinator — not yet wired.");
                     break;
             }
+            
+            _cleanupActions.Add(() => { weapon.GetInputStat(reactor.inputMod.stat).TryRemoveModifier(reactor.inputMod.modifier); });
         }
         
         private void Fire(IItemChain chain, IWeaponItem weapon, Resource costResource, Resource genResource)
@@ -212,20 +189,9 @@ namespace Code.Runtime.Combat
                 ConditionType.ResourceBelow         => _pawn.Stats.mana.Percentage < payload.PayloadConditionThreshold,
                 ConditionType.ResourceAbove         => _pawn.Stats.mana.Percentage > payload.PayloadConditionThreshold,
                 ConditionType.DamageAbove           => rootDamage >= payload.PayloadConditionThreshold,
+                ConditionType.HasStatusEffect => false,
                 _                                          => false,
             };
-
-        private bool EvaluateCondition(ConditionType type, float threshold)
-        {
-            return type switch
-            {
-                ConditionType.Always          => true,
-                ConditionType.ResourceBelow   => _pawn.Stats.mana.Percentage < threshold,
-                ConditionType.ResourceAbove   => _pawn.Stats.mana.Percentage > threshold,
-                ConditionType.HasStatusEffect => false,
-                _                                      => false,
-            };
-        }
 
         private bool CanFire(IWeaponItem weapon, Resource costResource) => costResource.CanSpend(weapon.ResourceCost);
 

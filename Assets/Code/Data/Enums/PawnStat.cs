@@ -1,6 +1,6 @@
 namespace Code.Data.Enums
 {
-    public enum PawnStatType : byte
+    public enum PawnStat : byte
     {
         None = 0,
         

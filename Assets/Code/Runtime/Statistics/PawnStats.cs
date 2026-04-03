@@ -18,19 +18,19 @@ namespace Code.Runtime.Statistics
 
         public PawnStats(PawnConfig config)
         {
-            health      = new Resource(PawnStatType.LifeMax, config.baseHealth);
-            healthRegen = new Stat(PawnStatType.LifeRegen,   config.baseHealthRegen);
-            mana        = new Resource(PawnStatType.ManaMax, config.baseMana);
-            manaRegen   = new Stat(PawnStatType.ManaRegen,   config.baseManaRegen);
+            health      = new Resource(PawnStat.LifeMax, config.baseHealth);
+            healthRegen = new Stat(PawnStat.LifeRegen,   config.baseHealthRegen);
+            mana        = new Resource(PawnStat.ManaMax, config.baseMana);
+            manaRegen   = new Stat(PawnStat.ManaRegen,   config.baseManaRegen);
         }
 
-        private Stat GetStat(PawnStatType type) => type switch
+        private Stat GetStat(PawnStat type) => type switch
         {
-            PawnStatType.LifeMax   => health,
-            PawnStatType.ManaMax   => mana,
-            PawnStatType.LifeRegen => healthRegen,
-            PawnStatType.ManaRegen => manaRegen,
-            PawnStatType.None or _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            PawnStat.LifeMax   => health,
+            PawnStat.ManaMax   => mana,
+            PawnStat.LifeRegen => healthRegen,
+            PawnStat.ManaRegen => manaRegen,
+            PawnStat.None or _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
         public void ApplyMod(PawnStatModifier mod)  => GetStat(mod.PawnStat)?.AddModifier(mod.Modifier);

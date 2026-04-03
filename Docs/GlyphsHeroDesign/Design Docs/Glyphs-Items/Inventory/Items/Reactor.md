@@ -1,71 +1,10 @@
-
-## Shifter
-
-### Definition
-
-A Shifter precedes a weapon and trades stats across the firing and output economies while its condition is continuously true. The weapon always fires regardless — the Shifter just reshapes its profile when conditions are met.
-
-Maps to `ActivatorItem` in code (`FiringStatType` enum covers the firing side).
-
-Multiple Shifters chain freely before a weapon — each applies its own trade while its own condition holds.
-
 ---
-
-### What a Shifter Trades
-
-One firing stat against one output stat (or within the same economy). Every bonus costs something on another axis.
-
-|Trade|Meaning|
-|---|---|
-|`AttackSpeed` ↓ → `Damage` ↑|Slow but hits hard — classic|
-|`AttackSpeed` ↑ → `Damage` ↓|Fast but soft — generator build feeding a payload|
-|`ResourceCost` ↑ → `Damage` ↑|Expensive but powerful|
-|`ResourceCost` ↓ → `Damage` ↓|Cheap and soft — high frequency, low impact|
-|`ResourceCost` ↑ → `ResourceGenOnHit` ↑|Costs more but feeds the pool harder on each hit|
-|`AttackSpeed` ↓ → `ResourceGenOnHit` ↑|Slower but each hit generates more|
-
-**Known constraint:** `AttackSpeed` trades have no effect when a Reactor replaces the weapon's timer. The Shifter's damage bonus still applies — the timing penalty becomes irrelevant. This is an intentional build exploitation, not a bug.
-
+tags:
+  - Item
+  - Attachment
+  - ChainRoot
+  - Inventory
 ---
-
-### Shifter Conditions
-
-A continuously readable gate — true or false at any moment. The trade only applies while the condition holds.
-
-**HP state**
-
-- HP below X% — high risk, high reward
-- HP above X% — only benefits healthy builds
-
-**Resource state**
-
-- Resource below X% — fires faster when starved
-- Resource above X% — fires faster when flush
-
-**Status state**
-
-- Unit currently has a specific status effect _(stub — defer until status system exists)_
-
-**Combat state**
-
-- First X seconds of combat — opening burst window
-- Enemy count below X — winning condition bonus
-- Ally count below X — last stand pressure
-
-**Deferred:**
-
-- Positional conditions (adjacent to ally, flanked, terrain type) — hex/PawnEffect layer. See [[PawnDesign|Pawn Design]].
-
----
-
-### Design Notes
-
-Resource threshold pair (above/below X%) is the richest condition — creates a build decision around whether to stay flush or spend aggressively. HP pair is the classic risk/reward axis.
-
----
-
-## Reactor
-
 ### Definition
 
 A Reactor listens for an external event it doesn't control. When the event fires, it replaces the weapon's default timer and fires the weapon. The weapon only fires when the event occurs.
@@ -73,6 +12,10 @@ A Reactor listens for an external event it doesn't control. When the event fires
 Reactors are the **design differentiator** — they bridge item chains and the hex unit system, making team composition directly empower individual weapon chains.
 
 Reactors also support a condition (`ConditionType`, `ConditionThreshold` in `ReactorItem`) — the event must occur AND the condition must be met for the weapon to fire.
+
+# Interactions
+
+- A slow but hard hitting weapon overridden by a Reactor that fires often can exploit Shifter's trading speed for damage. The timing penalty stays irrelevant but the damage bonus remains.
 
 ---
 

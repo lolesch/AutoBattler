@@ -9,10 +9,9 @@ namespace Code.Runtime.Inventory
     [Serializable]
     public sealed class TetrisContainer : ITetrisContainer
     {
-        public TetrisContainer(Vector2Int gridSize, IPawnStats stats)
+        public TetrisContainer(Vector2Int gridSize)
         {
             GridSize = gridSize;
-            _stats   = stats; // null is valid — stash containers have no owning pawn
         }
 
         private readonly Dictionary<Vector2Int, ITetrisItem> _contents       = new();
@@ -22,7 +21,6 @@ namespace Code.Runtime.Inventory
         public IReadOnlyDictionary<Vector2Int, Vector2Int>  ContentPointer => _contentPointer;
 
         public Vector2Int GridSize { get; }
-        private readonly IPawnStats _stats;
 
         public event Action<IReadOnlyDictionary<Vector2Int, ITetrisItem>> OnContentsChanged;
 

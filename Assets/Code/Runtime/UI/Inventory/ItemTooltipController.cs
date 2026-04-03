@@ -294,28 +294,28 @@ namespace Code.Runtime.UI.Inventory
 
         private static void ApplyAmp(IAmplifierItem amp, IWeaponItem weapon)
         {
-            var mod = amp.weaponAttackModifier;
-            weapon.GetAttackStat(mod.stat)
+            var mod = amp.outputMod;
+            weapon.GetOutputStat(mod.stat)
                 .AddModifier(mod.modifier);
         }
 
         private static void RemoveAmp(IAmplifierItem amp, IWeaponItem weapon)
         {
-            var mod = amp.weaponAttackModifier;
-            weapon.GetAttackStat(mod.stat)
+            var mod = amp.outputMod;
+            weapon.GetOutputStat(mod.stat)
                 .TryRemoveModifier(mod.modifier);
         }
 
         private static void ApplyActivator(IShifterItem act, IWeaponItem weapon)
         {
-            weapon.GetUsageStat(act.usageMod.stat).AddModifier(act.usageMod.modifier);
-            weapon.GetAttackStat(act.attackMod.stat).AddModifier(act.attackMod.modifier);
+            weapon.GetInputStat(act.inputMod.stat).AddModifier(act.inputMod.modifier);
+            weapon.GetOutputStat(act.outputMod.stat).AddModifier(act.outputMod.modifier);
         }
 
         private static void RemoveActivator(IShifterItem act, IWeaponItem weapon)
         {
-            weapon.GetUsageStat(act.usageMod.stat).TryRemoveModifier(act.usageMod.modifier);
-            weapon.GetAttackStat(act.attackMod.stat).TryRemoveModifier(act.attackMod.modifier);
+            weapon.GetInputStat(act.inputMod.stat).TryRemoveModifier(act.inputMod.modifier);
+            weapon.GetOutputStat(act.outputMod.stat).TryRemoveModifier(act.outputMod.modifier);
         }
 
         // ── Stat formatting ───────────────────────────────────────────────
@@ -396,11 +396,11 @@ namespace Code.Runtime.UI.Inventory
         private static string ChainedDescription(ITetrisItem item) => item switch
         {
             IAmplifierItem amp => 
-                $"chained:   {amp.weaponAttackModifier.stat} {amp.weaponAttackModifier.modifier}",
+                $"chained:   {amp.outputMod.stat} {amp.outputMod.modifier}",
 
             IShifterItem act =>
-                $"chained:   {act.usageMod.stat} {act.usageMod.modifier}" +
-                $" ↔ {act.attackMod.stat} {act.attackMod.modifier}",
+                $"chained:   {act.inputMod.stat} {act.inputMod.modifier}" +
+                $" ↔ {act.outputMod.stat} {act.outputMod.modifier}",
 
             IReactorItem reactor =>
                 $"chained:   {reactor.ReactorType}" +

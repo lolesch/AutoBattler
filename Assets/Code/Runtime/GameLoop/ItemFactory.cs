@@ -12,12 +12,6 @@ using Random = UnityEngine.Random;
 
 namespace Code.Runtime.GameLoop
 {
-    /// <summary>
-    /// Creates ITetrisItem runtime instances from ItemConfig data assets.
-    /// Dispatches on config type — add a case here when new item types are introduced.
-    /// RarityType is currently assigned randomly inside TetrisItem; weight it here later
-    /// by filtering the pool before selection (e.g. by rarity tier, enemy level, etc.).
-    /// </summary>
     public static class ItemFactory
     {
         public static ITetrisItem Create(IReadOnlyList<ItemConfig> pool)
@@ -36,7 +30,7 @@ namespace Code.Runtime.GameLoop
         {
             WeaponConfig    c => new WeaponItem(c),
             AmplifierConfig c => new AmplifierItem(c),
-            ShifterConfig c => new ShifterItem(c),
+            ShifterConfig   c => new ShifterItem(c),
             ReactorConfig   c => new ReactorItem(c),
             ConverterConfig c => new ConverterItem(c),
             _                 => throw new ArgumentOutOfRangeException(nameof(config), config.GetType().Name, "No factory mapping found.")

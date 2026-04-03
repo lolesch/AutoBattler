@@ -1,6 +1,6 @@
 namespace Code.Data.Enums
 {
-    public enum AttackStatType : byte
+    public enum WeaponOutputStat : byte
     {
         Damage,
         ResourceGenOnHit,

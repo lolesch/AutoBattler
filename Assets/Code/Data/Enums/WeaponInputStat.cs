@@ -1,6 +1,6 @@
 namespace Code.Data.Enums
 {
-    public enum UsageStatType : byte
+    public enum WeaponInputStat : byte
     {
         AttackSpeed,
         LifeCost,

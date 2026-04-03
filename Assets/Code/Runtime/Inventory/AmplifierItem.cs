@@ -5,18 +5,18 @@ namespace Code.Runtime.Inventory
 {
     public sealed class AmplifierItem : AttachmentItem, IAmplifierItem
     {
-        public WeaponAttackModifier weaponAttackModifier { get; }
+        public WeaponOutputModifier outputMod { get; }
 
         public AmplifierItem(AmplifierConfig config, RotationType rotation = RotationType.None) : base(config, rotation)
         {
-            weaponAttackModifier = new WeaponAttackModifier(
-                config.attackStatMod.stat,
-                new Modifier(config.attackStatMod.value, config.attackStatMod.type, Guid));
+            outputMod = new WeaponOutputModifier(
+                config.outputStatMod.stat,
+                new Modifier(config.outputStatMod.value, config.outputStatMod.type, Guid));
         }
     }
 
     public interface IAmplifierItem : ITetrisItem
     {
-        WeaponAttackModifier weaponAttackModifier { get; }
+        WeaponOutputModifier outputMod { get; }
     }
 }

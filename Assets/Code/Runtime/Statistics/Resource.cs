@@ -8,7 +8,7 @@ namespace Code.Runtime.Statistics
     [Serializable]
     public sealed class Resource : Stat, IResource
     {
-        public Resource( PawnStatType resource, /*Stat regen,*/ float baseValue ) : base( resource, baseValue )
+        public Resource( PawnStat resource, /*Stat regen,*/ float baseValue ) : base( resource, baseValue )
         {
             CurrentValue = baseValue;
             MaxValue.OnTotalChanged += _ => SetCurrentTo( CurrentValue );
@@ -26,7 +26,7 @@ namespace Code.Runtime.Statistics
         public event Action OnDepleted;
         public event Action OnRecharged;
 
-        public bool CanSpend( float amount ) => pawnStatType == PawnStatType.LifeMax
+        public bool CanSpend( float amount ) => pawnStat == PawnStat.LifeMax
             ? amount < CurrentValue // prevent deplete health when using health as a resource
             : amount <= CurrentValue;
 
@@ -70,7 +70,7 @@ namespace Code.Runtime.Statistics
         {
             var other = (Resource) MemberwiseClone();
             other.name = string.Copy( name );
-            other.pawnStatType = pawnStatType;
+            other.pawnStat = pawnStat;
             other.MaxValue = MaxValue;
             other.CurrentValue = CurrentValue;
             other.OnCurrentChanged = null; //have no listeners to these deep copies
@@ -97,7 +97,7 @@ namespace Code.Runtime.Statistics
         {
             var other = (Resource) MemberwiseClone();
             other.name = string.Copy( name );
-            other.pawnStatType = pawnStatType;
+            other.pawnStat = pawnStat;
             other.MaxValue = MaxValue;
             other.OnCurrentChanged = null; //have no listeners to these deep copies
 

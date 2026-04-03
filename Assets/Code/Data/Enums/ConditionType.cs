@@ -2,9 +2,7 @@ namespace Code.Data.Enums
 {
     public enum ConditionType
     {
-        None,              // always fires as payload
-        
-        Always,
+        None,
         
         // Pawn
         ResourceBelow,

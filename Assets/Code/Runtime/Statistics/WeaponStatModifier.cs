@@ -22,14 +22,14 @@ namespace Code.Runtime.Statistics
     }
     
     [Serializable]
-    public class WeaponUsageModifier : WeaponModifier<UsageStatType>
+    public class WeaponInputModifier : WeaponModifier<WeaponInputStat>
     {
-        public WeaponUsageModifier(UsageStatType stat, Modifier modifier) : base(stat, modifier) { }
+        public WeaponInputModifier(WeaponInputStat stat, Modifier modifier) : base(stat, modifier) { }
     }
     
     [Serializable]
-    public class WeaponAttackModifier : WeaponModifier<AttackStatType>
+    public class WeaponOutputModifier : WeaponModifier<WeaponOutputStat>
     {
-        public WeaponAttackModifier(AttackStatType stat, Modifier modifier) : base(stat, modifier) { }
+        public WeaponOutputModifier(WeaponOutputStat stat, Modifier modifier) : base(stat, modifier) { }
     }
 }

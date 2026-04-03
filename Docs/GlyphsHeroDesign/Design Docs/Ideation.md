@@ -1,5 +1,5 @@
 
-The pawn / [[PawnDesign#Aura (PawnEffect)|PawnEffect]] could instead have some form of weapon handling that adds modifiers to equipped weapons. More defined Weapon types add a layer of customization and balancing. 
+The pawn / [[Pawn#Aura (PawnEffect)|PawnEffect]] could instead have some form of weapon handling that adds modifiers to equipped weapons. More defined Weapon types add a layer of customization and balancing. 
 
 # Block
 Armor and Shields can block attacks, without them, no block.
@@ -12,7 +12,9 @@ Shields against melee, Armor against ranged?
 
 pawn could have general weapon stats, so they would apply to all equipped weapons, like
 - ResourceCostReduction
-- CDR/attackSpeed
+- CDR/attackSpeed 
+	- adrenaline/focus (status effect) grants attack speed per stack
+		- is applied by combat events such as getting flanked, being hit, executing someone and so on.
 - damageScaler
 - ...
 
@@ -32,38 +34,40 @@ pawn could have general weapon stats, so they would apply to all equipped weapon
 	- bonus X for attacks that apply burning...
 	- +X% per consecutive hit
 
-# Combat Events
+---
 
-- OnDamageTaken
-- OnManaSpent
-- OnOverheal
+# Item Ideas
 
-
-have an item with negative stats both in chained and unchained state, so it is a burden to keep/carry it but it has a rare potential synergy that would make it super worthy.
+have an item with negative stats both in chained and unchained state, so it is a burden to keep/carry it but it has a synergy counterpart that converts the negative into power
 
 +1 MaxMana per hit and +1% damage per CurrentMana -> scaling mana build but requires scaling mana regen/instant refill to be worth
 
+**Mirror shard** - that (as payload) 
+- reverts the chain resolution, so that it goes back through all amplifiers and adds the weapon itself as payload to its own firing 
+	- but also blocks the mirrored inventory slots? 
+	- Or is simply a large item
 
-# Build Strategies
+sacrificia/ceremonial knife
+- targets self, deals little DMG but offers ... yeah, what?
 
-## Tank
-getting hit is part of the strategy
-- convert damage taken into X
-- reflect damage
-- OnGettingHit reactor
+---
 
-## AttackSpeed
-high OnHitEffect stacking
-- more hits = more ResourceGenOnHit
-- can stack effects
-- can fuel/enable other strategies
+## Weapon Archetypes
 
-## Burst
-high resource usage with high downtime
-- counters flat mitigation
-- if precharged, huge upfront impact on combat
+Examples:
+- Bolt (projectile)
+- Beam (continuous)
+- Burst (AoE)
+- Field (zone)
+- Chain (bounce)
+- Strike (melee)
+- Dash (movement)
+- Trap (triggered)
 
-## Glass Cannon
-oneshot before getting hit
-- relies on setup or support
-- high risk/reward
+---
+
+# Achievements
+
+"Hoarder" - fill the entire inventory with 1x1 items
+"Chainer" - fill the entire inventory with chained items
+"Chain Master" - fill the entire inventory with one chain

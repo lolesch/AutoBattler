@@ -27,7 +27,7 @@ namespace Code.Data.Items.Weapon
         //public PayloadModifier payload;
         //public StatusEffect status;
     }
-    
+
     [System.Serializable]
     public class DeliveryProfile
     {
