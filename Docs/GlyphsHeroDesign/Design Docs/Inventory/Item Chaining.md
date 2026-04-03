@@ -3,18 +3,19 @@ tags:
   - Inventory
 aliases:
   - Item Chain
+  - Chain Propagation
 ---
 
 Item chains are formed in the inventory when attachments are chained to a [[Weapon|Weapon]]. They contribute to the attack based on their type. 
 # Chain Item Taxonomy
 
-| Component                    | Role                                                                                    |
-| ---------------------------- | --------------------------------------------------------------------------------------- |
-| [[Shifter#Shifter\|Shifter]] | Trades [[Weapon#Weapon Stats\|input- against output stats]]                             |
-| [[Shifter#Reactor\|Reactor]] | Listens for [[Combat#Combat Events\|Combat Events]] and fires the weapon when it occurs |
-| [[Weapon\|Weapon]]           | Fires OR enhances the attack (as payload)                                               |
-| **Amplifier**                | Adds to the upstream Weapons output stats                                               |
-| **Converter**                | Reclassifies the output type of a matching upstream type                                |
+| Component                                                              | Role                                                                                                                        |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| [[Reactor]]                                                            | Listens for [[Combat#Combat Events\|Combat Events]] and fires the weapon when it occurs<br>Bridge from HexGrid to inventory |
+| [[Shifter#Shifter\|Shifter]]                                           | Trades [[Weapon#Weapon Stats\|input- against output stats]]                                                                 |
+| [[Weapon#Delivery Mode\|Weapon]] /<br>[[Weapon#Payload Mode\|Payload]] | Fires OR enhances the attack (as payload)<br>Bridge from inventory to HexGrid                                               |
+| **Amplifier**                                                          | Adds to the upstream Weapons output stats                                                                                   |
+| **Converter**                                                          | Reclassifies the output type of a matching upstream type                                                                    |
 
 ---
 

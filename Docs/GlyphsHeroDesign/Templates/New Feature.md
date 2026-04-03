@@ -1,28 +1,29 @@
 
-> [!tldr] Description
+> [!tldr]+ Description
+> 
 
-> [!quote] Purpose
+> [!quote]- Purpose - *Why is this essential?*
 > *Why is this mechanic essential for the game?*
 
-> [!check] Reward
+> [!check]- Reward - *What is the gain?*
 > *What is the gain for engaging with this mechanic?*
 
-> [!warning] Risk
+> [!warning]- Risk - *What are the punishments*
 > *What are the punishments when the mechanic is executed poorly?*
 
-> [!fail] Opposition
+> [!fail]- Opposition - *What counters this?*
 > *What is the mechanics countering force?*
 
-> [!error] Polarity
+> [!error]- Polarity - *What increases its weakness?*
 > *How to increase the mechanic's weakness?*
 
-> [!example] Progress
+> [!example]- Progress - *What is the goal*
 > *Why should the player invest into this mechanic?*
 > *What is the goal this mechanic is working towards?*
 
-> [!info] Depth
+> [!info]- Depth - *Where are the synergies*
 > *How does the mechanic synergize with other mechanics?*
 > *How does the mechanic influence the overall gameplay?*
 
-> [!tip] Appeal
+> [!tip]- Appeal - *Does it help the game*
 > *How does this mechanic support the overall game idea?*

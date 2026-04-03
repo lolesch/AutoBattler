@@ -1,4 +1,5 @@
 
+Status effects scale better via payload than via delivery mode.
 Statuses scale primarily through payloads.
 
 each effect should have a pawn impact as well as a terrain impact.

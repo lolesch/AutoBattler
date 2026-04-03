@@ -66,6 +66,15 @@ Examples:
 
 ---
 
+## Scripted Synergies
+Items can highlight scripted interactions, like 'Backpack Battles' merge function. 
+
+Rock + Whip = Sling
+- highly increased range but decreasing accuracy over distance
+	Rock has a weak payload, but as a Sling, that payload is much stronger
+
+---
+
 # Achievements
 
 "Hoarder" - fill the entire inventory with 1x1 items
