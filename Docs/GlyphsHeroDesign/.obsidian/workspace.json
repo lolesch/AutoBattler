@@ -35,12 +35,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Design Docs/Inventory/Items/Reactor.md",
+                "file": "Design Docs/Inventory/Missing Documentation.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Reactor"
+              "title": "Missing Documentation"
             }
           }
         ]
@@ -207,21 +207,22 @@
   },
   "active": "0f17960b0cfa66ce",
   "lastOpenFiles": [
-    "Design Docs/Inventory/Items/Shifter.md",
     "Design Docs/Inventory/Items/Splitter & Merger.md",
+    "Design Docs/Inventory/Items/Shifter.md",
     "Design Docs/Inventory/Items/Weapon.md",
+    "Design Docs/Inventory/Items/Reactor.md",
+    "Design Docs/Inventory/Items/Payload.md",
+    "Design Docs/Inventory/Items/Converter.md",
+    "Design Docs/Inventory/Items/Amplifier.md",
+    "Templates/New Feature.md",
+    "Design Docs/Inventory/Missing Documentation.md",
+    "Design Docs/Combat/Combat.md",
     "Design Docs/Inventory/Inventory.md",
     "Design Docs/Inventory/Item Chaining.md",
     "Design Docs/Ideation.md",
     "Design Docs/KNOWN_ISSUES.md",
-    "Templates/New Feature.md",
-    "Design Docs/Inventory/Items/Reactor.md",
-    "Design Docs/Inventory/Items/Payload.md",
-    "Design Docs/Inventory/Items/Amplifier.md",
-    "Design Docs/Inventory/Items/Converter.md",
     "Design Docs/Combat/Status Effects.md",
     "Design Docs/Combat/Pawn.md",
-    "Design Docs/Combat/Combat.md",
     "Technical Information.md",
     "Weapons.md",
     "Reference Games.md",

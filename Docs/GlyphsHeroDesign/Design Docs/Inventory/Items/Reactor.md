@@ -5,77 +5,39 @@ tags:
   - ChainRoot
   - Inventory
 ---
-### Definition
+# Definition
 
-A Reactor listens for an external event it doesn't control. When the event fires, it replaces the weapon's default timer and fires the weapon. The weapon only fires when the event occurs.
+> [!tldr]+ Description
+> Replaces the weapon's timer with an external combat event. Weapon only fires when the event occurs
 
-Reactors are the **design differentiator** — they bridge item chains and the hex unit system, making team composition directly empower individual weapon chains.
+> [!quote]- Purpose - *Why is this essential?*
+> Bridges [[Item Chaining]] and the hex unit system - combat directly empowers individual weapon chains.
 
-Reactors also support a condition (`ConditionType`, `ConditionThreshold` in `ReactorItem`) — the event must occur AND the condition must be met for the weapon to fire.
+> [!check]- Reward - *What is the gain?*
+> Attack rate can greatly exceed normal timer rate if the triggering event is frequent.
 
-# Interactions
+> [!warning]- Risk - *What are the punishments*
+> Low combat impact / loss of control - Total dependency on external conditions
+> [[Weapon#Input Economy|input costs]] drain resources
 
-- A slow but hard hitting weapon overridden by a Reactor that fires often can exploit Shifter's trading speed for damage. The timing penalty stays irrelevant but the damage bonus remains.
+> [!fail]- Opposition - *What counters this?*
+> Bypassing the event / event suppression
 
----
+> [!error]- Polarity - *What increases its weakness?*
+> Make common events rare on Reactors, 
+> High [[Weapon#Input Economy|input costs]] per attack
 
-### Event List
+> [!example]- Progress - *What is the goal*
+> Opt-in frequency optimization.
+> Overwrite timer-limitation
 
-**Self — receiving damage**
+> [!info]- Depth - *Where are the synergies*
+> Overrides [[Weapon]] timers
+> Negates frequency penalties from [[Shifter]]
+> Hex Grid layer feeds inventory output - positioning, team comp become relevant 
 
-|Event|Notes|
-|---|---|
-|This unit is hit (any)||
-|This unit is critically hit||
-|This unit is hit for X% max HP in one strike||
-|This unit takes damage of a specific type||
-|This unit is stunned||
-|This unit is debuffed||
-|This unit is flanked / surrounded|_Deferred — hex layer_|
-
-**Self — attacking**
-
-|Event|Notes|
-|---|---|
-|This unit attacks||
-|This unit hits||
-|This unit misses|Underexplored — risk/reward potential|
-|This unit crits||
-|This unit kills||
-|This unit overkills||
-|This unit stuns an enemy||
-
-**Ally events (hex radius)**
-
-|Event|Notes|
-|---|---|
-|Any ally attacks||
-|Any ally hits||
-|Any ally crits||
-|Any ally kills||
-|Any ally takes damage||
-|Any ally dies||
-|Ally count drops below X||
-|Ally enters a special state (rage, etc.)||
-
-**Enemy events (hex radius)**
-
-|Event|Notes|
-|---|---|
-|Nearby enemy dies||
-|Nearby enemy is debuffed / poisoned||
-|Nearby enemy is stunned||
-|Enemy enters adjacent hex|_Deferred — hex layer_|
-|Enemy count drops below X||
-
-**State / threshold events**
-
-|Event|Notes|
-|---|---|
-|This unit's HP drops below X%||
-|A buff is consumed|From Backpack Battles|
-|Chain propagates through this weapon (payload fired)|Unique to this system|
-|This unit is last surviving ally||
+> [!tip]- Appeal - *Does it help the game*
+> Bridging the systems - Chain → hex map → back to chain
 
 ---
 

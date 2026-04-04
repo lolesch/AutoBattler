@@ -32,4 +32,72 @@ multiple Weapons fire simultaneously
 - OnManaSpent
 - OnOverheal
 
+support hex positioning for "nearby" and similar
+
+- OnNearbyAllyGotHit
+- OnOutOfVision
+- OnFlanked/Surrounded
+
+careful with [[Reactor]] 
+
+- OnEnemyHit
+
+# Event List
+
+**Self — receiving damage**
+
+|Event|Notes|
+|---|---|
+|This unit is hit (any)||
+|This unit is critically hit||
+|This unit is hit for X% max HP in one strike||
+|This unit takes damage of a specific type||
+|This unit is stunned||
+|This unit is debuffed||
+|This unit is flanked / surrounded|_Deferred — hex layer_|
+
+**Self — attacking**
+
+|Event|Notes|
+|---|---|
+|This unit attacks||
+|This unit hits||
+|This unit misses|Underexplored — risk/reward potential|
+|This unit crits||
+|This unit kills||
+|This unit overkills||
+|This unit stuns an enemy||
+
+**Ally events (hex radius)**
+
+|Event|Notes|
+|---|---|
+|Any ally attacks||
+|Any ally hits||
+|Any ally crits||
+|Any ally kills||
+|Any ally takes damage||
+|Any ally dies||
+|Ally count drops below X||
+|Ally enters a special state (rage, etc.)||
+
+**Enemy events (hex radius)**
+
+|Event|Notes|
+|---|---|
+|Nearby enemy dies||
+|Nearby enemy is debuffed / poisoned||
+|Nearby enemy is stunned||
+|Enemy enters adjacent hex|_Deferred — hex layer_|
+|Enemy count drops below X||
+
+**State / threshold events**
+
+|Event|Notes|
+|---|---|
+|This unit's HP drops below X%||
+|A buff is consumed|From Backpack Battles|
+|Chain propagates through this weapon (payload fired)|Unique to this system|
+|This unit is last surviving ally||
+
 ---
