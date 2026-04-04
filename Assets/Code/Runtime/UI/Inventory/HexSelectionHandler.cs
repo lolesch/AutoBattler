@@ -54,7 +54,8 @@ namespace Code.Runtime.UI.Inventory
 
             foreach (var pawn in pawns)
             {
-                var pawnCell = grid.WorldToCell(pawn.transform.position);
+                //var pawnCell = grid.WorldToCell(pawn.transform.position);
+                var pawnCell = pawn.HexPosition.ToCell();
 
                 if (pawnCell != _selectedCell)
                     continue;
@@ -67,7 +68,7 @@ namespace Code.Runtime.UI.Inventory
 
                 foreach (var hex in pawn.PawnEffects.GetHexes())
                 {
-                    var cell = pawnCell.CellToHex().Add(hex).ToCell();
+                    var cell = pawn.HexPosition.Add(hex).ToCell();
                     pawnEffectMap.SetTile(cell, effectTile);
                 }
             }

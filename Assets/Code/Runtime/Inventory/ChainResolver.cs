@@ -225,7 +225,7 @@ namespace Code.Runtime.Inventory
                 var isPayload = item is IWeaponItem w && w != weapon;
                 sb.Append($" → {GetSemanticLabel(item, false, isPayload)}({item.Name}");
                 if (isPayload)
-                    sb.Append($"|{((IWeaponItem)item).PayloadCondition}");
+                    sb.Append($"|{((IWeaponItem)item).Payload.Condition}");
                 sb.Append(")");
             }
             return sb.ToString();

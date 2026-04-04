@@ -1,14 +1,22 @@
 
-The pawn / [[Pawn#Aura (PawnEffect)|PawnEffect]] could instead have some form of weapon handling that adds modifiers to equipped weapons. More defined Weapon types add a layer of customization and balancing. 
+Use unique items to modify [[Pawn#Aura (PawnEffect)|PawnEffects]] (crafting currency like in poe)
+- "use" these items by right-clicking and then left-clicking the pawn the item should be used on. This will destroy/remove the item from inventory and permanently apply it's pawnEffectModifier to that unit. <- relic-like upgrade.
+	- maybe items could be broken down into currency for further customization/crafting
+- Or it is the unique stat mod and just sits in the inventory (unchained only?)
+   
+defensive layers - avoid, reduce, regen
+- have mechanics that are effective against hard-hitting (%reduction) and others against many attacks (flatReduction)
 
 # Block
-Armor and Shields can block attacks, without them, no block.
+Armor and Shields can block attacks, without them, no block. (equipment items - not chainable?)
 a shield could reflect damage back to the attacker
 a legendary shield could reflect all damage of melee weapons. This would be an interesting enemy to overcome -> strategy needed.
 
 Shields against melee, Armor against ranged?
 
 # Stats
+
+The pawn / [[Pawn#Aura (PawnEffect)|PawnEffect]] could have some form of [[Payload#Affinity Tags|weapon handling]] that adds modifiers to equipped weapons. More defined Weapon types add a layer of customization and balancing.
 
 pawn could have general weapon stats, so they would apply to all equipped weapons, like
 - ResourceCostReduction
@@ -20,7 +28,7 @@ pawn could have general weapon stats, so they would apply to all equipped weapon
 
 - [ ] **Max Resource vs Regeneration Rate**
 	- Big pool vs fast recovery = different playstyles
-- [ ] shield as defensive layer
+- [ ] shield as defensive layer (energy shield)
 	- break it, ignore it, reduce its effectiveness and so on
 - [ ] Resource Overflow should grant shield for the other resource
 	- so ManaOverflow creates health shield and vise versa
@@ -49,20 +57,6 @@ have an item with negative stats both in chained and unchained state, so it is a
 
 sacrificia/ceremonial knife
 - targets self, deals little DMG but offers ... yeah, what?
-
----
-
-## Weapon Archetypes
-
-Examples:
-- Bolt (projectile)
-- Beam (continuous)
-- Burst (AoE)
-- Field (zone)
-- Chain (bounce)
-- Strike (melee)
-- Dash (movement)
-- Trap (triggered)
 
 ---
 

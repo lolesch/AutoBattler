@@ -341,11 +341,11 @@ namespace Code.Runtime.UI.Inventory
                 case IWeaponItem w:
                     sb.AppendLine($"  dmg  {(float)w.Damage:F1}   spd  {(float)w.AttackSpeed:F1}");
                     sb.AppendLine($"  cost {(float)w.ResourceCost:F1}   gen  {(float)w.ResourceGenOnHit:F1}");
-                    if (w.PayloadCondition != ConditionType.None)
+                    if (w.Payload.Condition != ConditionType.None)
                     {
                         sb.AppendLine();
-                        var payloadStr = $"  payload:   {w.PayloadCondition} \n" +
-                                         $"  threshold: {w.PayloadConditionThreshold:F2}";
+                        var payloadStr = $"  payload:   {w.Payload.Condition} \n" +
+                                         $"  threshold: {w.Payload.ConditionThreshold:F2}";
                         sb.AppendLine(isPayload ? $"<b>{payloadStr}</b>" : payloadStr.Colored(LightGray));
                     }
                     break;

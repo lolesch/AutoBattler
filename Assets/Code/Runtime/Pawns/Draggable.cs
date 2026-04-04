@@ -1,4 +1,6 @@
 using Code.Runtime.GameLoop;
+using NaughtyAttributes;
+using Submodules.Utility.Extensions;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -16,6 +18,7 @@ namespace Code.Runtime.Pawns
         [SerializeField] private Transform   pawn;
         [SerializeField] private Grid        grid;
         [SerializeField] private Tilemap     tilemap;
+        [SerializeField] private Pawn        pawnActor;
 
         private bool    _isDragging;
         private Vector2 _offset;
@@ -24,7 +27,11 @@ namespace Code.Runtime.Pawns
         private void Awake()
         {
             _previousPos = pawn.position;
+            if (pawnActor != null) return;
+            pawnActor = pawn.GetComponent<Pawn>(); Debug.LogWarning("Assign _pawnActor in Inspector.", this);
         }
+        
+        void Start() => pawnActor.MoveTo(grid.WorldToCell(pawnActor.transform.position).CellToHex());
 
         private void OnEnable()
         {
@@ -67,6 +74,7 @@ namespace Code.Runtime.Pawns
             {
                 pawn.position = grid.CellToWorld(cell);
                 _previousPos  = pawn.position;
+                pawnActor.MoveTo(cell.CellToHex());
             }
             else
                 pawn.position = _previousPos;

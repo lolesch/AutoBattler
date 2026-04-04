@@ -141,6 +141,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Pawn
   <Config>k__BackingField: {fileID: 11400000, guid: 4525cc981333f3e429fcc6aff9c4caaa, type: 2}
   <Team>k__BackingField: 1
+  <HexPosition>k__BackingField:
+    name: Hex(0, 0)
+    <q>k__BackingField: 0
+    <r>k__BackingField: 0
   _icon: {fileID: 21300000, guid: 9e735fd97a3956f499e8da8a5708e7a6, type: 3}
   _pawnEffects:
     shape:
@@ -153,6 +157,7 @@ MonoBehaviour:
     rotation: 0
     <Effect>k__BackingField: 
   _healthView: {fileID: 0}
+  _manaView: {fileID: 0}
 --- !u!114 &211134515494925660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,6 +177,7 @@ MonoBehaviour:
   pawn: {fileID: 4927067294153613365}
   grid: {fileID: 0}
   tilemap: {fileID: 0}
+  pawnActor: {fileID: 4876227807000541500}
 --- !u!82 &6496576454921074128
 AudioSource:
   m_ObjectHideFlags: 0

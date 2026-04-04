@@ -28,17 +28,15 @@ MonoBehaviour:
   <AttackSpeed>k__BackingField: 1.4
   <ResourceCost>k__BackingField: 0
   <ResourceGenOnHit>k__BackingField: 3
-  <PayloadCondition>k__BackingField: 6
-  <PayloadConditionThreshold>k__BackingField: 2
+  <Payload>k__BackingField:
+    <Condition>k__BackingField: 0
+    <ConditionThreshold>k__BackingField: 0.5
+    <Targeting>k__BackingField: 0
+    <Range>k__BackingField: 1
+    <Timing>k__BackingField: 0
+    <TimingValue>k__BackingField: 0
+    _effects: []
   tags: 0
-  delivery:
-    range: 0
-    radius: 0
-    chainCount: 0
-    tickRate: 0
-    duration: 0
-    requiresLOS: 0
-  payload:
-    powerMultiplier: 1
-    effects: []
-  status: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

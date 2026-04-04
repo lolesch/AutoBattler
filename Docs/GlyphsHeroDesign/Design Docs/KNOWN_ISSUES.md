@@ -1,16 +1,21 @@
-## Bugs
 
+# TODO
+
+- [ ] resource regen on pawns.
+- [ ] converter should only show cenvertable types, not the input enum and actually apply the change
 - [ ] Enemies should not be draggable
 	- [ ] enemies inventory should not be interactable ( inspect, but no add/remove/drag )
-cross container drag swaps items
-the returning item is placed at the outgoing item with its origin cell, not relative to the cell the outgoing item was placed on top of the returning. make it relative to the dropped cell might feel better. -> or just highlight the required slots in the origin inventory, to show the collisions.
-- [ ] implement required slots highlights again -> use backpack battles as reference.
+
+# Bugs
+
+- cross container drag swaps items:
+	the returning item is placed at the outgoing item with its origin cell, not relative to the cell the outgoing item was placed on top of the returning. make it relative to the dropped cell might feel better. -> or just highlight the required slots in the origin inventory, to show the collisions.
 - [ ] Same-container drag should attempt swap first to match cross-container; fallback to force-pickup only if returning item does not fit at source
-- [x] Weapons with no chained items should still show as root, as they fire on their own
+- [ ] implement required slots highlights again -> use backpack battles as reference.
 - adding and removing max resource mods changes the current value. 
 	- change implementation or reset on battle start?
-	- [ ] implement resource gen first and think of giving a bonus while not in combat
-- [ ] The current problem with item chaining is that weapons fired twice when connected to amplifiers from both sides. ChainResolver should apply all connected amplifiers and then perform the attack once. -> could be the general solution for all attachment types
+		- implement resource gen first and think of giving a bonus while not in combat
+- [ ] The current problem with item chaining is that weapons fire twice when connected to amplifiers from both sides. ChainResolver should apply all connected amplifiers and then perform the attack once. -> could be the general solution for all attachment types
 
 ---
 

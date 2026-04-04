@@ -14,9 +14,7 @@ namespace Code.Data.Items.Weapon
         [field: SerializeField] public float ResourceGenOnHit { get; private set; }
 
         [field: Header("Payload")]
-        //TODO: rework conditions!
-        [field: SerializeField] public ConditionType        PayloadCondition          { get; private set; }
-       [field: SerializeField] public float                PayloadConditionThreshold { get; private set; } = 0.5f;
+        [field: SerializeField] public PayloadBehavior Payload { get; private set; }
 
         public override int MaxConnectors => 2;
         

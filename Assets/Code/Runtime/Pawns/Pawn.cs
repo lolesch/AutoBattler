@@ -7,6 +7,7 @@ using Code.Runtime.Statistics;
 using Code.Runtime.UI;
 using NaughtyAttributes;
 using Submodules.Utility.Attributes;
+using Submodules.Utility.Extensions;
 using UnityEngine;
 
 namespace Code.Runtime.Pawns
@@ -15,6 +16,7 @@ namespace Code.Runtime.Pawns
     {
         [field: SerializeField] public PawnConfig Config { get; private set; }
         [field: SerializeField] public PawnTeam   Team   { get; private set; }
+        [field: SerializeField] public Hex        HexPosition      { get; private set; }
         [SerializeField, ReadOnly, PreviewIcon] private Sprite _icon;
         [SerializeField] private PawnEffect _pawnEffects;
         [SerializeField] private PawnResourceView _healthView;
@@ -68,6 +70,10 @@ namespace Code.Runtime.Pawns
         }
 
         public void TakeDamage(float damage) => Stats.health.ReduceCurrent(damage);
+        public void MoveTo(Hex hex)
+        {
+            HexPosition = hex;
+        }
 
         public void EquipItem(TetrisItem item)
         {
@@ -86,6 +92,8 @@ namespace Code.Runtime.Pawns
         IPawnCombatController CombatController { get; }
         PawnTeam              Team             { get; }
         event Action          OnDefeated;
+        Hex                   HexPosition { get; }
+        void MoveTo(Hex hex);
         void EquipItem(TetrisItem item);
     }
 
