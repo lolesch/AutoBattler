@@ -173,7 +173,7 @@ MonoBehaviour:
   cam: {fileID: 0}
   audioSource: {fileID: 6496576454921074128}
   pickupClip: {fileID: 8300000, guid: 40354ee8014c6aa4b927eeede73a1e21, type: 3}
-  dropClip: {fileID: 8300000, guid: 45091f7823347df428eca052cf637343, type: 3}
+  dropClip: {fileID: 8300000, guid: afbacdce463eb944db3aecde8dfef921, type: 3}
   pawn: {fileID: 4927067294153613365}
   grid: {fileID: 0}
   tilemap: {fileID: 0}

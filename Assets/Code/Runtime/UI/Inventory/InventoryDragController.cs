@@ -9,10 +9,10 @@ namespace Code.Runtime.UI.Inventory
     [RequireComponent(typeof(Canvas))]
     public sealed class InventoryDragController : MonoBehaviour, IInventoryDragController
     {
-        [SerializeField] private Image                _ghostImage;
-        [SerializeField] private Canvas               _canvas;
-
-        // ── Registered containers ─────────────────────────────────────────
+        [SerializeField] private Image       _ghostImage;
+        [SerializeField] private Canvas      _canvas;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip   pickupClip, dropClip;
 
         private sealed class ContainerBinding
         {
@@ -21,8 +21,6 @@ namespace Code.Runtime.UI.Inventory
 
         private readonly Dictionary<ITetrisContainer, ContainerBinding> _bindings        = new();
         private readonly Dictionary<ISlotView, ITetrisContainer>        _slotToContainer = new();
-
-        // ── Drag state ────────────────────────────────────────────────────
 
         private ITetrisContainer _sourceContainer;
         private ISlotView        _hoveredSlot;
@@ -37,8 +35,6 @@ namespace Code.Runtime.UI.Inventory
 
         private enum GestureMode { Idle, Click, Drag }
         private GestureMode _gesture;
-
-        // ── Unity ─────────────────────────────────────────────────────────
         
         private void Awake()
         {
@@ -70,8 +66,6 @@ namespace Code.Runtime.UI.Inventory
             if (Input.GetKeyDown(KeyCode.Escape)) Cancel();
         }
 
-        // ── IInventoryDragController ───────────────────────────────────────
-
         public void Register(ITetrisContainer container, IReadOnlyList<ISlotView> slots)
         {
             if (_bindings.ContainsKey(container))
@@ -99,7 +93,6 @@ namespace Code.Runtime.UI.Inventory
 
         public void OnSlotPointerClick(ISlotView slot, Vector2 screenPos)
         {
-            
             if (_gesture == GestureMode.Idle &&
                 (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) ||
                  Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
@@ -177,9 +170,7 @@ namespace Code.Runtime.UI.Inventory
             else
                 ContinueHolding(returning);
         }
-        
-        // ── Quick Move ────────────────────────────────────────────────────────
-
+       
         private void TryTransferToOtherContainer(ISlotView slot, Vector2 screenPos)
         {
             if (!_slotToContainer.TryGetValue(slot, out var source)) return;
@@ -193,6 +184,8 @@ namespace Code.Runtime.UI.Inventory
                 if (target.TryAdd(transfer))
                 {
                     source.TryRemove(anchor, out _);
+                    
+                    audioSource.PlayOneShot(dropClip);
                     return;
                 }
             }
@@ -208,8 +201,6 @@ namespace Code.Runtime.UI.Inventory
                 if (container != source) return container;
             return null;
         }
-
-        // ── Pickup ────────────────────────────────────────────────────────
 
         private bool TryPickUp(ISlotView slot, Vector2 screenPos)
         {
@@ -232,8 +223,6 @@ namespace Code.Runtime.UI.Inventory
             _ghostImage.gameObject.SetActive(true);
             return true;
         }
-
-        // ── Drop ──────────────────────────────────────────────────────────
 
         private void DropAt(ISlotView slot)
         {
@@ -305,6 +294,8 @@ namespace Code.Runtime.UI.Inventory
             _grabOffset        = new Vector2Int(dims.x / 2, dims.y / 2) - _grabOrigin;
             _grabSubCellOffset = Vector2.zero;
             _gesture           = GestureMode.Click;
+            
+            audioSource.PlayOneShot(dropClip);
             RefreshGhostImage();
         }
 
@@ -315,9 +306,9 @@ namespace Code.Runtime.UI.Inventory
             _gesture         = GestureMode.Idle;
             _ghostImage.gameObject.SetActive(false);
             ClearAllHighlights();
+            
+            audioSource.PlayOneShot(dropClip);
         }
-
-        // ── Rotation ──────────────────────────────────────────────────────
 
         private void Rotate(bool clockwise)
         {
@@ -341,8 +332,6 @@ namespace Code.Runtime.UI.Inventory
             RefreshGhostImage();
         }
 
-        // ── Ghost ─────────────────────────────────────────────────────────
-
         private void RefreshGhostImage()
         {
             if (_heldItem == null || _ghostImage == null) return;
@@ -356,6 +345,8 @@ namespace Code.Runtime.UI.Inventory
 
             _ghostImage.sprite = _heldItem.Icon;
             _ghostImage.color  = new Color(1f, 1f, 1f, 0.70f);
+            
+            audioSource.PlayOneShot(pickupClip);
         }
 
         private void UpdateGhostPosition(Vector2 screenPos)
@@ -376,8 +367,6 @@ namespace Code.Runtime.UI.Inventory
                 _grabOffset.x + _grabOrigin.x + 0.5f - dims.x * 0.5f, 
                 dims.y * 0.5f - _grabOffset.y - _grabOrigin.y - 0.5f) * Const.InventoryCellSize;
         }
-
-        // ── Preview ───────────────────────────────────────────────────────
 
         private void UpdatePreview()
         {
@@ -425,8 +414,6 @@ namespace Code.Runtime.UI.Inventory
                 foreach (var slot in binding.Slots)
                     slot.SetHighlight(SlotHighlight.None);
         }
-
-        // ── Helpers ───────────────────────────────────────────────────────
 
         private ISlotView GetSlotAt(ITetrisContainer container, Vector2Int gridPos)
         {

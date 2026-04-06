@@ -88,12 +88,14 @@ namespace Code.Runtime.UI.Inventory
 
         public void OnPointerClick(PointerEventData eventData)
         {
+            if( eventData.button != PointerEventData.InputButton.Left) return;
             _tooltipController?.Hide(null);
             _dragController?.OnSlotPointerClick(this, eventData.position);
         }
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            if( eventData.button != PointerEventData.InputButton.Left) return;
             _tooltipController?.Hide(null);
             _dragController?.OnSlotBeginDrag(this, eventData.position);
         }
