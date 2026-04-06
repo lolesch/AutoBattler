@@ -1,5 +1,5 @@
 using Code.Runtime.GameLoop;
-using NaughtyAttributes;
+using Code.Runtime.Grids;
 using Submodules.Utility.Extensions;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -75,6 +75,11 @@ namespace Code.Runtime.Pawns
                 pawn.position = grid.CellToWorld(cell);
                 _previousPos  = pawn.position;
                 pawnActor.MoveTo(cell.CellToHex());
+                
+                var ground = tilemap.GetTile(cell) is TerrainTileBase terrain
+                    ? terrain.type
+                    : TerrainType.Normal;
+                Debug.LogWarning($"Terrain: {ground}");
             }
             else
                 pawn.position = _previousPos;

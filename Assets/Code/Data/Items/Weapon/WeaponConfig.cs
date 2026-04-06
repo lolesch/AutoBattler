@@ -13,23 +13,18 @@ namespace Code.Data.Items.Weapon
         [field: SerializeField] public float ResourceCost { get; private set; }
         [field: SerializeField] public float ResourceGenOnHit { get; private set; }
 
+        public WeaponTags tags;
+        public int range;
+        
         [field: Header("Payload")]
         [field: SerializeField] public PayloadBehavior Payload { get; private set; }
 
         public override int MaxConnectors => 2;
-        
-        // CONTINUE HERE
-        public WeaponTags tags;
-
-        //public DeliveryProfile delivery;
-        //public PayloadModifier payload;
-        //public StatusEffect status;
     }
 
     [System.Serializable]
     public class DeliveryProfile
     {
-        public float range;
         public float radius;
         public int chainCount;
 
@@ -38,6 +33,7 @@ namespace Code.Data.Items.Weapon
 
         public bool requiresLOS;
     }
+    
     [System.Serializable]
     public class PayloadModifier
     {
@@ -45,12 +41,14 @@ namespace Code.Data.Items.Weapon
 
         public List<ModifierEffect> effects;
     }
+    
     [System.Serializable]
     public class ModifierEffect
     {
         public ModifierType type;
         public float value;
     }
+    
     public enum ModifierType
     {
         AddPierce,
@@ -72,8 +70,6 @@ namespace Code.Data.Items.Weapon
         public int maxStacks;
         public float duration;
 
-        public WeaponTags tags;
-
         public List<StatusBehavior> behaviors;
     }
     
@@ -85,6 +81,7 @@ namespace Code.Data.Items.Weapon
 
         public float value;
     }
+    
     public enum StatusTrigger
     {
         OnTick,
@@ -92,6 +89,7 @@ namespace Code.Data.Items.Weapon
         OnMove,
         OnExpire
     }
+    
     public enum StatusEffectType
     {
         Damage,
@@ -101,12 +99,7 @@ namespace Code.Data.Items.Weapon
         Detonate,
         Amplify
     }
-    public class TerrainTile
-    {
-        public TerrainType type;
-
-        public List<TerrainModifier> modifiers;
-    }
+    
     public enum TerrainType
     {
         Normal,
@@ -115,11 +108,5 @@ namespace Code.Data.Items.Weapon
         Toxic,
         Conductive,
         Obstructed
-    }
-    [System.Serializable]
-    public class TerrainModifier
-    {
-        public StatusEffect appliedStatus;
-        public float intensity;
     }
 }

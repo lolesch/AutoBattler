@@ -117,3 +117,32 @@ low DPS, huge battlefield impact
 
 - **Aura upgrade pool design** — opt-in relic-style pickups not yet designed
 
+
+
+# Movement
+
+### Default Kite
+- find weapon with smallest range
+- move into range.
+	- move away if target is closer that half the range?
+	- or use weapon tags to derive dominant behavior? (melee/range)
+
+
+continue with
+- terrain tiles
+	- [x] modifiable
+- pawn movement
+	- terrain heuristic
+	- direction angle heuristic
+	- movement speed 
+		- attack readyness
+		- targetable during movement
+- define weapon attacks
+	- define status effects
+	- define payload attacks
+		- implement status effects
+		- implement terrain changes
+
+
+List Terrain tile hierarchy, how they order
+- does sand goes over or under grass? and do on
