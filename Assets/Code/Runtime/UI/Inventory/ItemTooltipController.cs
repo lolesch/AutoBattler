@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Code.Data.Enums;
-using Code.Runtime.Inventory;
+using Code.Runtime.Modules.Inventory;
 using Submodules.Utility.Extensions;
 using TMPro;
 using UnityEngine;

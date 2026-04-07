@@ -20,10 +20,6 @@ MonoBehaviour:
     - row: 000100
     - row: 010101
     - row: 000100
-  <HexShape>k__BackingField:
-    radius: 0
-    cellSize: {x: 0, y: 0}
-    rows: []
   connectors:
   - <position>k__BackingField: {x: 1, y: 0}
     <direction>k__BackingField: 0

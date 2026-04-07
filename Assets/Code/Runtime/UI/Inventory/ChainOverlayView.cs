@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Code.Runtime.Inventory;
+using Code.Runtime.Modules.Inventory;
 using Submodules.Utility.Extensions;
 using UnityEngine;
 

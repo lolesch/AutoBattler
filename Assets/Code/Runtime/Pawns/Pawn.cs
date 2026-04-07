@@ -1,10 +1,9 @@
 using System;
 using Code.Data.Enums;
 using Code.Data.Pawns;
-using Code.Runtime.GameLoop;
-using Code.Runtime.HexGrid;
-using Code.Runtime.Inventory;
-using Code.Runtime.Statistics;
+using Code.Runtime.Modules.HexGrid;
+using Code.Runtime.Modules.Inventory;
+using Code.Runtime.Modules.Statistics;
 using NaughtyAttributes;
 using Submodules.Utility.Attributes;
 using Submodules.Utility.Extensions;
@@ -12,97 +11,81 @@ using UnityEngine;
 
 namespace Code.Runtime.Pawns
 {
-    public sealed class Pawn : MonoBehaviour, IPawn, ICombatParticipant, IHexOccupant
+    public sealed class Pawn : MonoBehaviour, IPawn
     {
-        [field: SerializeField] public PawnConfig        Config { get; private set; }
-        [field: SerializeField] public PawnTeam          Team   { get; private set; }
-        [field: SerializeField] public Hex               HexPosition      { get; private set; }
-        [field: SerializeField] public HexGridController HexGrid { get; private set; }
-        [field: SerializeField] public GamePhaseController GameLoop { get; private set; }
-
-        public void UnregisterFrom(HexGridController controller) => controller.Unregister(this);
-        public void RegisterWith(HexGridController controller) => controller.Register(this);
-        public void UnregisterFrom(GamePhaseController controller) => controller.Unregister(this);
-        public void RegisterWith(GamePhaseController controller) => controller.Register(this);
-
         [SerializeField, ReadOnly, PreviewIcon] private Sprite _icon;
         [SerializeField] private PawnEffect _pawnEffects;
 
-        public IPawnStats            Stats            { get; private set; }
-        public ITetrisContainer      Inventory        { get; private set; }
-        public IPawnEffect           PawnEffects      { get; private set; }
-        public IPawnCombatController CombatController { get; private set; }
-
+        [field: SerializeField] public PawnConfig        Config        { get; private set; }
+        [field: SerializeField] public PawnTeam          Team          { get; private set; }
+        [field: SerializeField] public Hex               HexPosition   { get; private set; }
+        
+        public IPawnStats       Stats         { get; private set; }
+        public ITetrisContainer Inventory     { get; private set; }
+        public IPawnEffect      PawnEffects   { get; private set; }
+        public TerrainCostMap   MovementCosts { get; private set; }
+       
         public event Action OnDefeated;
 
         private void Awake()
         {
-            SpawnPawn();
-            CombatController = new PawnCombatController(this);
-            //_chainStateController = new ChainStateController(Inventory, Stats);
+            SpawnPawn(Config);
         }
 
-        [ContextMenu("Spawn")]
-        private void SpawnPawn()
+        private void SpawnPawn(PawnConfig  config)
         {
-            if (!Config)
+            if (!config)
             {
                 Debug.LogError("Missing Config to draw from");
                 return;
             }
 
-            _icon       = Config.icon;
-            Stats       = new PawnStats(Config);
-            Inventory   = new TetrisContainer(new Vector2Int(6, 3));
-            PawnEffects = _pawnEffects;
+            _icon         = config.icon;
+            Stats         = new PawnStats(config);
+            Inventory     = new TetrisContainer(new Vector2Int(6, 3));
+            PawnEffects   = _pawnEffects;
+            MovementCosts = config.movementCosts;
             
-            if (Config.StarterWeapon != null)
-                Inventory.TryAdd(ItemFactory.Create(Config.StarterWeapon));
+            if (config.starterWeapon != null)
+                Inventory.TryAdd(ItemFactory.Create(config.starterWeapon));
             else
                 Debug.LogWarning($"{gameObject.name} has no StarterWeapon assigned in PawnConfig.", this);
 
             Stats.health.OnDepleted += DespawnPawn;
             //_healthView.SetPawn(Stats.health);
             //_manaView.SetPawn(Stats.mana);
-            RegisterWith(HexGrid);
-            RegisterWith(GameLoop);
+            
+            gameObject.SetActive(true);
         }
 
         private void DespawnPawn()
         {
             Debug.Log($"{gameObject.name} has been defeated!");
             OnDefeated?.Invoke();
+            
             gameObject.SetActive(false);
-            UnregisterFrom(HexGrid);
-            UnregisterFrom(GameLoop);
         }
 
         public void TakeDamage(float damage) => Stats.health.ReduceCurrent(damage);
+        
         public void MoveTo(Hex hex)
         {
             HexPosition = hex;
         }
-
-        public void EquipItem(TetrisItem item)
-        {
-            if (Inventory.TryAdd(item))
-                Debug.Log($"{item.Name} has been equipped!");
-        }
     }
 
-    public interface IPawn : IDamageable
+    public interface IPawn : IHexOccupant, ICombatParticipant
     {
-        IPawnStats            Stats            { get; }
-        ITetrisContainer      Inventory        { get; }
-        IPawnEffect           PawnEffects      { get; }
-        IPawnCombatController CombatController { get; }
-        event Action          OnDefeated;
-        void MoveTo(Hex hex);
-        void EquipItem(TetrisItem item);
+        IPawnEffect      PawnEffects   { get; }
+        IPawnStats       Stats         { get; }
+        ITetrisContainer Inventory     { get; }
+        TerrainCostMap   MovementCosts { get; }
     }
 
-    public interface IDamageable
+    public interface ICombatParticipant
     {
+        PawnTeam Team { get; }
+        event Action OnDefeated;
         void TakeDamage(float damage);
     }
 }

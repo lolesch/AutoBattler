@@ -7,7 +7,6 @@ namespace Code.Data.Enums
     {
         None = 0,
         Player = 1 << 0, 
-        Enemy  = 1 << 1, 
-        All = Enemy | Player, // = 3
+        Enemy  = 1 << 1,
     }
 }

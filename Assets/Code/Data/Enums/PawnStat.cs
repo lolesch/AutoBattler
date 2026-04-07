@@ -10,6 +10,8 @@ namespace Code.Data.Enums
         ManaMax,
         ManaRegen,
         
+        MovementSpeed,
+        
         
         // WEAPON BONI
         // ResourceCostReduction,

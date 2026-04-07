@@ -10,7 +10,6 @@ namespace Code.Data.Items
     {
         [field: SerializeField, PreviewIcon] public Sprite       Icon  { get; private set; }
         [field: SerializeField]              public RectShapeBool Shape { get; private set; }
-        [field: SerializeField]              public HexShapeBool HexShape { get; private set; }
 
         public abstract int MaxConnectors { get; }
         

@@ -18,10 +18,6 @@ MonoBehaviour:
     cellSize: {x: 16, y: 16}
     rows:
     - row: 0101
-  <HexShape>k__BackingField:
-    radius: 0
-    cellSize: {x: 0, y: 0}
-    rows: []
   connectors:
   - <position>k__BackingField: {x: 0, y: 0}
     <direction>k__BackingField: 2

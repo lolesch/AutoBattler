@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::Code.Data.Items.Reactor.ReactorConfig
   <Icon>k__BackingField: {fileID: -287228304, guid: 9d42f8adbb04e6e488d120f4e458e692, type: 3}
   <Shape>k__BackingField:
-    gridSize: {x: 1, y: 1}
+    shapeSize: {x: 1, y: 1}
     cellSize: {x: 16, y: 16}
     rows:
     - row: 01
@@ -25,6 +25,8 @@ MonoBehaviour:
     stat: 3
     value: 20
     type: 1
-  <ReactorType>k__BackingField: 0
-  <ConditionType>k__BackingField: 1
-  <ConditionThreshold>k__BackingField: 0
+  <reactorType>k__BackingField: 0
+  <inputStatMod>k__BackingField:
+    stat: 0
+    value: 0
+    type: 0

@@ -127,6 +127,9 @@ low DPS, huge battlefield impact
 	- move away if target is closer that half the range?
 	- or use weapon tags to derive dominant behavior? (melee/range)
 
+pulling pushing into occupied/invalid pieces adds a stun
+- or chain push, all in a line get pushed
+
 
 continue with
 - terrain tiles
@@ -147,3 +150,6 @@ continue with
 
 List Terrain tile hierarchy, how they order
 - does sand goes over or under grass? and so on
+
+cleanup who owns the list of all pawns / pawn registration
+- is doubled in gameLoop and pawnCombat

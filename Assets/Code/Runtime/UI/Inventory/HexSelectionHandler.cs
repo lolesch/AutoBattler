@@ -1,6 +1,6 @@
 using System.Linq;
-using Code.Runtime.GameLoop;
-using Code.Runtime.HexGrid;
+using Code.Runtime.Core;
+using Code.Runtime.Modules.HexGrid;
 using Code.Runtime.Pawns;
 using UnityEngine;
 using UnityEngine.Tilemaps;

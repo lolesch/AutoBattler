@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Code.Data;
-using Code.Runtime.Inventory;
+using Code.Runtime.Modules.Inventory;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.EventSystems;

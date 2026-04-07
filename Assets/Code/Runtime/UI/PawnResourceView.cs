@@ -1,4 +1,4 @@
-using Code.Runtime.Statistics;
+using Code.Runtime.Modules.Statistics;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Serialization;
