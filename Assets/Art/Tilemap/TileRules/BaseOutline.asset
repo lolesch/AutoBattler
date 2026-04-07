@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55f747e8af38fbe4d8819f37be6fd5aa, type: 3}
+  m_Script: {fileID: 11500000, guid: 68261ea04ef6472290d881712ce23234, type: 3}
   m_Name: BaseOutline
   m_EditorClassIdentifier: 
   m_DefaultSprite: {fileID: 21300000, guid: 3b870831588dccf4c89615f59ccdbfea, type: 3}
@@ -1047,3 +1047,5 @@ MonoBehaviour:
     - {x: -1, y: 0, z: 0}
     m_RuleTransform: 0
   m_FlatTop: 0
+  <type>k__BackingField: 0
+  modifiers: []
