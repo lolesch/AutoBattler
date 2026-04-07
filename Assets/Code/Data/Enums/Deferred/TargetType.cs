@@ -1,6 +1,6 @@
 using System;
 
-namespace Code.Data.Enums
+namespace Code.Data.Enums.Deferred
 {
     [Flags]
     public enum TargetType

@@ -14,12 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::Code.Data.Items.Weapon.WeaponConfig
   <Icon>k__BackingField: {fileID: 21300000, guid: 7cb9945dc01d0834eae4c2ca2b3c969f, type: 3}
   <Shape>k__BackingField:
-    gridSize: {x: 3, y: 3}
+    shapeSize: {x: 3, y: 3}
     cellSize: {x: 16, y: 16}
     rows:
     - row: 000100
     - row: 010101
     - row: 000100
+  <HexShape>k__BackingField:
+    radius: 0
+    cellSize: {x: 0, y: 0}
+    rows: []
   connectors:
   - <position>k__BackingField: {x: 1, y: 0}
     <direction>k__BackingField: 0
@@ -29,17 +33,16 @@ MonoBehaviour:
   <AttackSpeed>k__BackingField: 1
   <ResourceCost>k__BackingField: 10
   <ResourceGenOnHit>k__BackingField: 2
-  <PayloadCondition>k__BackingField: 1
-  <PayloadConditionThreshold>k__BackingField: 0.5
   tags: 0
-  delivery:
-    range: 0
-    radius: 0
-    chainCount: 0
-    tickRate: 0
-    duration: 0
-    requiresLOS: 0
-  payload:
-    powerMultiplier: 1
-    effects: []
-  status: {fileID: 0}
+  range: 0
+  <Payload>k__BackingField:
+    <Condition>k__BackingField: 0
+    <ConditionThreshold>k__BackingField: 0.5
+    <Targeting>k__BackingField: 0
+    <Range>k__BackingField: 1
+    <Timing>k__BackingField: 0
+    <TimingValue>k__BackingField: 0
+    _effects: []
+  references:
+    version: 2
+    RefIds: []

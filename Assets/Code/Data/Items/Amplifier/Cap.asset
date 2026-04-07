@@ -14,11 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::Code.Data.Items.Amplifier.AmplifierConfig
   <Icon>k__BackingField: {fileID: 21300000, guid: 9e735fd97a3956f499e8da8a5708e7a6, type: 3}
   <Shape>k__BackingField:
-    gridSize: {x: 1, y: 2}
+    shapeSize: {x: 1, y: 2}
     cellSize: {x: 16, y: 16}
     rows:
     - row: 01
     - row: 01
+  <HexShape>k__BackingField:
+    radius: 0
+    cellSize: {x: 0, y: 0}
+    rows: []
   connectors:
   - <position>k__BackingField: {x: 0, y: 0}
     <direction>k__BackingField: 0
@@ -28,7 +32,7 @@ MonoBehaviour:
     stat: 1
     value: 10
     type: 1
-  <attackStatMod>k__BackingField:
+  <outputStatMod>k__BackingField:
     stat: 0
-    value: 10
-    type: 2
+    value: 0
+    type: 0

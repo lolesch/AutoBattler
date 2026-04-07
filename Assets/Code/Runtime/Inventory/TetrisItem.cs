@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Code.Data.Items;
-using Code.Runtime.Grids.RectGridInspector;
 using Code.Runtime.Statistics;
+using Submodules.Utility.Tools.ShapeInspector.RectShape;
 using UnityEngine;
 
 namespace Code.Runtime.Inventory
@@ -11,7 +11,7 @@ namespace Code.Runtime.Inventory
     [Serializable]
     public abstract class TetrisItem : AbstractItem, ITetrisItem
     {
-        private readonly RectGridBool _shape;
+        private readonly RectShapeBool _shape;
         private readonly ItemConfig   _config;
 
         public string       Name       { get; private set; }

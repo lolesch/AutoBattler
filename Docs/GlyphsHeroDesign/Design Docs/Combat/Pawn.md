@@ -132,11 +132,12 @@ continue with
 - terrain tiles
 	- [x] modifiable
 - pawn movement
-	- terrain heuristic
-	- direction angle heuristic
+	- [x] terrain heuristic
+	- [x] direction heuristic (cross-product tiebreaker)
 	- movement speed 
 		- attack readyness
 		- targetable during movement
+			- draw position outline tile for feedback
 - define weapon attacks
 	- define status effects
 	- define payload attacks
@@ -145,4 +146,4 @@ continue with
 
 
 List Terrain tile hierarchy, how they order
-- does sand goes over or under grass? and do on
+- does sand goes over or under grass? and so on

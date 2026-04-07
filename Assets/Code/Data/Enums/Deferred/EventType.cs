@@ -1,4 +1,4 @@
-namespace Code.Data.Enums
+namespace Code.Data.Enums.Deferred
 {
     public enum EventType
     {

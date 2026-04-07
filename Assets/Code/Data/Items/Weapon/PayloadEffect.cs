@@ -1,4 +1,5 @@
 using System;
+using Code.Data.Enums;
 using UnityEngine;
 
 namespace Code.Data.Items.Weapon

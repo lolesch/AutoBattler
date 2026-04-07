@@ -1,5 +1,7 @@
+using System.Linq;
+using Code.Runtime.GameLoop;
+using Code.Runtime.HexGrid;
 using Code.Runtime.Pawns;
-using Submodules.Utility.Extensions;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -12,7 +14,6 @@ namespace Code.Runtime.UI.Inventory
     /// </summary>
     public sealed class HexSelectionHandler : MonoBehaviour
     {
-        [SerializeField] private Pawn[]        pawns;
         [SerializeField] private InventoryView inventoryView;
         [SerializeField] private Grid          grid;
         [SerializeField] private Tilemap       levelMap;
@@ -21,7 +22,7 @@ namespace Code.Runtime.UI.Inventory
 
         private Plane      _plane = new(Vector3.back, 0f);
         private Vector3Int _selectedCell;
-        private Pawn       _selectedPawn;
+        private IPawn      _selectedPawn;
         private Camera     _cam;
 
         private void Awake() => _cam = Camera.main;
@@ -52,10 +53,12 @@ namespace Code.Runtime.UI.Inventory
         {
             pawnEffectMap.ClearAllTiles();
 
-            foreach (var pawn in pawns)
+            foreach (var p in GamePhaseController.allPawns)
             {
-                //var pawnCell = grid.WorldToCell(pawn.transform.position);
-                var pawnCell = pawn.HexPosition.ToCell();
+                if(p is not IPawn pawn) return;
+
+                var pawnPos = ((IHexOccupant) pawn).HexPosition;
+                var pawnCell = pawnPos.ToCell();
 
                 if (pawnCell != _selectedCell)
                     continue;
@@ -68,7 +71,7 @@ namespace Code.Runtime.UI.Inventory
 
                 foreach (var hex in pawn.PawnEffects.GetHexes())
                 {
-                    var cell = pawn.HexPosition.Add(hex).ToCell();
+                    var cell = pawnPos.Add(hex).ToCell();
                     pawnEffectMap.SetTile(cell, effectTile);
                 }
             }

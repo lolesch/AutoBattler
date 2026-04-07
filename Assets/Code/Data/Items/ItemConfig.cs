@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using Code.Data.Enums;
-using Code.Runtime.Grids.RectGridInspector;
 using Submodules.Utility.Attributes;
-using Submodules.Utility.Extensions;
+using Submodules.Utility.Tools.ShapeInspector.HexShape;
+using Submodules.Utility.Tools.ShapeInspector.RectShape;
 using UnityEngine;
 
 namespace Code.Data.Items
@@ -10,7 +9,8 @@ namespace Code.Data.Items
     public abstract class ItemConfig : ScriptableObject, IItemData
     {
         [field: SerializeField, PreviewIcon] public Sprite       Icon  { get; private set; }
-        [field: SerializeField]              public RectGridBool Shape { get; private set; }
+        [field: SerializeField]              public RectShapeBool Shape { get; private set; }
+        [field: SerializeField]              public HexShapeBool HexShape { get; private set; }
 
         public abstract int MaxConnectors { get; }
         
@@ -32,7 +32,13 @@ namespace Code.Data.Items
             {
                 var c = connectors[i];
                 if (!shapeCells.Contains(c.position))
+                {
                     Debug.LogWarning($"[{name}] Connector {i}: LocalPosition {c.position} is not part of the item shape.", this);
+                    if(shapeCells.Count == 0)
+                        Debug.LogWarning($"[{name}] shapeCellCount was 0!.", this);
+                    foreach (var cell in shapeCells)
+                        Debug.LogWarning($"[{name}] shapeCell {cell}.", this);
+                }
                 if (shapeCells.Contains(c.position + c.direction.ToVector2Int()))
                     Debug.LogWarning($"[{name}] Connector {i}: Direction points inward — target cell {c.position + c.direction.ToVector2Int()} is part of the item shape.", this);
                 for (var j = i + 1; j < connectors.Count; j++)
@@ -45,7 +51,7 @@ namespace Code.Data.Items
     public interface IItemData
     {
         Sprite                        Icon       { get; }
-        RectGridBool                  Shape      { get; }
+        RectShapeBool                  Shape      { get; }
         IReadOnlyList<ChainConnector> Connectors { get; }
     }
 }

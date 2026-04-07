@@ -14,10 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::Code.Data.Items.Shifter.ConverterConfig
   <Icon>k__BackingField: {fileID: -978266203, guid: 4197085e07bf81a4a9f3d1a784fc9e91, type: 3}
   <Shape>k__BackingField:
-    gridSize: {x: 1, y: 1}
+    shapeSize: {x: 1, y: 1}
     cellSize: {x: 16, y: 16}
     rows:
     - row: 01
+  <HexShape>k__BackingField:
+    radius: 0
+    cellSize: {x: 0, y: 0}
+    rows: []
   connectors:
   - <position>k__BackingField: {x: 0, y: 0}
     <direction>k__BackingField: 0

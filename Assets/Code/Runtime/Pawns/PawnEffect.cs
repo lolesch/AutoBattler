@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Code.Runtime.Grids.HexGridInspector;
 using Submodules.Utility.Extensions;
+using Submodules.Utility.Tools.ShapeInspector.HexShape;
 using UnityEngine;
 
 namespace Code.Runtime.Pawns
@@ -9,7 +9,7 @@ namespace Code.Runtime.Pawns
     [Serializable]
     public sealed class PawnEffect : IPawnEffect
     {
-        [SerializeField] private HexGridBool shape;
+        [SerializeField] private HexShapeBool shape;
         [SerializeField] private int         rotation;
 
         [field: SerializeField] public string Effect { get; private set; } // was public field

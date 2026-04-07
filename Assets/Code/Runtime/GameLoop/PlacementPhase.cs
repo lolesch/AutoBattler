@@ -1,5 +1,5 @@
 using System;
-using Code.Runtime.Pawns;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,13 +12,13 @@ namespace Code.Runtime.GameLoop
     /// </summary>
     public sealed class PlacementPhase : IGamePhase
     {
-        private readonly Pawn[]  _playerPawns;
         private readonly Button  _confirmButton;
         private readonly Action  _onConfirm;
+        private readonly List<ICombatParticipant> _playerPawns;
 
-        public PlacementPhase(Pawn[] playerPawns, Button confirmButton, Action onConfirm)
+        public PlacementPhase( List<ICombatParticipant> playerPawns, Button confirmButton, Action onConfirm)
         {
-            _playerPawns   = playerPawns;
+            _playerPawns = playerPawns;
             _confirmButton = confirmButton;
             _onConfirm     = onConfirm;
         }
@@ -45,9 +45,9 @@ namespace Code.Runtime.GameLoop
         {
             foreach (var pawn in _playerPawns)
             {
-                var draggable = pawn.GetComponent<Draggable>();
-                if (draggable != null)
-                    draggable.enabled = enabled;
+                //var draggable = pawn.GetComponent<Draggable>();
+                //if (draggable != null)
+                //    draggable.enabled = enabled;
             }
         }
 

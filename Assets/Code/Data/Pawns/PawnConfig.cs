@@ -14,5 +14,7 @@ namespace Code.Data.Pawns
         [Min(1)] public uint baseManaRegen = 5;
         
         public WeaponConfig StarterWeapon;
+        
+        public TerrainCostMap MovementCosts;
     }
 }

@@ -14,11 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Data::Code.Data.Items.Weapon.WeaponConfig
   <Icon>k__BackingField: {fileID: 21300000, guid: a0d5f69052443d84195ee769fc5f33e2, type: 3}
   <Shape>k__BackingField:
-    gridSize: {x: 1, y: 2}
+    shapeSize: {x: 1, y: 2}
     cellSize: {x: 16, y: 16}
     rows:
     - row: 01
     - row: 01
+  <HexShape>k__BackingField:
+    radius: 1
+    cellSize: {x: 16, y: 16}
+    rows:
+    - row: 000000
+    - row: 000101
+    - row: 000100
   connectors:
   - <position>k__BackingField: {x: 0, y: 0}
     <direction>k__BackingField: 1
@@ -28,6 +35,8 @@ MonoBehaviour:
   <AttackSpeed>k__BackingField: 1.4
   <ResourceCost>k__BackingField: 0
   <ResourceGenOnHit>k__BackingField: 3
+  tags: 0
+  range: 0
   <Payload>k__BackingField:
     <Condition>k__BackingField: 0
     <ConditionThreshold>k__BackingField: 0.5
@@ -36,7 +45,6 @@ MonoBehaviour:
     <Timing>k__BackingField: 0
     <TimingValue>k__BackingField: 0
     _effects: []
-  tags: 0
   references:
     version: 2
     RefIds: []

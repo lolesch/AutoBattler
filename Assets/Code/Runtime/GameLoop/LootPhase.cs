@@ -1,5 +1,6 @@
 using System;
 using Code.Data.Items;
+using Code.Runtime.Inventory;
 using UnityEngine;
 using UnityEngine.UI;
 

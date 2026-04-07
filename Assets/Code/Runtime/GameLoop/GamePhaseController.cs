@@ -1,19 +1,14 @@
-using System;
+using System.Collections.Generic;
+using System.Linq;
+using Code.Data.Enums;
 using Code.Data.Items;
-using Code.Data.Items.Amplifier;
-using Code.Data.Items.Reactor;
-using Code.Data.Items.Weapon;
 using Code.Runtime.Inventory;
-using Code.Runtime.Pawns;
-using Code.Runtime.UI.Inventory;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Code.Runtime.GameLoop
 {
-    public enum GamePhase { Placement, Combat, Loot }
-
     /// <summary>
     /// Owns the game loop state machine.
     /// Drives transitions between Placement → Combat → Loot → Placement.
@@ -21,14 +16,14 @@ namespace Code.Runtime.GameLoop
     /// </summary>
     public sealed class GamePhaseController : MonoBehaviour
     {
-        [Header("Pawns")]
-        [SerializeField] private Pawn[] playerPawns;
-        [SerializeField] private Pawn[] enemyPawns;
 
+        public static List<ICombatParticipant> enemyPawns { get; set; }
+        public static List<ICombatParticipant> playerPawns { get; set; }
+        
         [Header("Stash")]
         [SerializeField] private Vector2Int stashSize = new(8, 6);
         [Header("UI — Stash")]
-        [SerializeField] private InventoryView stashView;
+        //[SerializeField] private InventoryView stashView;
         
         [Header("UI — Placement")]
         [SerializeField] private Button confirmPlacementButton;
@@ -40,10 +35,10 @@ namespace Code.Runtime.GameLoop
         [SerializeField] private ItemConfig[] itemPool;
         [SerializeField, Min(1)] private int lootCount = 3;
 
-        public static event Action<GamePhase> OnPhaseChanged;
         [field: SerializeField, ReadOnly] public GamePhase Current { get; private set; }
 
         public IPlayerData PlayerData { get; private set; }
+        public static IEnumerable<ICombatParticipant> allPawns => enemyPawns.Concat(playerPawns);
 
         private IGamePhase _placementPhase;
         private IGamePhase _combatPhase;
@@ -52,7 +47,7 @@ namespace Code.Runtime.GameLoop
         private void Awake()
         {
             PlayerData = new PlayerData(stashSize);
-            stashView?.RefreshView(PlayerData.Stash);
+            //stashView?.RefreshView(PlayerData.Stash);
 
             _placementPhase = new PlacementPhase(
                 playerPawns,
@@ -82,8 +77,11 @@ namespace Code.Runtime.GameLoop
         {
             GetPhase(Current)?.Exit();
             Current = next;
-            OnPhaseChanged?.Invoke(Current);
             GetPhase(Current)?.Enter();
+            
+            ////TODO: move OnPhaseChanged into pawn and let Draggable look that up
+            //foreach (var pawn in playerPawns)
+            //    pawn.GetComponent<Draggable>().OnPhaseChanged(Current);
         }
 
         private IGamePhase GetPhase(GamePhase phase) => phase switch
@@ -102,6 +100,20 @@ namespace Code.Runtime.GameLoop
                 PlayerData.Stash.TryAdd(ItemFactory.Create(config));
                 PlayerData.Stash.TryAdd(ItemFactory.Create(config));
             }
+        }
+
+        public void Register(ICombatParticipant pawn)
+        {
+            if (pawn.Team == PawnTeam.Enemy && !enemyPawns.Contains(pawn)) 
+                enemyPawns.Add(pawn);
+            else if (pawn.Team == PawnTeam.Player && !playerPawns.Contains(pawn)) 
+                playerPawns.Add(pawn);
+        }
+
+        public void Unregister(ICombatParticipant pawn)
+        {
+            if (pawn.Team == PawnTeam.Enemy) enemyPawns.Remove(pawn);
+            else if (pawn.Team == PawnTeam.Player) playerPawns.Remove(pawn);
         }
     }
 

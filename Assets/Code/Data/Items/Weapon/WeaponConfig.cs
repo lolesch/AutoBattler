@@ -99,14 +99,4 @@ namespace Code.Data.Items.Weapon
         Detonate,
         Amplify
     }
-    
-    public enum TerrainType
-    {
-        Normal,
-        Burning,
-        Frozen,
-        Toxic,
-        Conductive,
-        Obstructed
-    }
 }

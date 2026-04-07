@@ -1,0 +1,23 @@
+{
+    "name": "Pawns",
+    "rootNamespace": "",
+    "references": [
+        "GUID:5b468494b8115f048b2a122fb22ae9ef",
+        "GUID:0d5a74922bb778442abeedf4258fb044",
+        "GUID:776d03a35f1b52c4a9aed9f56d7b4229",
+        "GUID:18bd0a5c99a54b06a5051b4533213ce0",
+        "GUID:2048edf7af4c23544ad7888b3f35db79",
+        "GUID:5e3ec151ae9c2fd418f3f9e74d30a5b7",
+        "GUID:34f40c76531c5b14faedd1d5c2b07bae",
+        "GUID:613783dc1674e844b87788ea74ede0f6"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

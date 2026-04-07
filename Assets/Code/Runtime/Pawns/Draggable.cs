@@ -1,5 +1,5 @@
-using Code.Runtime.GameLoop;
-using Code.Runtime.Grids;
+using Code.Data.Enums;
+using Code.Runtime.HexGrid;
 using Submodules.Utility.Extensions;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -8,7 +8,7 @@ namespace Code.Runtime.Pawns
 {
     /// <summary>
     /// Handles pawn drag-and-drop onto the hex tilemap.
-    /// Automatically disabled outside of PlacementPhase via GamePhaseController.OnPhaseChanged.
+    /// Automatically disabled outside of PlacementPhase.
     /// </summary>
     public sealed class Draggable : MonoBehaviour
     {
@@ -33,17 +33,9 @@ namespace Code.Runtime.Pawns
         
         void Start() => pawnActor.MoveTo(grid.WorldToCell(pawnActor.transform.position).CellToHex());
 
-        private void OnEnable()
-        {
-            GamePhaseController.OnPhaseChanged += OnPhaseChanged;
-        }
-
-        private void OnDisable()
-        {
-            GamePhaseController.OnPhaseChanged -= OnPhaseChanged;
-        }
-
-        private void OnPhaseChanged(GamePhase phase)
+        
+        // TODO: wire PhaseChange from GameLoop side. Pawn/Draggable should expose IPhaseListener OnPhaseChanged()
+        public void OnPhaseChanged(GamePhase phase)
         {
             enabled = phase == GamePhase.Placement;
         }
@@ -78,7 +70,7 @@ namespace Code.Runtime.Pawns
                 
                 var ground = tilemap.GetTile(cell) is TerrainTileBase terrain
                     ? terrain.type
-                    : TerrainType.Normal;
+                    : TerrainType.Dirt;
                 Debug.LogWarning($"Terrain: {ground}");
             }
             else
