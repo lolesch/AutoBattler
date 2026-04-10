@@ -21,7 +21,7 @@ namespace Code.Runtime.UI.Inventory
 
         [SerializeField, ReadOnly, AllowNesting] private SlotView[] _slots;
 
-        public IReadOnlyList<ISlotView> Slots => _slots.Cast<ISlotView>().ToList();
+        public IReadOnlyList<ISlotView> Slots => _slots.ToList();
 
         private ITetrisContainer _container;
         private Vector2Int       _builtForSize;
@@ -46,12 +46,14 @@ namespace Code.Runtime.UI.Inventory
         {
             if (_container != null)
                 _dragController?.Register(_container, Slots);
+            HexSelectionHandler.OnPawnHovered += RefreshView;
         }
 
         private void OnDisable()
         {
             if (_container != null)
                 _dragController?.Unregister(_container);
+            HexSelectionHandler.OnPawnHovered -= RefreshView;
         }
 
         private void OnDestroy()

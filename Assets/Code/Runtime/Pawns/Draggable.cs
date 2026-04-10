@@ -62,16 +62,13 @@ namespace Code.Runtime.Pawns
 
             var cell = grid.WorldToCell(pawn.position);
 
-            if (tilemap.HasTile(cell))
+            if (tilemap.HasTile(cell) && tilemap.GetTile(cell) is TerrainTileBase terrain)
             {
                 pawn.position = grid.CellToWorld(cell);
                 _previousPos  = pawn.position;
                 pawnActor.MoveTo(cell.CellToHex());
                 
-                var ground = tilemap.GetTile(cell) is TerrainTileBase terrain
-                    ? terrain.type
-                    : TerrainType.Dirt;
-                Debug.LogWarning($"Terrain: {ground}");
+                Debug.LogWarning($"Terrain: {terrain.type}");
             }
             else
                 pawn.position = _previousPos;

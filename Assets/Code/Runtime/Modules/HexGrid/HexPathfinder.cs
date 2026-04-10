@@ -24,14 +24,14 @@ namespace Code.Runtime.Modules.HexGrid
         /// Hexes occupied by standing units. Passable during traversal at a high cost penalty,
         /// but invalid as a landing destination. Pass null for uniform traversal.
         /// </param>
-        /// <param name="costMap">Per-terrain movement costs for the moving pawn. Null = uniform cost.</param>
+        /// <param name="costConfig">Per-terrain movement costs for the moving pawn. Null = uniform cost.</param>
         public static PathNode FindPath(
             Hex            from,
             Hex            to,
             HashSet<Hex>   invalidSet,
             IHexGrid       grid,
             HashSet<Hex>   occupiedSet = null,
-            TerrainCostMap costMap     = null)
+            TerrainCostConfig costConfig     = null)
         {
             if (from.Equals(to))
                 return new PathNode(from, null, 0f);
@@ -76,7 +76,7 @@ namespace Code.Runtime.Modules.HexGrid
                     if (closedSet.Contains(neighbor) || invalidSet.Contains(neighbor))
                         continue;
 
-                    var terrainCost = grid != null ? GetTerrainCost(neighbor, grid, costMap) : 1;
+                    var terrainCost = GetTerrainCost(neighbor, grid, costConfig);
 
                     // Occupied hexes are passable but expensive — pathfinder routes around
                     // clusters of units if a reasonable detour exists.
@@ -90,7 +90,7 @@ namespace Code.Runtime.Modules.HexGrid
 
                     costSoFar[neighbor] = newCost;
 
-                    var priority = newCost + Heuristic(neighbor, to) + Deviation(neighbor, current.Hex, idealLine);
+                    var priority = newCost + Distance(neighbor, to) + Deviation(neighbor, current.Hex, idealLine);
                     var node     = new PathNode(neighbor, current, priority);
                     var insertAt = openList.BinarySearch(node);
                     openList.Insert(insertAt < 0 ? ~insertAt : insertAt, node);
@@ -100,7 +100,7 @@ namespace Code.Runtime.Modules.HexGrid
             return LogInvalidPath();
         }
 
-        private static int Heuristic(Hex from, Hex to) => from.Distance(to);
+        private static int Distance(Hex from, Hex to) => from.Distance(to);
 
         private static float Deviation(Hex neighbor, Hex current, Hex idealLine)
         {
@@ -109,11 +109,11 @@ namespace Code.Runtime.Modules.HexGrid
             return cross * 0.001f;
         }
 
-        private static int GetTerrainCost(Hex hex, IHexGrid grid, TerrainCostMap costMap)
+        private static int GetTerrainCost(Hex hex, IHexGrid grid, TerrainCostConfig costConfig)
         {
-            if (costMap == null) return 1;
+            if (costConfig == null) return 1; //?
             var terrain = grid.GetTerrain(hex);
-            return costMap.GetCost(terrain);
+            return costConfig.GetCost(terrain);
         }
 
         private static PathNode LogInvalidPath()

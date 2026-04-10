@@ -131,25 +131,3 @@ pulling pushing into occupied/invalid pieces adds a stun
 - or chain push, all in a line get pushed
 
 
-continue with
-- terrain tiles
-	- [x] modifiable
-- pawn movement
-	- [x] terrain heuristic
-	- [x] direction heuristic (cross-product tiebreaker)
-	- movement speed 
-		- attack readyness
-		- targetable during movement
-			- draw position outline tile for feedback
-- define weapon attacks
-	- define status effects
-	- define payload attacks
-		- implement status effects
-		- implement terrain changes
-
-
-List Terrain tile hierarchy, how they order
-- does sand goes over or under grass? and so on
-
-cleanup who owns the list of all pawns / pawn registration
-- is doubled in gameLoop and pawnCombat

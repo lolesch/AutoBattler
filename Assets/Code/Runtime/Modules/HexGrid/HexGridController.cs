@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Code.Data.Enums;
 using Submodules.Utility.Extensions;
+using UnityEditor;
+using UnityEditor.Overlays;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -13,8 +16,9 @@ namespace Code.Runtime.Modules.HexGrid
     /// </summary>
     public sealed class HexGridController : MonoBehaviour, IHexGrid
     {
-        [SerializeField] private Tilemap tilemap;
-        [SerializeField] private Grid    grid;
+        //[SerializeField] private Grid    grid;
+        [SerializeField] private Tilemap terrain;
+        [SerializeField] private int levelIndex;
         
         //TODO: a wrapper holding all terrain tiles
         [SerializeField] private TerrainTileBase expr;
@@ -22,7 +26,7 @@ namespace Code.Runtime.Modules.HexGrid
         public TerrainType GetTerrain(Hex hex)
         {
             var cell = hex.ToCell();
-            return tilemap.GetTile(cell) is TerrainTileBase terrain
+            return this.terrain.GetTile(cell) is TerrainTileBase terrain
                 ? terrain.type
                 : TerrainType.Impassable;
         }
@@ -38,7 +42,31 @@ namespace Code.Runtime.Modules.HexGrid
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
             };
             Debug.LogWarning($"[HexGrid] Set terrain at {hex} from {GetTerrain(hex)} to {terrain.type}", this);
-            tilemap.SetTile(hex.ToCell(), terrain);
+            this.terrain.SetTile(hex.ToCell(), terrain);
+        }
+
+        [ContextMenu("SaveMap")]
+        private void SaveMap()
+        {
+            var allTerrainTiles = terrain.GetAllCellTiles<TerrainTileBase>();
+            
+            var newTerrain = ScriptableObject.CreateInstance<TerrainData>();
+            
+            newTerrain.name = $"Terrain {levelIndex}";
+            newTerrain.levelIndex = levelIndex;
+            newTerrain.terrainTiles = allTerrainTiles.ToList();
+            
+            newTerrain.Save();
+        }
+
+        private void LoadMap()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ClearMap()
+        {
+            throw new NotImplementedException();
         }
     }
     
@@ -49,11 +77,5 @@ namespace Code.Runtime.Modules.HexGrid
  
         /// <summary>Writes a terrain type onto the given hex tile.</summary>
         void SetTerrain(Hex hex, TerrainType type);
-    }
-    
-    public interface IHexOccupant
-    {
-        Hex HexPosition { get; }
-        void MoveTo(Hex hex); // does this belong here or into the IPawn?
     }
 }

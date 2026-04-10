@@ -3,11 +3,33 @@
 
 - [ ] resource regen on pawns.
 - [ ] converter should only show cenvertable types, not the input enum and actually apply the change
-- [ ] Enemies should not be draggable
+- [x] Enemies should not be draggable
 	- [ ] enemies inventory should not be interactable ( inspect, but no add/remove/drag )
+- pawn movement
+	- [x] terrain heuristic
+	- [x] direction heuristic (cross-product tiebreaker)
+	- movement speed 
+		- attack readyness
+		- targetable during movement
+			- draw position outline tile for feedback
+- define weapon attacks
+	- define status effects
+	- define payload attacks
+		- implement status effects
+		- implement terrain changes
 
+~~List Terrain tile hierarchy, how they order~~
+- ~~does sand goes over or under grass? and so on~~
+
+- implement player roster
+- extend PlayerData and save 
+	- [ ] current roster
+	- [ ] current map
+	- [ ] serialize/deserialize to file
+
+- move pathFinder into submodule, extract all 'non-submodule' logic and pass in its calculations upfront.
 # Bugs
-
+- [ ] currently combat is broken, pawns do not move to each other.
 - cross container drag swaps items:
 	the returning item is placed at the outgoing item with its origin cell, not relative to the cell the outgoing item was placed on top of the returning. make it relative to the dropped cell might feel better. -> or just highlight the required slots in the origin inventory, to show the collisions.
 - [ ] Same-container drag should attempt swap first to match cross-container; fallback to force-pickup only if returning item does not fit at source

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c525ee336ac242b2a8b253a434d8338b, type: 3}
+  m_Name: EncounterConfig
+  m_EditorClassIdentifier: Data::Code.Data.Pawns.MapConfig
+  enemies:
+  - config: {fileID: 11400000, guid: 4525cc981333f3e429fcc6aff9c4caaa, type: 2}
+    startHex:
+      name: Hex (3, -1)
+      <q>k__BackingField: 3
+      <r>k__BackingField: -1
+  players:
+  - config: {fileID: 11400000, guid: 5f7e65c9f1b721a49ab1b539386fcbbb, type: 2}
+    startHex:
+      name: Hex (-2, 1)
+      <q>k__BackingField: -2
+      <r>k__BackingField: 1

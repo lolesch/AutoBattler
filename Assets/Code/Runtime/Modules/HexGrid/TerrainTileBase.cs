@@ -6,6 +6,7 @@ using UnityEngine;
 namespace Code.Runtime.Modules.HexGrid
 {
     [Serializable]
+    [CreateAssetMenu(fileName = "New Terrain Rule Tile", menuName = "2D/Tiles/Terrain Tile")]
     public class TerrainTileBase : HexagonalRuleTile
     {
         [Header("Terrain")]

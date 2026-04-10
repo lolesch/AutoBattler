@@ -1,10 +1,11 @@
 using System.Collections.Generic;
-using System.Linq;
 using Code.Data.Enums;
 using Code.Data.Items;
+using Code.Data.Pawns;
 using Code.Runtime.Core.Combat;
 using Code.Runtime.Modules.Inventory;
 using Code.Runtime.Pawns;
+using Code.Runtime.UI.Inventory;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,22 +19,18 @@ namespace Code.Runtime.Core
     /// </summary>
     public sealed class GamePhaseController : MonoBehaviour
     {
-        [Header("Pawns")]
-        [SerializeField] private static List<IPawn> _enemyPawns  = new();
-        [SerializeField] private static List<IPawn> _playerPawns = new();
-        //TODO: probably want to change this lookup
-        public static IEnumerable<IPawn> allPawns => _enemyPawns.Concat(_playerPawns);
+        private readonly PawnRegistry _registry = new();
 
         [Header("Combat")]
         [SerializeField] private CombatCoordinator combatCoordinator;
+        [SerializeField] private HexSelectionHandler selectionHandler;
+        [SerializeField] private PawnFactory pawnFactory;
 
         [Header("Stash")]
         [SerializeField] private Vector2Int stashSize = new(8, 6);
 
-        [Header("UI — Placement")]
+        [Header("UI")]
         [SerializeField] private Button confirmPlacementButton;
-
-        [Header("UI — Loot")]
         [SerializeField] private Button continueAfterLootButton;
 
         [Header("Loot")]
@@ -47,13 +44,19 @@ namespace Code.Runtime.Core
         private IGamePhase _placementPhase;
         private IGamePhase _combatPhase;
         private IGamePhase _lootPhase;
-
+        
+        [SerializeField] private EncounterConfig currentEncounter;
+        
         private void Awake()
         {
-            PlayerData = new PlayerData(stashSize);
-
+            PlayerData = new PlayerData(stashSize, currentEncounter);
+            
+            combatCoordinator.Initialize(_registry);
+            selectionHandler.Initialize(_registry);
+            pawnFactory.Initialize(_registry);
+            
             _placementPhase = new PlacementPhase(
-                _playerPawns,
+                _registry.playerPawns,
                 confirmPlacementButton,
                 () => TransitionTo(GamePhase.Combat));
 
@@ -68,14 +71,25 @@ namespace Code.Runtime.Core
                 continueAfterLootButton,
                 () => TransitionTo(GamePhase.Placement));
         }
+        
+        public void LoadMap(EncounterConfig encounterData)
+        {
+            _registry.ClearEnemies();
+            pawnFactory.SpawnEnemies(encounterData);
+            pawnFactory.SpawnAllys(encounterData);
+        }
 
         private void Start()
         {
-            TransitionTo(GamePhase.Placement);
+            confirmPlacementButton.gameObject.SetActive(false);
+            continueAfterLootButton.gameObject.SetActive(false);
+            
+            LoadMap(PlayerData.currentEncounter);
             AddItems();
+            TransitionTo(GamePhase.Placement);
         }
 
-        public void TransitionTo(GamePhase next)
+        private void TransitionTo(GamePhase next)
         {
             GetPhase(Current)?.Exit();
             Current = next;
@@ -89,18 +103,6 @@ namespace Code.Runtime.Core
             GamePhase.Loot      => _lootPhase,
             _                   => null,
         };
-
-        public void Register(IPawn pawn)
-        {
-            if (pawn.Team == PawnTeam.Enemy  && !_enemyPawns.Contains(pawn))  _enemyPawns.Add(pawn);
-            if (pawn.Team == PawnTeam.Player && !_playerPawns.Contains(pawn)) _playerPawns.Add(pawn);
-        }
-
-        public void Unregister(IPawn pawn)
-        {
-            if (pawn.Team == PawnTeam.Enemy)  _enemyPawns.Remove(pawn);
-            if (pawn.Team == PawnTeam.Player) _playerPawns.Remove(pawn);
-        }
 
         [ContextMenu("AddItems")]
         private void AddItems()

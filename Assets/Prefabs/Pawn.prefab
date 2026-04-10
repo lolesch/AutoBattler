@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 9e735fd97a3956f499e8da8a5708e7a6, type: 3}
-  m_Color: {r: 0.47472408, g: 0.7924528, b: 0.47472408, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -138,14 +138,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c7a441a53eb2f74f99cbad39bf989b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pawn
-  <Config>k__BackingField: {fileID: 11400000, guid: 4525cc981333f3e429fcc6aff9c4caaa, type: 2}
-  <Team>k__BackingField: 2
-  <HexPosition>k__BackingField:
-    name: Hex(0, 0)
-    <q>k__BackingField: 0
-    <r>k__BackingField: 0
-  <HexGrid>k__BackingField: {fileID: 0}
-  <GameLoop>k__BackingField: {fileID: 0}
   _icon: {fileID: 21300000, guid: 9e735fd97a3956f499e8da8a5708e7a6, type: 3}
   _pawnEffects:
     shape:
@@ -157,6 +149,14 @@ MonoBehaviour:
       - row: 000000
     rotation: 0
     <Effect>k__BackingField: 
+  <Team>k__BackingField: 2
+  <HexPosition>k__BackingField:
+    name: Hex (0, 0)
+    <q>k__BackingField: 0
+    <r>k__BackingField: 0
+  <MovementCosts>k__BackingField:
+    _entries: []
+    _defaultCost: 1
 --- !u!82 &6496576454921074128
 AudioSource:
   m_ObjectHideFlags: 0

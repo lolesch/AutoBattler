@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
-using Code.Data.Enums;
 using Code.Runtime.Modules.HexGrid;
 using Code.Runtime.Modules.Inventory;
 using Code.Runtime.Pawns;
@@ -18,11 +16,11 @@ namespace Code.Runtime.Core.Combat
     /// </summary>
     public sealed class CombatCoordinator : MonoBehaviour, ICombatCoordinator
     {
+        private PawnRegistry _registry;
         [SerializeField] private HexGridController _hexGrid;
 
-        private static readonly List<IPawn> _playerUnits = new();
-        private static readonly List<IPawn> _enemyUnits  = new();
-        public static IEnumerable<IPawn> allUnits => _playerUnits.Concat(_enemyUnits);
+        private IReadOnlyList<IPawn> playerUnits => _registry.playerPawns;
+        private IReadOnlyList<IPawn> enemyUnits  => _registry.enemyPawns;
 
         // Per-unit combat controllers
         private readonly Dictionary<IPawn, PawnCombatController> _controllers    = new();
@@ -41,19 +39,13 @@ namespace Code.Runtime.Core.Combat
         {
             _eventBus       = new CombatEventBus();
         }
-
-        // ── Registration ─────────────────────────────────────────────────
-
-        public void Register(IPawn unit)
+        
+        public void Initialize(PawnRegistry registry)
         {
-            var list = unit.Team == PawnTeam.Player ? _playerUnits : _enemyUnits;
-            if (!list.Contains(unit)) list.Add(unit);
-        }
-
-        public void Unregister(IPawn unit)
-        {
-            _playerUnits.Remove(unit);
-            _enemyUnits.Remove(unit);
+            _registry = registry;
+            _registry.OnPawnRegistered += InsertUnit;
+            // Automatically clean up dictionaries when a pawn is removed from the registry
+            _registry.OnPawnUnregistered += HandlePawnRemoved;
         }
 
         // ── Lifecycle ────────────────────────────────────────────────────
@@ -62,11 +54,11 @@ namespace Code.Runtime.Core.Combat
         {
             _isRunning = true;
 
-            foreach (var unit in _playerUnits) InitUnit(unit);
-            foreach (var unit in _enemyUnits)  InitUnit(unit);
+            foreach (var unit in playerUnits) InitUnit(unit);
+            foreach (var unit in enemyUnits)  InitUnit(unit);
 
-            foreach (var unit in _playerUnits) EvaluateUnit(unit, _enemyUnits);
-            foreach (var unit in _enemyUnits)  EvaluateUnit(unit, _playerUnits);
+            foreach (var unit in playerUnits) EvaluateUnit(unit, enemyUnits);
+            foreach (var unit in enemyUnits)  EvaluateUnit(unit, playerUnits);
         }
 
         public void StopCombat()
@@ -85,13 +77,19 @@ namespace Code.Runtime.Core.Combat
 
         // ── Internal ─────────────────────────────────────────────────────
 
+        private void InsertUnit(IPawn unit)
+        {
+            InitUnit(unit);
+            
+            foreach (var u in playerUnits) EvaluateUnit(u, enemyUnits);
+            foreach (var u in enemyUnits)  EvaluateUnit(u, playerUnits);
+        }
+        
         private void InitUnit(IPawn unit)
         {
             _claimedHexes[unit]   = unit.HexPosition;
             _maxWeaponRange[unit] = ResolveMaxRange(unit);
-            _controllers[unit]    = new PawnCombatController(unit, _hexGrid, _eventBus);
-
-            unit.OnDefeated += () => OnUnitDefeated(unit);
+            _controllers[unit]    = new PawnCombatController(unit, _hexGrid, _eventBus, _registry);
         }
 
         /// <summary>
@@ -227,7 +225,7 @@ namespace Code.Runtime.Core.Combat
             return nearest;
         }
 
-        private void OnUnitDefeated(IPawn unit)
+        private void HandlePawnRemoved(IPawn unit)
         {
             StopMovement(unit);
 
@@ -240,14 +238,12 @@ namespace Code.Runtime.Core.Combat
             _claimedHexes.Remove(unit);
             _reservedHexes.Remove(unit);
             _maxWeaponRange.Remove(unit);
-            _playerUnits.Remove(unit);
-            _enemyUnits.Remove(unit);
 
             _eventBus.PublishDefeated(unit);
 
             // Re-evaluate all surviving units — their target may be gone or a new gap opened.
-            foreach (var u in _playerUnits) EvaluateUnit(u, _enemyUnits);
-            foreach (var u in _enemyUnits)  EvaluateUnit(u, _playerUnits);
+            foreach (var u in playerUnits) EvaluateUnit(u, enemyUnits);
+            foreach (var u in enemyUnits)  EvaluateUnit(u, playerUnits);
         }
 
         /// <summary>
@@ -268,8 +264,6 @@ namespace Code.Runtime.Core.Combat
 
     public interface ICombatCoordinator
     {
-        void Register(IPawn unit);
-        void Unregister(IPawn unit);
         void StartCombat();
         void StopCombat();
     }

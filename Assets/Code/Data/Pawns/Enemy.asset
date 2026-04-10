@@ -12,7 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3afcb0ff45fd4981a00b3a4aef0ce144, type: 3}
   m_Name: Enemy
   m_EditorClassIdentifier: Data::Code.Data.SO.PawnConfig
-  baseHealth: 100
   icon: {fileID: -124431276, guid: f53c29de7123b714d9b24a977fb43f39, type: 3}
+  baseHealth: 100
+  baseHealthRegen: 2
   baseMana: 60
-  StarterWeapon: {fileID: 11400000, guid: fb19e700426d517408b5be9a2cefd59e, type: 2}
+  baseManaRegen: 5
+  movementSpeed: 1
+  starterWeapon: {fileID: 11400000, guid: fd4a579c748d3414f88c941336c65ec9, type: 2}
+  movementCosts:
+    _entries: []
+    _defaultCost: 1

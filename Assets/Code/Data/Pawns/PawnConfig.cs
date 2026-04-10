@@ -15,6 +15,8 @@ namespace Code.Data.Pawns
         [Min(0.1f)] public float movementSpeed = 1f;
         
         public WeaponConfig starterWeapon;
-        public TerrainCostMap movementCosts;
+        public TerrainCostConfig movementCosts;
+        
+        //public PawnEffectConfig pawnEffects;
     }
 }

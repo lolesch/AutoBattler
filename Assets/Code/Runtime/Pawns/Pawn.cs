@@ -1,7 +1,6 @@
 using System;
 using Code.Data.Enums;
 using Code.Data.Pawns;
-using Code.Runtime.Modules.HexGrid;
 using Code.Runtime.Modules.Inventory;
 using Code.Runtime.Modules.Statistics;
 using NaughtyAttributes;
@@ -14,25 +13,21 @@ namespace Code.Runtime.Pawns
     public sealed class Pawn : MonoBehaviour, IPawn
     {
         [SerializeField, ReadOnly, PreviewIcon] private Sprite _icon;
+        // TODO: move pawn effect into config!
         [SerializeField] private PawnEffect _pawnEffects;
 
-        [field: SerializeField] public PawnConfig        Config        { get; private set; }
-        [field: SerializeField] public PawnTeam          Team          { get; private set; }
-        [field: SerializeField] public Hex               HexPosition   { get; private set; }
+        //[field: SerializeField] public PawnConfig        Config        { get; private set; }
+        [field: SerializeField, ReadOnly] public PawnTeam          Team          { get; private set; }
+        [field: SerializeField, ReadOnly] public Hex               HexPosition   { get; private set; }
+        [field: SerializeField, ReadOnly] public TerrainCostConfig    MovementCosts { get; private set; }
         
         public IPawnStats       Stats         { get; private set; }
         public ITetrisContainer Inventory     { get; private set; }
         public IPawnEffect      PawnEffects   { get; private set; }
-        public TerrainCostMap   MovementCosts { get; private set; }
        
         public event Action OnDefeated;
 
-        private void Awake()
-        {
-            SpawnPawn(Config);
-        }
-
-        private void SpawnPawn(PawnConfig  config)
+        public  void SpawnPawn(PawnConfig config, PawnTeam team, Hex hex)
         {
             if (!config)
             {
@@ -52,8 +47,9 @@ namespace Code.Runtime.Pawns
                 Debug.LogWarning($"{gameObject.name} has no StarterWeapon assigned in PawnConfig.", this);
 
             Stats.health.OnDepleted += DespawnPawn;
-            //_healthView.SetPawn(Stats.health);
-            //_manaView.SetPawn(Stats.mana);
+            
+            Team = team;
+            MoveTo(hex);
             
             gameObject.SetActive(true);
         }
@@ -68,18 +64,14 @@ namespace Code.Runtime.Pawns
 
         public void TakeDamage(float damage) => Stats.health.ReduceCurrent(damage);
         
-        public void MoveTo(Hex hex)
-        {
-            HexPosition = hex;
-        }
+        public void MoveTo(Hex hex) => HexPosition = hex;
     }
 
-    public interface IPawn : IHexOccupant, ICombatParticipant
+    public interface IPawn : IMovable, ICombatParticipant
     {
         IPawnEffect      PawnEffects   { get; }
         IPawnStats       Stats         { get; }
         ITetrisContainer Inventory     { get; }
-        TerrainCostMap   MovementCosts { get; }
     }
 
     public interface ICombatParticipant
@@ -87,5 +79,12 @@ namespace Code.Runtime.Pawns
         PawnTeam Team { get; }
         event Action OnDefeated;
         void TakeDamage(float damage);
+    }
+    
+    public interface IMovable
+    {
+        Hex HexPosition { get; }
+        void MoveTo(Hex hex);
+        TerrainCostConfig   MovementCosts { get; }
     }
 }

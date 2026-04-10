@@ -15,9 +15,9 @@ namespace Code.Runtime.Core
     {
         private readonly Button  _confirmButton;
         private readonly Action  _onConfirm;
-        private readonly List<IPawn> _playerPawns;
+        private readonly IReadOnlyList<IPawn> _playerPawns;
 
-        public PlacementPhase( List<IPawn> playerPawns, Button confirmButton, Action onConfirm)
+        public PlacementPhase( IReadOnlyList<IPawn> playerPawns, Button confirmButton, Action onConfirm)
         {
             _playerPawns = playerPawns;
             _confirmButton = confirmButton;

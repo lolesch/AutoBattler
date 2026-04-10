@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68261ea04ef6472290d881712ce23234, type: 3}
   m_Name: Terrain_Honey
   m_EditorClassIdentifier: 
-  m_DefaultSprite: {fileID: 21300000, guid: 5b2c4e36ac757554a9f31c4f4735d9c0, type: 3}
+  m_DefaultSprite: {fileID: 21300000, guid: af5fddaf3d263d640b602eed2e801969, type: 3}
   m_DefaultGameObject: {fileID: 0}
   m_DefaultColliderType: 0
   m_TilingRules:

@@ -29,13 +29,15 @@ namespace Code.Runtime.Core.Combat
 
         private IPawn _target;
         private bool        _isRunning;
+        private PawnRegistry _registry;
 
-        public PawnCombatController(IPawn pawn, IHexGrid hexGrid, ICombatEventBus eventBus)
+        public PawnCombatController(IPawn pawn, IHexGrid hexGrid, ICombatEventBus eventBus, PawnRegistry registry)
         {
             _pawn      = pawn;
             _inventory = pawn.Inventory;
             _hexGrid   = hexGrid;
             _eventBus  = eventBus;
+            _registry  = registry;
 
             _inventory.OnContentsChanged += _ => RebuildChains();
         }
@@ -252,6 +254,7 @@ namespace Code.Runtime.Core.Combat
             if (behavior == null || _target == null)
                 return FallbackToSingleTarget();
 
+            var otherTeam = _target.Team == PawnTeam.Player ? PawnTeam.Enemy  : PawnTeam.Player;
             switch (behavior.Targeting)
             {
                 case PayloadTargeting.Single:
@@ -263,7 +266,7 @@ namespace Code.Runtime.Core.Combat
                 case PayloadTargeting.Aoe:
                 {
                     var aoeTargets = TargetSelector
-                        .GetPawnsInRange(_target.HexPosition, behavior.Range, CombatCoordinator.allUnits, PawnTeam.Enemy).ToList();
+                        .GetPawnsInRange(_target.HexPosition, behavior.Range, _registry.allPawns, otherTeam).ToList();
                     return aoeTargets.Count > 0 ? (aoeTargets, _target.HexPosition.HexRange(behavior.Range)) : FallbackToSingleTarget();
                 }
 
@@ -273,8 +276,8 @@ namespace Code.Runtime.Core.Combat
                     var lineHexes  = _pawn.HexPosition.HexLine(_target.HexPosition);
                     var lineTargets = new List<IPawn>();
                     foreach (var hex in lineHexes)
-                        foreach (var occupant in TargetSelector.GetPawnsInRange(hex, 0, CombatCoordinator.allUnits, PawnTeam.Enemy))
-                            if (occupant is IPawn pawn && !lineTargets.Contains(pawn))
+                        foreach (var pawn in TargetSelector.GetPawnsInRange(hex, 0, _registry.allPawns, otherTeam))
+                            if ( !lineTargets.Contains(pawn))
                                 lineTargets.Add(pawn);
                     return (lineTargets, lineHexes);
                 }
