@@ -20,8 +20,37 @@
               "icon": "lucide-file",
               "title": "KNOWN_ISSUES"
             }
+          },
+          {
+            "id": "25327e918c12dc89",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Design Docs/Inventory/Items/Payload.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Payload"
+            }
+          },
+          {
+            "id": "f9ff66f23e83e6cb",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Reference Games.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Reference Games"
+            }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -183,38 +212,38 @@
       "bases:Create new base": false
     }
   },
-  "active": "67f58c1cfce64830",
+  "active": "f9ff66f23e83e6cb",
   "lastOpenFiles": [
-    "Design Docs/Combat/Pawn.md",
-    "Design Docs/KNOWN_ISSUES.md",
-    "Untitled.md",
-    "Design Docs/Ideation.md",
-    "Design Docs/Game Concept.md",
+    "Design Debates.md",
+    "Design Docs/Combat/Attack Targeting.md",
+    "Design Docs/Inventory/Items/Payload.md",
+    "TODO.md",
+    "Design Docs/Inventory/Items/Weapon.md",
     "Design Docs/Inventory/Missing Documentation.md",
+    "Design Docs/Game Concept.md",
+    "Design Docs/Ideation.md",
+    "Design Docs/KNOWN_ISSUES.md",
+    "Glyphs/Sigil_Design_Handoff.md",
+    "Templates/New Feature.md",
+    "Reference Games.md",
+    "Technical Information.md",
+    "Design Docs/Combat/Combat.md",
+    "Design Docs/Combat/Pawn.md",
     "Design Docs/Inventory/Item Chaining.md",
     "Design Docs/Inventory/Inventory.md",
     "Design Docs/Combat/Status Effects.md",
-    "Design Docs/Combat/Combat.md",
-    "Templates/New Feature.md",
-    "Design Docs/Inventory/Items/Payload.md",
-    "Design Docs/Inventory/Items/Weapon.md",
     "Design Docs/Inventory/Items/Splitter & Merger.md",
     "Design Docs/Inventory/Items/Shifter.md",
     "Design Docs/Inventory/Items/Reactor.md",
     "Design Docs/Inventory/Items/Converter.md",
     "Design Docs/Inventory/Items/Amplifier.md",
-    "Technical Information.md",
     "Weapons.md",
-    "Reference Games.md",
     "Handover/Itemchain handover March 26.md",
     "Handover/Itemchain handover March 15.md",
-    "Design Docs/Glyphs-Items/Payload refined.md",
     "Design Docs/Combat",
     "Design Docs/Inventory/Items",
     "Design Docs/Inventory",
-    "Pawns.md",
     "Design Docs/Glyphs-Items",
-    "README.md",
     "Templates",
     "Ported"
   ]

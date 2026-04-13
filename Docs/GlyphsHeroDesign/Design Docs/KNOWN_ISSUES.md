@@ -24,7 +24,7 @@
 - implement player roster
 - extend PlayerData and save 
 	- [ ] current roster
-	- [ ] current map
+	- [x] current map
 	- [ ] serialize/deserialize to file
 
 - move pathFinder into submodule, extract all 'non-submodule' logic and pass in its calculations upfront.

@@ -74,3 +74,10 @@ Rock + Whip = Sling
 "Hoarder" - fill the entire inventory with 1x1 items
 "Chainer" - fill the entire inventory with chained items
 "Chain Master" - fill the entire inventory with one chain
+
+---
+
+# Pawn
+
+think about having all pawn stats in the inventory, so the entire health globe/pool is defined by what's on the grid. check other stats too.
+- if the item pool is an item, the same chaining could apply
