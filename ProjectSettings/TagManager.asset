@@ -41,6 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: DamageNumbers
+    uniqueID: 2790241823
+    locked: 0
   m_RenderingLayers:
   - Default
   - Light Layer 1
